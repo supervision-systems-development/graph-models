@@ -1,0 +1,193 @@
+*** Definition of Node types ***
+fmod NTYPE is
+  
+  sort NType .
+  ops genN andN orn xorN unkN : -> NType [ctor] .
+
+endfm
+
+*** Definition of Node function ***
+fmod NFUNC is
+
+  sort NFunc .
+  ops str fin oth : -> NFunc [ctor] .
+
+endfm
+
+*** Definition of execution status ***
+fmod STATUS is
+
+  sort Status .
+  ops correct incorrect executing : -> Status [ctor] .
+
+endfm
+
+*** Definition of a Graph ***
+fmod GRAPH is
+  pr NAT .
+  pr INT .
+  pr STRING .
+  pr NTYPE .
+  pr NFUNC .
+  pr STATUS .
+
+  --- Definition of a Graph
+  sort Graph .
+  op nil : -> Graph [ctor] . --- There was no [ctor]
+  op _;_ : Graph Graph -> Graph [assoc comm id: nil prec 50 ] .
+
+  *** A Graph is conformed by Arcs and Nodes ***
+  --- Definition of a List of Nodes
+  sort NodeList .
+  subsort NodeList < Graph . --- List of Nodes should be part of Graph
+  op nil : -> NodeList [ctor] . --- Definition of List of Nodes. There was no [ctor]
+  op _,_ : NodeList NodeList -> NodeList [assoc id: nil] .
+
+  --- Definition of Nodes
+  sort Node .
+  subsort Node < NodeList .
+  op (n[_]:_,_) : Int NType NFunc -> Node [ctor] . --- Definition of Node. Has Id and Type
+
+  --- Definition of Arcs
+  sort Arc .
+  subsort Arc < Graph .
+  op _->_ : Node Node -> Arc [ctor prec 30] . --- Definition of Arc. Unites two nodes.
+
+endfm
+
+*** Initial configurations ***
+fmod CONFIG is
+  pr GRAPH .
+
+  sort Config .
+  op _|_|_|_|_ : NodeList NodeList NodeList Graph Status -> Config [ctor] .
+  
+  *** Variables ***
+  var AList CList EList : NodeList .
+  var G : Graph .
+  var type : NType .
+  var func : NFunc .
+  var i : Int .
+
+  *** Empty configuration ***
+  op init-empty : -> Config .
+  eq init-empty = nil | nil | nil | nil | executing .
+
+  op init1 : -> Config .
+  eq init1 = 
+    (n[1]: genN, str), (n[2]: genN, fin) | 
+    nil | 
+    nil | 
+    (n[1]: genN, str)->(n[2]: genN, fin) |
+    executing .
+
+  op init2 : -> Config .
+  eq init2 = 
+    (n[1]: genN, str), (n[3]: genN, oth), (n[2]: genN, oth), (n[4]: genN, fin) | 
+    nil | 
+    nil | 
+    (n[1]: genN, str)->(n[2]: genN, oth); 
+    (n[1]: genN, str)->(n[3]: genN, oth); 
+    (n[2]: genN, oth)->(n[4]: andN, fin);
+    (n[3]: genN, oth)->(n[4]: andN, fin)  |
+    executing .
+
+endfm
+
+fmod GRAPH-EQ is
+  pr CONFIG .
+
+  *** Variables ***
+  var NList NList1 NList2 : NodeList . --- Generic node list
+  var AList AList1 AList2 : NodeList . --- Lists of user actions
+  var CList CList1 CList2 : NodeList . --- Lists of correct actions
+  var EList EList1 EList2 : NodeList . --- Lists of incorrect actions
+  var G G1 G2 : Graph . --- Graphs
+  var type : NType . --- Node types
+  var func : NFunc . --- Node functions
+  var i  i1 i2 : Int . --- Node ids
+  var status : Status . --- Status of the execution
+
+  *** Equations ***
+  op checkStatus : NodeList -> Bool .
+  eq checkStatus(nil) = false .
+  eq checkStatus(CList, (n[i]: type, func)) = 
+    if func == fin
+    then true
+    else false
+    fi .
+
+ --- Check if parents are in list of correct nodes
+ ***op checkParents : NodeList Node Graph -> Bool .
+ *** eq checkParents(nil, (n[i]: type, func), G) = false .
+ *** eq checkParents(CList, (n[i]: type, func), G) = 
+ ***   if parents((n[i]: type, func), G) in CList
+ ***   then true 
+ ***   else false
+ ***   fi [owise] .
+
+  *** Auxiliary equations ***
+  --- To obtain the list of direct parents of a node in a graph.
+  op parents : Node Graph -> NodeList .
+  eq parents((n[i]: type, func) , G) = nil .
+  eq parents((n[i]: type, func) , (n[i1]: type, func) -> (n[i]: type, func) ; G) = 
+    (n[i1]: type, func) , parents((n[i]: type, func) , G) [owise] .
+  
+  op _in_ : Node NodeList -> Bool .
+  eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
+  eq (n[i]: type, func) in NList1 = false [owise] .
+
+endfm
+
+mod GRAPH-RL is
+  pr GRAPH-EQ .
+  inc CONFIG .
+
+  *** Variables ***
+  var AList AList1 AList2 : NodeList . --- Lists of user actions
+  var CList CList1 CList2 : NodeList . --- Lists of correct actions
+  var EList EList1 EList2 : NodeList . --- Lists of incorrect actions
+  var G G1 G2 : Graph . --- Graphs
+  var type : NType . --- Node types
+  var func : NFunc . --- Node functions
+  var i : Int . --- Node ids
+  var status : Status . --- Status of the execution
+
+
+  *** Rules ***
+  --- Start the execution
+  rl [start]: 
+    (n[i]: genN, str), AList | CList | EList | G | executing
+    =>
+    AList | (CList, (n[i]: genN, str)) | EList | G | executing .
+
+  --- End the execution
+  rl [end]: 
+    nil | CList | EList | G | executing
+    =>
+    if checkStatus(CList)
+    then
+      nil | CList | EList | G | correct 
+    else 
+      nil | CList | EList | G | incorrect
+    fi .
+
+  --- Consume action when node is and type
+  ***rl [step-and] :
+  ***  (n[i]: type, func), AList | CList | EList | G1 ; (n[i]: andN, func) ; G2 | executing
+  ***  => 
+  ***  if checkParents(CList, (n[i]: andN, func), )
+  ***  then 
+  ***    (n[i]: type, func), AList | CList | EList | G1 ; (n[i]: andN, func) ; G2 | executing
+  ***  else
+
+
+endm
+
+
+
+
+
+
+
+
