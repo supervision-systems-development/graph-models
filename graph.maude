@@ -70,8 +70,8 @@ fmod CONFIG is
   var i : Int .
 
   *** Empty configuration ***
-  op init-empty : -> Config .
-  eq init-empty = nil | nil | nil | nil | executing .
+  op init-mt : -> Config .
+  eq init-mt = nil | nil | nil | nil | executing .
 
   op init1 : -> Config .
   eq init1 = 
@@ -105,33 +105,40 @@ fmod GRAPH-EQ is
   var G G1 G2 : Graph . --- Graphs
   var type : NType . --- Node types
   var func : NFunc . --- Node functions
-  var i  i1 i2 : Int . --- Node ids
+  var i  x y : Int . --- Node ids
   var status : Status . --- Status of the execution
 
   *** Equations ***
   op checkStatus : NodeList -> Bool .
   eq checkStatus(nil) = false .
-  eq checkStatus(CList, (n[i]: type, func)) = 
+  eq checkStatus((CList, (n[i]: type, func))) = 
     if func == fin
     then true
     else false
     fi .
 
  --- Check if parents are in list of correct nodes
- ***op checkParents : NodeList Node Graph -> Bool .
- *** eq checkParents(nil, (n[i]: type, func), G) = false .
- *** eq checkParents(CList, (n[i]: type, func), G) = 
- ***   if parents((n[i]: type, func), G) in CList
- ***   then true 
- ***   else false
- ***   fi [owise] .
+ op checkParentsInList : Node NodeList Graph -> Bool .
+ eq checkParentsInList((n[i]: type, func), CList, G) =
+    if isParentListInList(parents((n[i]: type, func), G), CList) 
+    then true
+    else false 
+    fi .
+    
+ op isParentListInList : NodeList NodeList -> Bool .
+ eq isParentListInList(nil, CList) = true .
+ eq isParentListInList(((n[x]: type, func), NList), CList) =
+    if (n[x]: type, func) in CList 
+    then isParentListInList(NList, CList)
+    else false 
+    fi .
 
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph.
   op parents : Node Graph -> NodeList .
-  eq parents((n[i]: type, func) , G) = nil .
-  eq parents((n[i]: type, func) , (n[i1]: type, func) -> (n[i]: type, func) ; G) = 
-    (n[i1]: type, func) , parents((n[i]: type, func) , G) [owise] .
+  eq parents((n[i]: type, func), G) = nil .
+  eq parents((n[i]: type, func), (n[x]: type, func) -> (n[i]: type, func) ; G) =
+    (n[x]: type, func) , parents((n[i]: type, func), G) [owise] .
   
   op _in_ : Node NodeList -> Bool .
   eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
@@ -173,14 +180,15 @@ mod GRAPH-RL is
     fi .
 
   --- Consume action when node is and type
-  ***rl [step-and] :
-  ***  (n[i]: type, func), AList | CList | EList | G1 ; (n[i]: andN, func) ; G2 | executing
-  ***  => 
-  ***  if checkParents(CList, (n[i]: andN, func), )
-  ***  then 
-  ***    (n[i]: type, func), AList | CList | EList | G1 ; (n[i]: andN, func) ; G2 | executing
-  ***  else
-
+  rl [step-and] :
+    (n[i]: type, func), AList | CList | EList | G | executing
+    => 
+    if checkParentsInList((n[i]: type, func), CList, G)
+    then 
+      AList | (CList, (n[i]: genN, func)) | EList | G | executing
+    else
+      (n[i]: type, func), AList | CList | EList | G | executing
+    fi .
 
 endm
 
