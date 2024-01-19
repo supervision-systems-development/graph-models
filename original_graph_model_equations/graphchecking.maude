@@ -1,0 +1,131 @@
+
+
+fmod GRAPH is
+  pr NAT .
+  pr STRING .
+  sort Graph .
+  sort Node . 
+  sort Arc .
+  subsort Arc < Graph .
+  subsort NNode < Node .
+  subsort ONode < Node .
+  subsort ANode < Node .
+
+  op mt : -> Graph .
+  op _;_ : Graph Graph -> Graph [prec 50 assoc comm id: mt] .
+  
+  sort NodeList . subsort Node < NodeList .
+  op nil : -> NodeList .
+  op _:_ : NodeList NodeList -> NodeList [assoc id: nil] .
+  
+  op _ _ : Char Nat -> Node [prec 20].
+  op _->_ : Node Node -> Arc [prec 30].
+  op g_ : Nat -> NNode [prec 20].
+  op o_ : Nat -> ONode [prec 20].
+  op a_ : Nat -> ANode [prec 20].
+
+  vars G1 G2 G3 : Node . 
+  vars Gr1 Gr2 Gr3 : Graph . 
+  vars NL1 NL2, ND, ND1, ND2, NL3, NL4 : NodeList .
+  vars NG2 : NNode .
+  vars O2 : ONode .
+  vars A2 : ANode .
+    
+    
+    
+    
+
+  --- Is there at least one path from Node to Node in Graph
+  op path : Node Node NodeList Graph -> Bool .
+  eq path(G1,G2,NL1,G1 -> G2 ; Gr1) 
+   = true .
+ ceq path(G1,G2,NL1,G1 -> G3 ; Gr1) 
+   = path(G3,G2,(NL1 : G1),G1 -> G3 ; Gr1) 
+     or
+     path(G1,G2,NL1,Gr1) 
+  if not(G3 in NL1) .
+  eq path(G1,G2,NL1,Gr1)
+   = false [owise] .
+  
+  op _in_ : Node NodeList -> Bool .
+  eq G1 in (NL1 : G1 : NL2) = true .
+  eq G1 in NL1 = false [owise] .
+  
+  --- Is it a subgraph?
+
+  op subGraph : Graph Graph -> Bool .
+  eq subGraph(mt,Gr2) = true .
+  eq subGraph(G1 -> G2 ; Gr1,Gr2)
+   = path(G1,G2,nil,Gr2)
+     and
+     subGraph(Gr1,Gr2) .
+
+--- Operators needed to check that a sequence fits a graph
+
+--- THIS WONT BE NECESSARY IF YOU IMPLEMENTED THE CORRECT CHECK OF THE LAST NODE.
+--- To obtain the list of all nodes that apears as initial node arc in the graph.
+op listhead : Graph -> NodeList .
+eq listhead(mt ; G1 -> G2) =  G1 : nil .
+eq listhead(Gr1 ; G1 -> G2) = G1 : listhead(Gr1) .
+
+--- To obtain the list of direct parents of a node in a graph.
+op parents : Node Graph -> NodeList .
+eq parents(G1, G2 -> G1 ; Gr1) = G2 : parents(G1, Gr1) .
+eq parents(G1 Gr1) = nil [owise] .
+
+--- To obtain the intersection of two list of nodes as sets.
+op intersec : NodeList NodeList -> NodeList .
+eq intersect(NL1 : G1 : NL2, NL3 : G1 : NL4) = G1 : intersect(NL1 : NL2, NL3 : NL4) .
+eq intersect(NL1, NL2) = nil [owise] .
+
+--- To consume all nodes of the first list that are present in the secon list .
+op consume : NodeList NodeList -> NodeList .
+eq consume(nil, NL2) = NL2 .
+eq consume(NL1 : G1 : NL2, NL3 : G1 : NL4) = consume(NL1 : NL2, NL3 : NL4) .
+eq consume(NL1, NL2) = NL2 [owise] . 
+
+--- To match to list of nodes like if they were a couple of sets.
+op match : NodeList NodeList -> Bool .
+eq match(nil , NL2) = true .
+eq match(NL1 : G1 : NL2, NL3 : G1 : NL4) = match(NL1 : NL2, NL3 : NL4).
+eq match(NL1, NL2) = false [owise] .
+
+--- The CHECKING process.
+op checking : NodeList NodeList NodeList Graph -> Bool .
+--- MAYBE YOU DO NOT NEED TO CHANGE THIS STARTING POINT OF THE CHECKING PROCESS
+eq checking(G1 : NL1, nil, nil, Gr1) = checking(NL1, nil : G1, G1 : nil, Gr1) .
+
+--- For normal nodes .
+eq checking(NG2 : NL1, NL2, ND1 : G1 : ND2, G1 -> NG2 ; Gr1) = checking(NL1, NL2 : NG2, ND1:ND2:NG2, G1 -> NG2 ; Gr1) .
+
+--- For Or nodes.
+eq checking(O2 : NL1, NL2, ND1 : G1 : ND2, G1 -> O2 ; Gr1) = checking(NL1, NL2:O2, 
+
+                                                                      
+                                                                      	consume(parents(O2,  G1 -> O2 ; Gr1), ND1 : ND2):O2, G1 -> O2 ; Gr1) .
+
+--- For And nodes.
+ceq checking(A2 : NL1, NL2, ND1 : G1 : ND2, G1 -> A2 ; Gr1) = false or 
+checking(NL1, NL2: A2, 
+		consume(parents(A2,  G1 -> A2 ; Gr1), ND1 : ND2):A2, G1 -> A2 ; Gr1) 
+if match(parents(A2,  G1 -> A2 ; Gr1), ND1 : ND2).
+
+--- End Checking: Have we achieved the last node? (NARROWING OR SOMTHING SIMILAR TO CHECK THAT THE LAST EVENT IS A t AND CAN BE ACHIEVED FROM TRIGGER SET).
+
+ceq checking(G2 : nil, NL2, ND1 : G1 : ND2, G1 -> G2 ; Gr1) = false or
+	true if not(G2 in listhead(Gr1)) .
+
+--- Otherwise, we are in a node without conexions in the graph and, therefore, can be a trigger.
+--- Add it to the list of possible triggers (THE ERROR LIST OF EVENTS MUST BE ADDED TO checking FUNCTION).
+eq  checking(G2 : NL1, NL2,  ND, Gr1) = checking(NL1, NL2, G2 : ND, Gr1) [owise] .  
+
+endfm
+
+--- Possible call?
+checking(Sequence_of_events, nil, nil, graph).
+
+Questions:
+*.- How can be checked the ND final list?
+*.- Someone should check that this is correctly built and if there is other more optimal possibilities. 
+*.- CHECK the deffinition of the type Node and the And, Normal and Or node. 
+
