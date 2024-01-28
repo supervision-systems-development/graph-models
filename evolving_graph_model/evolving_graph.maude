@@ -119,6 +119,23 @@ fmod CONFIG is
   eq init12 = seq1 | nil | nil | graph2 | starting .
 
 
+
+  op init-seq-correct : -> Config .
+  eq init-seq-correct = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: genN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+     (n[2]: genN, oth)->(n[3]: genN, oth);
+     (n[3]: genN, oth)->(n[4]: genN, fin) | starting .
+     
+     
+  op init-seq-incorrect : -> Config .
+  eq init-seq-incorrect = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: genN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+     (n[2]: genN, oth)->(n[3]: genN, oth);
+     (n[3]: genN, oth)->(n[5]: genN, fin) | starting .
+
+
+
+
 ---- Various configs- first number indicates the graph, second number indicates the sequences
 
 
@@ -598,9 +615,9 @@ mod GRAPH-RL is
   var CList CList1 CList2 : NodeList . --- Lists of correct actions
   var EList EList1 EList2 : NodeList . --- Lists of incorrect actions
   var G G1 G2 : Graph . --- Graphs
-  var type type1 type2 type3 : NType . --- Node types
+  var type type1 type2 type3 typ4 : NType . --- Node types
   var func func1 func2 func3 : NFunc . --- Node functions
-  var i x y z : Int . --- Node ids
+  var i x y z v : Int . --- Node ids
   var status : Status . --- Status of the execution
 
 
@@ -649,7 +666,7 @@ mod GRAPH-RL is
 
 
   rl [step-sequential]: 
-    (n[i]: genN, func), AList | (CList, (n[x]: type1, func1)) | EList | G | executing  --- if there is a simple node, just add it to the list of correct nodes
+    (n[i]: type, func), AList | (CList, (n[x]: type1, func1)) | EList | G  | executing  --- if there is a simple node, just add it to the list of correct nodes
     => 
     if isThereAnEdge?((n[x]: type1, func1), (n[i]: genN, func), G)
     then
