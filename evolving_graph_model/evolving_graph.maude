@@ -502,11 +502,12 @@ fmod GRAPH-EQ is
   var CList CList1 CList2 : NodeList . --- Lists of correct actions
   var EList EList1 EList2 : NodeList . --- Lists of incorrect actions
   var G G1 G2 : Graph . --- Graphs
-  var type type2 type1 : NType . --- Node types
-  var func func2 func1 : NFunc . --- Node functions
+  var type type2 type1 type3 : NType . --- Node types
+  var func func2 func1 func3 : NFunc . --- Node functions
   var i  x y : Int . --- Node ids
   var status : Status . --- Status of the execution
   var Arc1 Arc2 : Arc . --- arc varables
+  var N1 N2 N3 N4 : Node . --- node variables
 
   *** Equations ***
   op checkStatus : NodeList -> Bool .
@@ -572,6 +573,10 @@ fmod GRAPH-EQ is
   op getNodeType : Node Graph -> NType .  --- this function extracts the node type in the graph by NODE NUMBER ignoring everything else
   eq getNodeType((n[i]: type, func), (G1 ; ((n[x]: type2, func2)->(n[i]: type1, func1)) ; G2)) = type1 .
   
+  op isThereAnEdge? : Node Node Graph -> Bool . --- is there an edge between two nodes in a graph? 
+  eq isThereAnEdge?((n[i]: type, func), (n[x]: type1, func1), (G1 ; ((n[i]: type2, func2)->(n[x]: type3, func3)) ; G2)) = true .
+  eq isThereAnEdge?(N1, N2, G1) = false [owise] .
+  
   
   
 ---  op checkSequenceWithGraph : NodeList Graph -> Bool .
@@ -593,10 +598,11 @@ mod GRAPH-RL is
   var CList CList1 CList2 : NodeList . --- Lists of correct actions
   var EList EList1 EList2 : NodeList . --- Lists of incorrect actions
   var G G1 G2 : Graph . --- Graphs
-  var type : NType . --- Node types
-  var func : NFunc . --- Node functions
-  var i : Int . --- Node ids
+  var type type1 type2 type3 : NType . --- Node types
+  var func func1 func2 func3 : NFunc . --- Node functions
+  var i x y z : Int . --- Node ids
   var status : Status . --- Status of the execution
+
 
 
   *** Rules ***
@@ -643,10 +649,14 @@ mod GRAPH-RL is
 
 
   rl [step-sequential]: 
-    (n[i]: genN, func), AList | CList | EList | G | executing  --- if there is a simple node, just add it to the list of correct nodes
+    (n[i]: genN, func), AList | (CList, (n[x]: type1, func1)) | EList | G | executing  --- if there is a simple node, just add it to the list of correct nodes
     => 
+    if isThereAnEdge?((n[x]: type1, func1), (n[i]: genN, func), G)
+    then
 	AList | (CList, (n[i]: genN, func)) | EList | G | executing   --- add the node to the list of correct nodes
-    .
+    else 
+    AList | CList | (EList, (n[i]: genN, func)) | G | executing   --- add the node to the list of correct nodes
+    fi .
 
 
   rl [step-xor]:    --- for now we assume that every input with XOR is with 2 inputs and 
