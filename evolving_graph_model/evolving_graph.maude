@@ -569,8 +569,8 @@ fmod GRAPH-EQ is
   eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
   eq (n[i]: type, func) in NList1 = false [owise] .
   
-  op getNodeType : Node Graph -> NType .
-  eq getNodeType((n[i]: type, func), ((Arc1);((n[x]: type2, func2)->(n[i]: type1, func1));(Arc2))) = type1 .
+  op getNodeType : Node Graph -> NType .  --- this function extracts the node type in the graph by NODE NUMBER ignoring everything else
+  eq getNodeType((n[i]: type, func), (G1 ; ((n[x]: type2, func2)->(n[i]: type1, func1)) ; G2)) = type1 .
   
   
   
@@ -662,6 +662,3 @@ mod GRAPH-RL is
     fi .
 
 endm
-
-
-
