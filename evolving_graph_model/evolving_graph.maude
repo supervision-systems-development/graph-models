@@ -608,13 +608,13 @@ mod GRAPH-RL is
   *** Rules ***
   --- Start the execution
 
-  rl [start]: 
-    (n[i]: genN, str), AList | CList | EList | G | starting  --- the first, artificially added START NODE is being moved to the correctly accepted sequence
+  rl [start]: --- this rule just changes the starting status into the executing status
+    (n[i]: type, str), AList | CList | EList | G | starting  --- the first, artificially added START NODE is being moved to the correctly accepted sequence
     =>
-    AList | (CList, (n[i]: genN, str)) | EList | G | executing .
+    (n[i]: type, str), AList | CList | EList | G | executing . --- due to only integer numbers being used for node labels, it is decided to avoid artificial nodes and use the node property
 
   --- End the execution
-  rl [end]: 
+  rl [end]:   --- this rule just changes the executing status into the finished correctly or incorrectly status
     nil | CList | EList | G | executing
     =>
     if checkStatus(CList)
@@ -653,10 +653,16 @@ mod GRAPH-RL is
     => 
     if isThereAnEdge?((n[x]: type1, func1), (n[i]: genN, func), G)
     then
-	AList | (CList, (n[i]: genN, func)) | EList | G | executing   --- add the node to the list of correct nodes
-    else 
-    AList | CList | (EList, (n[i]: genN, func)) | G | executing   --- add the node to the list of correct nodes
+	AList | ((CList, (n[x]: type1, func1)), (n[i]: genN, func)) | EList | G | executing   --- add the node to the list of correct nodes
+	else
+   	AList | (CList, (n[x]: type1, func1)) | (EList, (n[i]: genN, func)) | G | executing   --- add the node to the list of incorrect nodes
     fi .
+    
+  rl [step-sequential-first]: 
+    ((n[i]: type, str), AList) | nil | nil | G | executing  --- if there is a simple node, just add it to the list of correct nodes
+    => 
+    AList | (n[i]: type, str) | nil | G | executing   --- add the node to the list of correct nodes
+	.
 
 
   rl [step-xor]:    --- for now we assume that every input with XOR is with 2 inputs and 
