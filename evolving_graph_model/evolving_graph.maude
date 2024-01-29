@@ -133,6 +133,13 @@ fmod CONFIG is
      (n[2]: genN, oth)->(n[3]: genN, oth);
      (n[3]: genN, oth)->(n[5]: genN, fin) | starting .
      
+  op init-or-incorrect : -> Config .
+  eq init-or-incorrect = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: genN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+     (n[2]: genN, oth)->(n[3]: genN, oth);
+     (n[3]: genN, oth)->(n[4]: genN, fin) | starting .
+     
+     
   op init-and-correct : -> Config .
   eq init-and-correct = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: andN, oth), (n[4]: genN, fin) | nil | nil | 
      (n[1]: genN, str)->(n[2]: genN, oth);
@@ -659,7 +666,7 @@ mod GRAPH-RL is
   rl [step-and]:
     (n[i]: andN, func), AList | CList | EList | G | executing
     => 
-    if checkParentsInList((n[i]: andN, func), CList, G)     --- if ALL parents of the node are in the Correct List
+    if checkParentsInList((n[i]: genN, func), CList, G)     --- if ALL parents of the node are in the Correct List
     then 
       AList | ( CList, (n[i]: andN, func) ) | EList | G | executing  --- then add the node to the list of Correct Nodes
     else
