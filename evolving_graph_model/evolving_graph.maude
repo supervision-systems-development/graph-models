@@ -133,11 +133,7 @@ fmod CONFIG is
      (n[2]: genN, oth)->(n[3]: genN, oth);
      (n[3]: genN, oth)->(n[5]: genN, fin) | starting .
      
-  op init-or-incorrect : -> Config .
-  eq init-or-incorrect = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: genN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-     (n[2]: genN, oth)->(n[3]: genN, oth);
-     (n[3]: genN, oth)->(n[4]: genN, fin) | starting .
+
      
      
   op init-and-correct : -> Config .
@@ -154,6 +150,34 @@ fmod CONFIG is
 	 (n[1]: genN, str)->(n[3]: andN, oth);
      (n[2]: genN, oth)->(n[3]: andN, oth);
      (n[3]: andN, oth)->(n[4]: genN, fin) | starting .
+     
+     
+  op init-or-correct : -> Config . --- only one parent node present
+  eq init-or-correct = (n[1]: genN, str), (n[3]: orN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+	 (n[1]: genN, str)->(n[3]: orN, oth);
+     (n[2]: genN, oth)->(n[3]: orN, oth);
+     (n[3]: orN, oth)->(n[4]: genN, fin) | starting .
+  
+  op init-or-correct-2 : -> Config . --- both parent nodes present
+  eq init-or-correct-2 = (n[1]: genN, str), (n[2]: genN, str), (n[3]: orN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+	 (n[1]: genN, str)->(n[3]: orN, oth);
+     (n[2]: genN, oth)->(n[3]: orN, oth);
+     (n[3]: orN, oth)->(n[4]: genN, fin) | starting .
+     
+  op init-or-incorrect : -> Config . --- only one parent node present
+  eq init-or-incorrect = (n[1]: genN, str), (n[5]: orN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+     (n[1]: genN, str)->(n[5]: genN, oth);
+     (n[5]: genN, str)->(n[4]: genN, oth);
+	 (n[1]: genN, str)->(n[3]: orN, oth);
+     (n[2]: genN, oth)->(n[3]: orN, oth);
+     (n[3]: orN, oth)->(n[4]: genN, fin) | starting .
+     
+     
+
+
 
 
 
