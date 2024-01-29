@@ -624,6 +624,9 @@ fmod GRAPH-EQ is
   else (parents2((n[i]: type, func), G)  )
   fi .
   
+  op startingNode? : Node Graph -> Bool .
+  eq startingNode?((n[i]: type, func) , ( G1 ; (n[i]: type1, str)->(n[y]: type2, func2) ; G2 ) ) = true .
+  eq startingNode?(N1, G) = false [owise] .
   
   
 ---  op checkSequenceWithGraph : NodeList Graph -> Bool .
@@ -698,18 +701,22 @@ mod GRAPH-RL is
   rl [step-sequential]: 
     (n[i]: genN, func), AList | (CList, (n[x]: type1, func1)) | EList | G  | executing  --- if there is a simple node, just add it to the list of correct nodes
     => 
-    if isThereAnEdge?((n[x]: type1, func1), (n[i]: genN, func), G)
+    if (isThereAnEdge?((n[x]: type1, func1), (n[i]: genN, func), G) and (getNodeType((n[i]: genN, func), G) == genN) )
     then
 	AList | ((CList, (n[x]: type1, func1)), (n[i]: genN, func)) | EList | G | executing   --- add the node to the list of correct nodes
 	else
    	AList | (CList, (n[x]: type1, func1)) | (EList, (n[i]: genN, func)) | G | executing   --- add the node to the list of incorrect nodes
     fi .
     
-  rl [step-sequential-first]: 
+  rl [step-sequential-first]:  
     ((n[i]: type, str), AList) | nil | nil | G | executing  --- if there is a simple node, just add it to the list of correct nodes
     => 
+    if startingNode?((n[i]: type, str), G)  --- both the sequence node (above) and the graph node have to be "str"
+    then
     AList | (n[i]: type, str) | nil | G | executing   --- add the node to the list of correct nodes
-	.
+	else
+    AList | nil | nil | G | executing
+    fi .
 
 
   rl [step-xor]:    --- for now we assume that every input with XOR is with 2 inputs and 
