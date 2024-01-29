@@ -559,7 +559,7 @@ fmod GRAPH-EQ is
  --- Check if parents are in list of correct nodes
  op checkParentsInList : Node NodeList Graph -> Bool . --- check if ALL parents of a node are in the list of correct nodes
  eq checkParentsInList((n[i]: type, func), CList, G) =
-    if isParentListInList(parents((n[i]: type, func), G), CList) 
+    if isParentListInList(parents2((n[i]: type, func), G), CList) 
     then true
     else false 
     fi .
@@ -616,11 +616,12 @@ fmod GRAPH-EQ is
   eq isThereAnEdge?(N1, N2, G1) = false [owise] .
   
   
-  op parents2 : Node Graph -> NodeList
+  op parents2 : Node Graph -> NodeList .
+  eq parents2(N1, nil) = nil .
   eq parents2((n[i]: type, func), (((n[x]: type1, func1)->(n[y]: type2, func2)) ; G)) = 
   if (y == i)
-  then ( (n[y]: type2, func2) , parents((n[i]: type, func), G)  )
-  else (parents((n[i]: type, func), G)  )
+  then ( (n[x]: type1, func1) , parents2((n[i]: type, func), G)  )
+  else (parents2((n[i]: type, func), G)  )
   fi .
   
   
