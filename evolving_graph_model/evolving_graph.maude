@@ -55,9 +55,177 @@ fmod GRAPH is
 
 endfm
 
+fmod SEQ is
+  pr GRAPH
+  
+  *** Variables ***
+  var AList CList EList : NodeList .
+  var G : Graph .
+  var type : NType .
+  var func : NFunc .
+  var i : Int .
+
+  *** Graph configurations for testing ***
+  op graph1 : -> Graph .
+  eq graph1 = 
+  	(n[1]: genN, str)->(n[5]: genN, oth);
+       (n[5]: genN, oth)->(n[8]: genN, oth);
+       (n[8]: genN, oth)->(n[2]: genN, oth);
+       (n[2]: genN, oth)->(n[3]: genN, oth);
+       (n[3]: genN, oth)->(n[6]: genN, oth);
+       (n[6]: genN, oth)->(n[4]: genN, oth);
+       (n[6]: genN, oth)->(n[11]: genN, oth);
+       (n[4]: genN, oth)->(n[2]: genN, fin) .   --- There is an error in node 2
+        
+  op graph2 : -> Graph .
+  eq graph2 = 
+       (n[1]: genN, str)->(n[5]: genN, oth);
+       (n[5]: genN, oth)->(n[8]: genN, oth);
+       (n[8]: genN, oth)->(n[2]: genN, oth);
+       (n[2]: genN, oth)->(n[3]: genN, oth);
+       (n[3]: genN, oth)->(n[6]: genN, oth);
+       (n[6]: genN, oth)->(n[9]: genN, oth);
+       (n[6]: genN, oth)->(n[4]: genN, oth);
+       (n[6]: genN, oth)->(n[11]: genN, oth);
+       (n[4]: genN, oth)->(n[2]: genN, oth);
+       (n[9]: genN, oth)->(n[4]: genN, fin) .   --- There is an error in node 4
+        
+  op graph3 : -> Graph .
+  eq graph3 =
+       (n[1]: genN, str)->(n[5]: genN, oth);
+       (n[5]: genN, oth)->(n[8]: genN, oth);
+       (n[8]: genN, oth)->(n[2]: genN, oth);
+       (n[2]: genN, oth)->(n[3]: genN, oth);
+       (n[3]: genN, oth)->(n[6]: genN, oth);
+       (n[6]: genN, oth)->(n[9]: genN, oth);
+       (n[6]: genN, oth)->(n[11]: genN, oth);
+       (n[4]: genN, oth)->(n[2]: genN, oth);
+       (n[9]: genN, oth)->(n[4]: genN, fin) .   --- There is an error in node 4
+
+
+  *** Action sequences for testing ***
+  op seq1 : -> NodeList .
+  eq seq1 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[2]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq2 : -> NodeList .
+  eq seq2 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq3 : -> NodeList .
+  eq seq3 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq4 : -> NodeList .
+  eq seq4 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq5 : -> NodeList .
+  eq seq5 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq6 : -> NodeList .
+  eq seq6 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq7 : -> NodeList .
+  eq seq7 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq8 : -> NodeList .
+  eq seq8 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq9 : -> NodeList .
+  eq seq9 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq10 : -> NodeList .
+  eq seq10 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq11 : -> NodeList .
+  eq seq11 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq12 : -> NodeList .
+  eq seq12 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq13 : -> NodeList .
+  eq seq13 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[2]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq14 : -> NodeList .
+  eq seq14 = (n[1]: genN, str), (n[1]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[6]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq15 : -> NodeList .
+  eq seq15 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq16 : -> NodeList .
+  eq seq16 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq17 : -> NodeList .
+  eq seq17 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq18 : -> NodeList .
+  eq seq18 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq19 : -> NodeList .
+  eq seq19 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq20 : -> NodeList .
+  eq seq20 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq21 : -> NodeList .
+  eq seq21 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq22 : -> NodeList .
+  eq seq22 = (n[8]: genN, str), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq23 : -> NodeList .
+  eq seq23 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq24 : -> NodeList .
+  eq seq24 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq25 : -> NodeList .
+  eq seq25 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq26 : -> NodeList .
+  eq seq26 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[5]: genN, oth), (n[6]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[9]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq27 : -> NodeList .
+  eq seq27 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq28 : -> NodeList .
+  eq seq28 = (n[8]: genN, str), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[10]: genN, oth), (n[2]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq29 : -> NodeList .
+  eq seq29 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq30 : -> NodeList .
+  eq seq30 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq31 : -> NodeList .
+  eq seq31 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[10]: genN, oth), (n[6]: genN, oth), (n[10]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq32 : -> NodeList .
+  eq seq32 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq33 : -> NodeList .
+  eq seq33 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq34 : -> NodeList .
+  eq seq34 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq35 : -> NodeList .
+  eq seq35 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[10]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq36 : -> NodeList .
+  eq seq36 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq37 : -> NodeList .
+  eq seq37 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq38 : -> NodeList .
+  eq seq38 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+  
+  op seq39 : -> NodeList .
+  eq seq39 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
+      
+endfm
+
 *** Initial configurations ***
 fmod CONFIG is
-  pr GRAPH .
+  pr SEQ .
 
   sort Config .
   op _|_|_|_|_ : NodeList NodeList NodeList Graph Status -> Config [ctor] .
@@ -71,8 +239,9 @@ fmod CONFIG is
 
   *** Empty configuration ***
   op init-mt : -> Config .
-  eq init-mt = nil | nil | nil | nil | executing .
+  eq init-mt = nil | nil | nil | nil | starting .
 
+ *** Initial configurations using simple actions and graphs ***
   op init1 : -> Config .
   eq init1 = 
     (n[1]: genN, str), (n[2]: genN, fin) | 
@@ -89,250 +258,111 @@ fmod CONFIG is
     (n[1]: genN, str)->(n[2]: genN, oth); 
     (n[1]: genN, str)->(n[3]: genN, oth); 
     (n[2]: genN, oth)->(n[4]: andN, fin);
-    (n[3]: genN, oth)->(n[4]: andN, fin)  |
+    (n[3]: genN, oth)->(n[4]: andN, fin) |
     starting .
 
-
-  op init3 : -> Config .
-  eq init3 = 
-    (n[1]: genN, str), (n[2]: genN, fin) | 
+  *** Various initial configurations that use complex sequences and graphs ***
+  op init-nseq-correct : -> Config .
+  eq init-nseq-correct = 
+   (n[1]: genN, str), (n[2]: genN, oth), (n[3]: genN, oth), (n[4]: genN, fin) |
+   nil |
+   nil | 
+   (n[1]: genN, str)->(n[2]: genN, oth);
+   (n[2]: genN, oth)->(n[3]: genN, oth);
+   (n[3]: genN, oth)->(n[4]: genN, fin) |
+   starting .
+     
+  op init-nseq-incorrect : -> Config .
+  eq init-nseq-incorrect = 
+    (n[1]: genN, str), (n[2]: genN, oth), (n[3]: genN, oth), (n[4]: genN, fin) |
+    nil |
     nil | 
+    (n[1]: genN, str)->(n[2]: genN, oth);
+    (n[2]: genN, oth)->(n[3]: genN, oth);
+    (n[3]: genN, oth)->(n[5]: genN, fin) |
+    starting .
+     
+  op init-nand-correct : -> Config .
+  eq init-nand-correct = 
+    (n[1]: genN, str), (n[2]: genN, oth), (n[3]: andN, oth), (n[4]: genN, fin) | --- We should not know node type in action list
+    nil |
     nil | 
-    (n[1]: genN, str)->(n[2]: genN, fin) |
+    (n[1]: genN, str)->(n[2]: genN, oth);
+    (n[1]: genN, str)->(n[3]: andN, oth);
+    (n[2]: genN, oth)->(n[3]: andN, oth);
+    (n[3]: andN, oth)->(n[4]: genN, fin) |
     starting .
 
-
-
-  op init11 : -> Config .
-  eq init11 = 
-    (n[1]: genN, str), (n[3]: genN, oth), (n[2]: genN, oth), (n[4]: genN, fin) | 
+  op init-nand-incorrect : -> Config .
+  eq init-nand-incorrect = 
+    (n[1]: genN, str), (n[3]: andN, oth), (n[4]: genN, fin) | --- We should not know node type in action list
+    nil |
     nil | 
-    nil | 
-    (n[1]: genN, str)->(n[2]: genN, oth); 
-    (n[1]: genN, str)->(n[3]: genN, oth); 
-    (n[2]: genN, oth)->(n[4]: andN, fin);
-    (n[3]: genN, oth)->(n[4]: andN, fin)  |
+    (n[1]: genN, str)->(n[2]: genN, oth);
+    (n[1]: genN, str)->(n[3]: andN, oth);
+    (n[2]: genN, oth)->(n[3]: andN, oth);
+    (n[3]: andN, oth)->(n[4]: genN, fin) |
     starting .
-
-
-  op init12 : -> Config . 
-  eq init12 = seq1 | nil | nil | graph2 | starting .
-
-
-
-  op init-seq-correct : -> Config .
-  eq init-seq-correct = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: genN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-     (n[2]: genN, oth)->(n[3]: genN, oth);
-     (n[3]: genN, oth)->(n[4]: genN, fin) | starting .
      
-     
-  op init-seq-incorrect : -> Config .
-  eq init-seq-incorrect = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: genN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-     (n[2]: genN, oth)->(n[3]: genN, oth);
-     (n[3]: genN, oth)->(n[5]: genN, fin) | starting .
-     
-
-     
-     
-  op init-and-correct : -> Config .
-  eq init-and-correct = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: andN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-	 (n[1]: genN, str)->(n[3]: andN, oth);
-     (n[2]: genN, oth)->(n[3]: andN, oth);
-     (n[3]: andN, oth)->(n[4]: genN, fin) | starting .
-
-
-  op init-and-incorrect : -> Config .
-  eq init-and-incorrect = (n[1]: genN, str), (n[3]: andN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-	 (n[1]: genN, str)->(n[3]: andN, oth);
-     (n[2]: genN, oth)->(n[3]: andN, oth);
-     (n[3]: andN, oth)->(n[4]: genN, fin) | starting .
-     
-     
-  op init-or-correct : -> Config . --- only one parent node present
-  eq init-or-correct = (n[1]: genN, str), (n[3]: orN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-	 (n[1]: genN, str)->(n[3]: orN, oth);
-     (n[2]: genN, oth)->(n[3]: orN, oth);
-     (n[3]: orN, oth)->(n[4]: genN, fin) | starting .
+  op init-nor-correct : -> Config . --- Only one parent node present
+  eq init-nor-correct = 
+    (n[1]: genN, str), (n[3]: orN, oth), (n[4]: genN, fin) | --- We should not know node type in action list
+    nil |
+    nil |
+    (n[1]: genN, str)->(n[2]: genN, oth);
+    (n[1]: genN, str)->(n[3]: orN, oth);
+    (n[2]: genN, oth)->(n[3]: orN, oth);
+    (n[3]: orN, oth)->(n[4]: genN, fin) |
+    starting .
   
-  op init-or-correct-2 : -> Config . --- both parent nodes present
-  eq init-or-correct-2 = (n[1]: genN, str), (n[2]: genN, str), (n[3]: orN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-	 (n[1]: genN, str)->(n[3]: orN, oth);
-     (n[2]: genN, oth)->(n[3]: orN, oth);
-     (n[3]: orN, oth)->(n[4]: genN, fin) | starting .
-     
-  op init-or-incorrect : -> Config . --- only one parent node present
-  eq init-or-incorrect = (n[1]: genN, str), (n[5]: orN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-     (n[1]: genN, str)->(n[5]: genN, oth);
-     (n[5]: genN, str)->(n[4]: genN, oth);
-	 (n[1]: genN, str)->(n[3]: orN, oth);
-     (n[2]: genN, oth)->(n[3]: orN, oth);
-     (n[3]: orN, oth)->(n[4]: genN, fin) | starting .
-     
-     
-     
-  op init-xor-correct : -> Config . --- only one parent node present
-  eq init-xor-correct = (n[1]: genN, str), (n[3]: xorN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-	 (n[1]: genN, str)->(n[3]: xorN, oth);
-     (n[2]: genN, oth)->(n[3]: xorN, oth);
-     (n[3]: xorN, oth)->(n[4]: genN, fin) | starting .
+  op init-nor-correct2 : -> Config . --- Both parent nodes present
+  eq init-nor-correct2 = 
+    (n[1]: genN, str), (n[2]: genN, str), (n[3]: orN, oth), (n[4]: genN, fin) | --- We should not know node type in action list
+    nil |
+    nil | 
+    (n[1]: genN, str)->(n[2]: genN, oth);
+    (n[1]: genN, str)->(n[3]: orN, oth);
+    (n[2]: genN, oth)->(n[3]: orN, oth);
+    (n[3]: orN, oth)->(n[4]: genN, fin) |
+    starting .
   
-  op init-xor-incorrect-2 : -> Config . --- both parent nodes present
-  eq init-xor-incorrect-2 = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: xorN, oth), (n[4]: genN, fin) | nil | nil | 
-     (n[1]: genN, str)->(n[2]: genN, oth);
-	 (n[1]: genN, str)->(n[3]: xorN, oth);
-     (n[2]: genN, oth)->(n[3]: xorN, oth);
-     (n[3]: xorN, oth)->(n[4]: genN, fin) | starting .
+  op init-nor-incorrect : -> Config . --- Only one parent node present
+  eq init-nor-incorrect = 
+    (n[1]: genN, str), (n[5]: orN, oth), (n[4]: genN, fin) | --- We should not know node type in action list
+    nil |
+    nil | 
+    (n[1]: genN, str)->(n[2]: genN, oth);
+    (n[1]: genN, str)->(n[5]: genN, oth);
+    (n[1]: genN, str)->(n[3]: orN, oth);
+    (n[5]: genN, str)->(n[4]: genN, oth);
+    (n[2]: genN, oth)->(n[3]: orN, oth);
+    (n[3]: orN, oth)->(n[4]: genN, fin) |
+    starting .
      
-
-
-
-
-
-
----- Various configs- first number indicates the graph, second number indicates the sequences
-
-
-
-
---- various sequences and graphs: 
-
-
-
-  op graph1 : -> Graph .
-  eq graph1 = 
-  		(n[1]: genN, str)->(n[5]: genN, oth);
-  		(n[5]: genN, oth)->(n[8]: genN, oth);
-  		(n[8]: genN, oth)->(n[2]: genN, oth);
-  		(n[2]: genN, oth)->(n[3]: genN, oth);
-  		(n[3]: genN, oth)->(n[6]: genN, oth);
-  		(n[6]: genN, oth)->(n[4]: genN, oth);
-  		(n[6]: genN, oth)->(n[11]: genN, oth);
-  		(n[4]: genN, oth)->(n[2]: genN, fin) .
-        
-        
-   op graph2 : -> Graph .
-   eq graph2 = 
-  		(n[1]: genN, str)->(n[5]: genN, oth);
-  		(n[5]: genN, oth)->(n[8]: genN, oth);
-  		(n[8]: genN, oth)->(n[2]: genN, oth);
-  		(n[2]: genN, oth)->(n[3]: genN, oth);
-  		(n[3]: genN, oth)->(n[6]: genN, oth);
-  		(n[6]: genN, oth)->(n[9]: genN, oth);
-  		(n[6]: genN, oth)->(n[4]: genN, oth);
-  		(n[6]: genN, oth)->(n[11]: genN, oth);
-  		(n[4]: genN, oth)->(n[2]: genN, oth);
-  		(n[9]: genN, oth)->(n[4]: genN, fin) .
-        
-        
-        
-    op graph3 : -> Graph .
-    eq graph3 =
-  		(n[1]: genN, str)->(n[5]: genN, oth);
-  		(n[5]: genN, oth)->(n[8]: genN, oth);
-  		(n[8]: genN, oth)->(n[2]: genN, oth);
-  		(n[2]: genN, oth)->(n[3]: genN, oth);
-  		(n[3]: genN, oth)->(n[6]: genN, oth);
-  		(n[6]: genN, oth)->(n[9]: genN, oth);
-  		(n[6]: genN, oth)->(n[11]: genN, oth);
-  		(n[4]: genN, oth)->(n[2]: genN, oth);
-  		(n[9]: genN, oth)->(n[4]: genN, fin) .
-
-
-  op seq1 : -> NodeList .
-        eq seq1 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[2]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq2 : -> NodeList .
-        eq seq2 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq3 : -> NodeList .
-        eq seq3 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq4 : -> NodeList .
-        eq seq4 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq5 : -> NodeList .
-        eq seq5 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq6 : -> NodeList .
-        eq seq6 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq7 : -> NodeList .
-        eq seq7 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq8 : -> NodeList .
-        eq seq8 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq9 : -> NodeList .
-        eq seq9 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq10 : -> NodeList .
-        eq seq10 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq11 : -> NodeList .
-        eq seq11 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq12 : -> NodeList .
-        eq seq12 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[11]: genN, fin) .
-  op seq13 : -> NodeList .
-        eq seq13 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[2]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[11]: genN, fin) .
-  op seq14 : -> NodeList .
-        eq seq14 = (n[1]: genN, str), (n[1]: genN, oth), (n[4]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[6]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[11]: genN, fin) .
-  op seq15 : -> NodeList .
-        eq seq15 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[11]: genN, fin) .
-  op seq16 : -> NodeList .
-        eq seq16 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq17 : -> NodeList .
-        eq seq17 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq18 : -> NodeList .
-        eq seq18 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq19 : -> NodeList .
-        eq seq19 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq20 : -> NodeList .
-        eq seq20 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq21 : -> NodeList .
-        eq seq21 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[11]: genN, fin) .
-  op seq22 : -> NodeList .
-        eq seq22 = (n[8]: genN, str), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq23 : -> NodeList .
-        eq seq23 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq24 : -> NodeList .
-        eq seq24 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq25 : -> NodeList .
-        eq seq25 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq26 : -> NodeList .
-        eq seq26 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[5]: genN, oth), (n[6]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[9]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq27 : -> NodeList .
-        eq seq27 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq28 : -> NodeList .
-        eq seq28 = (n[8]: genN, str), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[10]: genN, oth), (n[2]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq29 : -> NodeList .
-        eq seq29 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq30 : -> NodeList .
-        eq seq30 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq31 : -> NodeList .
-        eq seq31 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[10]: genN, oth), (n[6]: genN, oth), (n[10]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq32 : -> NodeList .
-        eq seq32 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq33 : -> NodeList .
-        eq seq33 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[9]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq34 : -> NodeList .
-        eq seq34 = (n[5]: genN, str), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq35 : -> NodeList .
-        eq seq35 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[10]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq36 : -> NodeList .
-        eq seq36 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq37 : -> NodeList .
-        eq seq37 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq38 : -> NodeList .
-        eq seq38 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-  op seq39 : -> NodeList .
-        eq seq39 = (n[1]: genN, str), (n[1]: genN, oth), (n[5]: genN, oth), (n[8]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[4]: genN, oth), (n[2]: genN, oth), (n[3]: genN, oth), (n[6]: genN, oth), (n[11]: genN, fin) .
-        
-        
-        
-        ---- Various configs- first number indicates the graph, second number indicates the sequences
-
-
-
-        
-        
+  op init-nxor-correct : -> Config . --- Only one parent node present
+  eq init-nxor-correct = 
+    (n[1]: genN, str), (n[3]: xorN, oth), (n[4]: genN, fin) | --- We should not know node type in action list
+    nil |
+    nil | 
+    (n[1]: genN, str)->(n[2]: genN, oth);
+    (n[1]: genN, str)->(n[3]: xorN, oth);
+    (n[2]: genN, oth)->(n[3]: xorN, oth);
+    (n[3]: xorN, oth)->(n[4]: genN, fin) |
+    starting .
+  
+  op init-nxor-incorrect2 : -> Config . --- both parent nodes present
+  eq init-nxor-incorrect2 =
+    (n[1]: genN, str), (n[2]: genN, oth), (n[3]: xorN, oth), (n[4]: genN, fin) | --- We should not know node type in action list
+    nil |
+    nil | 
+    (n[1]: genN, str)->(n[2]: genN, oth);
+    (n[1]: genN, str)->(n[3]: xorN, oth);
+    (n[2]: genN, oth)->(n[3]: xorN, oth);
+    (n[3]: xorN, oth)->(n[4]: genN, fin) |
+    starting .
+     
+   *** Various initial configurations that use complex sequences and graphs from SEQ module ***     
+   --- First number indicates the graph, second number indicates the sequence     
    op init1-1 : -> Config . 
           eq init1-1 = seq1 | nil | nil | graph1 | starting .
    op init1-2 : -> Config . 
@@ -355,6 +385,8 @@ fmod CONFIG is
           eq init1-10 = seq10 | nil | nil | graph1 | starting .
    op init1-11 : -> Config . 
           eq init1-11 = seq11 | nil | nil | graph1 | starting .
+  op init12 : -> Config . 
+  eq init12 = seq1 | nil | nil | graph2 | starting .
    op init1-12 : -> Config . 
           eq init1-12 = seq12 | nil | nil | graph1 | starting .
    op init1-13 : -> Config . 
@@ -669,12 +701,7 @@ fmod GRAPH-EQ is
   eq startingNode?(N1, G) = false [owise] .
   
   
----  op checkSequenceWithGraph : NodeList Graph -> Bool .
----  eq checkSequenceWithGraph(NList, G) = 
----  	if (NList | CList | EList | G | correct)
----    then true
----    else false
----    fi .
+
   
 
 endfm
