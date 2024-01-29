@@ -176,6 +176,29 @@ fmod CONFIG is
      (n[3]: orN, oth)->(n[4]: genN, fin) | starting .
      
      
+     
+  op init-xor-correct : -> Config . --- only one parent node present
+  eq init-xor-correct = (n[1]: genN, str), (n[3]: xorN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+	 (n[1]: genN, str)->(n[3]: xorN, oth);
+     (n[2]: genN, oth)->(n[3]: xorN, oth);
+     (n[3]: xorN, oth)->(n[4]: genN, fin) | starting .
+  
+  op init-xor-incorrect-2 : -> Config . --- both parent nodes present
+  eq init-xor-incorrect-2 = (n[1]: genN, str), (n[2]: genN, str), (n[3]: xorN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+	 (n[1]: genN, str)->(n[3]: xorN, oth);
+     (n[2]: genN, oth)->(n[3]: xorN, oth);
+     (n[3]: xorN, oth)->(n[4]: genN, fin) | starting .
+     
+  op init-xor-incorrect : -> Config . --- only one parent node present
+  eq init-xor-incorrect = (n[1]: genN, str), (n[5]: genN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+     (n[1]: genN, str)->(n[5]: genN, oth);
+     (n[5]: genN, str)->(n[4]: genN, oth);
+	 (n[1]: genN, str)->(n[3]: xorN, oth);
+     (n[2]: genN, oth)->(n[3]: xorN, oth);
+     (n[3]: xorN, oth)->(n[4]: genN, fin) | starting .
 
 
 
@@ -615,7 +638,7 @@ fmod GRAPH-EQ is
 
  op xor : NodeList NodeList -> Bool .
  eq xor(AList, NList) = 
- 	if atLeastOneInList(AList, NList) and not allListInList(AList, NList)
+ 	if atLeastOneInList(AList, NList) and (not allListInList(AList, NList))
     then true
     else false
     fi .
@@ -700,25 +723,27 @@ mod GRAPH-RL is
 
   --- Consume action when node is and type
   rl [step-and]:
-    (n[i]: andN, func), AList | CList | EList | G | executing
+    (n[i]: andN, func), AList | ( CList, (n[x]: type1, func1) ) | EList | G | executing
     => 
-    if checkParentsInList((n[i]: genN, func), CList, G)     --- if ALL parents of the node are in the Correct List
+    if (isThereAnEdge?((n[x]: type1, func1), (n[i]: andN, func), G)) and (getNodeType((n[i]: andN, func), G) == andN) and checkParentsInList((n[i]: andN, func), ( CList, (n[x]: type1, func1) ), G)     --- if ALL parents of the node are in the Correct List
     then 
-      AList | ( CList, (n[i]: andN, func) ) | EList | G | executing  --- then add the node to the list of Correct Nodes
+      AList | ( CList, (n[x]: type1, func1), (n[i]: andN, func) ) | EList | G | executing  --- then add the node to the list of Correct Nodes
     else
-      AList | CList | (EList, (n[i]: andN, func)) | G | executing  --- otherwise add the node to the list of Error Nodes
+      AList | ( CList, (n[x]: type1, func1) ) | (EList, (n[i]: andN, func)) | G | executing  --- otherwise add the node to the list of Error Nodes
     fi .
+    
+    
 
   rl [step-or]:        ---- space before colon creates problems
-    (n[i]: orN, func), AList | CList | EList | G | executing  
+    (n[i]: orN, func), AList | (CList, (n[x]: type1, func1)) | EList | G | executing  
     => 
-    if isAtLeastOneListElementInList(							--- if at least one element from the list of parents of the node is in the list of Correct List, then
+    if (isThereAnEdge?((n[x]: type1, func1), (n[i]: orN, func), G)) and (getNodeType((n[i]: orN, func), G) == orN) and isAtLeastOneListElementInList(							--- if at least one element from the list of parents of the node is in the list of Correct List, then
 				parents((n[i]: orN, func), G),
-				CList )
+				(CList, (n[x]: type1, func1)) )
     then 
-      AList | (CList, (n[i]: orN, func)) | EList | G | executing   --- add the node to the list of correct nodes
+      AList | (CList, (n[x]: type1, func1), (n[i]: orN, func)) | EList | G | executing   --- add the node to the list of correct nodes
     else
-      AList | CList | (EList, (n[i]: orN, func)) | G | executing  --- otherwise add the node to the list of incorrect nodes
+      AList | (CList, (n[x]: type1, func1)) | (EList, (n[i]: orN, func)) | G | executing  --- otherwise add the node to the list of incorrect nodes
     fi .
 
 
@@ -746,9 +771,7 @@ mod GRAPH-RL is
   rl [step-xor]:    --- for now we assume that every input with XOR is with 2 inputs and 
     (n[i]: xorN, func), AList | CList | EList | G | executing  
     => 
-    if xor(
-		parents((n[i]: orN, func), G),
-		CList )
+    if xor((parents2((n[i]: xorN, func), G)), CList )
     then 
       AList | (CList, (n[i]: xorN, func)) | EList | G | executing   --- add the node to the list of correct nodes
     else
