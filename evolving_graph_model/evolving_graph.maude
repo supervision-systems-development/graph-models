@@ -132,7 +132,21 @@ fmod CONFIG is
      (n[1]: genN, str)->(n[2]: genN, oth);
      (n[2]: genN, oth)->(n[3]: genN, oth);
      (n[3]: genN, oth)->(n[5]: genN, fin) | starting .
+     
+  op init-and-correct : -> Config .
+  eq init-and-correct = (n[1]: genN, str), (n[2]: genN, oth), (n[3]: andN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+	 (n[1]: genN, str)->(n[3]: andN, oth);
+     (n[2]: genN, oth)->(n[3]: andN, oth);
+     (n[3]: andN, oth)->(n[4]: genN, fin) | starting .
 
+
+  op init-and-incorrect : -> Config .
+  eq init-and-incorrect = (n[1]: genN, str), (n[3]: andN, oth), (n[4]: genN, fin) | nil | nil | 
+     (n[1]: genN, str)->(n[2]: genN, oth);
+	 (n[1]: genN, str)->(n[3]: andN, oth);
+     (n[2]: genN, oth)->(n[3]: andN, oth);
+     (n[3]: andN, oth)->(n[4]: genN, fin) | starting .
 
 
 
@@ -579,10 +593,11 @@ fmod GRAPH-EQ is
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph.
   op parents : Node Graph -> NodeList .
-  eq parents((n[i]: type, func), G) = nil .
-  eq parents((n[i]: type, func), (n[x]: type, func) -> (n[i]: type, func) ; G) =
-    (n[x]: type, func) , parents((n[i]: type, func), G) [owise] .
-  
+  ---
+  eq parents((n[i]: type, func), G1 ; (n[x]: type, func) -> (n[i]: type, func) ; G) =
+    (n[x]: type, func) , parents((n[i]: type, func), G1 ; G) [owise] .
+  ---eq parents((n[i]: type, func), G) = nil .
+
   op _in_ : Node NodeList -> Bool .
   eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
   eq (n[i]: type, func) in NList1 = false [owise] .
@@ -666,7 +681,7 @@ mod GRAPH-RL is
 
 
   rl [step-sequential]: 
-    (n[i]: type, func), AList | (CList, (n[x]: type1, func1)) | EList | G  | executing  --- if there is a simple node, just add it to the list of correct nodes
+    (n[i]: genN, func), AList | (CList, (n[x]: type1, func1)) | EList | G  | executing  --- if there is a simple node, just add it to the list of correct nodes
     => 
     if isThereAnEdge?((n[x]: type1, func1), (n[i]: genN, func), G)
     then
