@@ -47,6 +47,8 @@ fmod GRAPH is
   sort Node .
   subsort Node < NodeList .
   op (n[_]:_,_) : Int NType NFunc -> Node [ctor] . --- Definition of Node. Has Id and Type
+---  op sNode : -> Node [ctor] . --- attempts at creating artificial starting and ending nodes
+---  op fNode : -> Node [ctor] .
 
   --- Definition of Arcs
   sort Arc .
@@ -285,6 +287,10 @@ fmod GRAPH-EQ is
   eq xor?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nxor, func2)) ; G2 ) ) = true . 
   eq xor?(N1, G) = false [owise] . 
   
+  op startingNode? : Node Graph -> Bool .
+  eq startingNode?((n[i]: type, func) , ( G1 ; (n[i]: type1, str)->(n[y]: type2, func2) ; G2 ) ) = true .
+  eq startingNode?(N1, G) = false [owise] .
+  
 
 endfm
 
@@ -309,7 +315,12 @@ mod GRAPH-RL is
   rl [start]: 
     (n[i]: nseq, str), AList | Cookies | CList | EList | G | starting  
     =>
-    AList | (Cookies, (n[i]: nseq, str)) | (CList, (n[i]: nseq, str)) | EList | G | executing .
+    if startingNode?( (n[i]: nseq, str),G)
+	then
+    AList | Cookies | (CList, (n[i]: nseq, str)) | EList, (n[i]: nseq, str) | G | executing
+	else
+    AList | Cookies | CList | EList, (n[i]: nseq, str) | G | starting
+ .
 
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
@@ -326,48 +337,48 @@ mod GRAPH-RL is
   --- Consume action: Consume "and" node
   --- Check what type of node we have found
   rl [step-and] :
-    (n[i]: type, func), AList | Cookies | CList | EList | G | executing
+    (n[i]: nand, func), AList | Cookies | CList | EList | G | executing
     => 
-    if and?((n[i]: type, func),G)
+    if and?((n[i]: nand, func),G)
     then
-    	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
+    	AList | Cookies | (CList, (n[i]: nand, func)) | EList | G | executing 
 	else 
-    	(n[i]: type, func), AList | Cookies | CList | EList | G | executing 
+    	AList | Cookies | CList | EList, (n[i]: nand, func) | G | executing 
     fi .
 
   --- Consume action: Consume "or" node
   --- Check what type of node we have found
   rl [step-or] :
-    (n[i]: type, func), AList | Cookies | CList | EList | G | executing
+    (n[i]: nor, func), AList | Cookies | CList | EList | G | executing
     => 
-    if or?((n[i]: type, func),G)
+    if or?((n[i]: nor, func),G)
     then
-    	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
+    	AList | Cookies | (CList, (n[i]: nor, func)) | EList | G | executing 
 	else 
-    	(n[i]: type, func), AList | Cookies | CList | EList | G | executing 
+    	AList | Cookies | CList | EList, (n[i]: nor, func) | G | executing 
     fi .
 
   --- Consume action: Consume sequential node
   --- Check what type of node we have found
   rl [step-seq] :
-    (n[i]: type, func), AList | Cookies | CList | EList | G | executing
+    (n[i]: nseq, func), AList | Cookies | CList | EList | G | executing
     => 
-    if seq?((n[i]: type, func),G)
+    if seq?((n[i]: nseq, func),G)
     then
     	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
 	else 
-    	(n[i]: type, func), AList | Cookies | CList | EList | G | executing 
+    	AList | Cookies | CList | EList, (n[i]: nseq, func) | G | executing 
     fi .
     
     
   rl [step-xor] :
-    (n[i]: type, func), AList | Cookies | CList | EList | G | executing
+    (n[i]: nxor, func), AList | Cookies | CList | EList | G | executing
     => 
-    if xor?((n[i]: type, func),G)
+    if xor?((n[i]: nxor, func),G)
     then
-    	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
+    	AList | Cookies | (CList, (n[i]: nxor, func)) | EList | G | executing 
 	else 
-    	(n[i]: type, func), AList | Cookies | CList | EList | G | executing 
+    	AList | Cookies | CList | EList, (n[i]: nxor, func) | G | executing 
     fi .
 
 
