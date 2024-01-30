@@ -313,8 +313,12 @@ fmod GRAPH-EQ is
   --- Consume cookie token
   --- if node we are on is child of cookie node, 
  op consumeCookies : Node NodeList Graph -> Bool .
---- op consumeCookies( (n[i]: type, func) , (nil), G) = false .   --- If Cookie List is empty, operator should not let rule match
---- op consumeCookies( (n[i]: type, func) , Cookies, G) = true .
+--- eq consumeCookies( (n[i]: type, func) , (nil) , G) = false .   --- If Cookie List is empty, operator should not let rule match
+--- eq consumeCookies( (n[i]: type, func) , Cookies, G) = true . 
+ 
+ op consumeCookies-listbased : Node NodeList -> NodeList . --- essentially remove one item  once from list
+ eq consumeCookies-listbased( (n[i]: type, func), ( CList1, (n[i]: type, func) , CList2 ) ) = (CList1, CList2) .
+ eq consumeCookies-listbased(N1, CList) = CList [owise] .
 
 
   --- Check if parents are in list of correct nodes
@@ -471,13 +475,13 @@ mod GRAPH-RL is
   --- Consume action: Consume "and" node
   --- Check what type of node we have found
   rl [step-and] :
-    (n[i]: nand, func), AList | ( Cookies1, (n[x]: type1, func1), Cookies2 )  | CList, (n[x]: type1, func1)  | EList | G | executing
+    (n[i]: nand, func), AList | Cookies  | CList, (n[x]: type1, func1)  | EList | G | executing
     => 
     if and?((n[x]: type1, func1),(n[i]: nand, func),G, (CList, (n[x]: type1, func1)))
     then
-    	AList | (Cookies1, Cookies2 , (n[i]: nand, str)) | (CList, (n[x]: type1, func1), (n[i]: nand, func)) | EList | G | executing 
+    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), (n[i]: nand, func) ) | (CList, (n[x]: type1, func1), (n[i]: nand, func)) | EList | G | executing 
 	else 
-    	AList | ( Cookies1, (n[x]: type1, func1), Cookies2 ) | CList, (n[x]: type1, func1) | EList, (n[i]: nand, func) | G | executing 
+    	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nand, func) | G | executing 
     fi .
 
   --- Consume action: Consume "or" node
@@ -495,13 +499,13 @@ mod GRAPH-RL is
   --- Consume action: Consume sequential node
   --- Check what type of node we have found
   rl [step-seq] :
-    (n[i]: nseq, func), AList | ( Cookies1, (n[x]: type1, func1), Cookies2 ) | CList, (n[x]: type1, func1) | EList | G | executing
+    (n[i]: nseq, func), AList | Cookies | CList, (n[x]: type1, func1) | EList | G | executing
     => 
     if seq?((n[x]: type1, func1),(n[i]: nseq, func),G)
     then
-    	AList | (Cookies1, Cookies2 , (n[i]: nand, str)) | (CList, (n[x]: type1, func1), (n[i]: nseq, func)) | EList | G | executing 
+    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), (n[i]: nseq, func) ) | (CList, (n[x]: type1, func1), (n[i]: nseq, func)) | EList | G | executing 
 	else 
-    	AList | ( Cookies1, (n[x]: type1, func1), Cookies2 ) | CList, (n[x]: type1, func1) | EList, (n[i]: nseq, func) | G | executing 
+    	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nseq, func) | G | executing 
     fi .
     
     
