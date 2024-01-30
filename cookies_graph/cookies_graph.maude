@@ -253,6 +253,31 @@ fmod CONFIG is
      
    
    
+  op preprocessed-init-nxor-correct : -> Config . 
+  eq preprocessed-init-nxor-correct = 
+  (n[0]: nseq, str), (n[1]: nseq, oth), (n[3]: nxor, oth), (n[4]: nseq, oth), (n[11]: nseq, fin) |
+  nil | nil | nil |
+  (n[0]: nseq, str)->(n[1]: nseq, oth);
+  (n[1]: nseq, oth)->(n[2]: nseq, oth);
+  (n[1]: nseq, oth)->(n[3]: nxor, oth);
+  (n[2]: nseq, oth)->(n[3]: nxor, oth);
+  (n[3]: nxor, oth)->(n[4]: nseq, oth);
+  (n[4]: nseq, oth)->(n[11]: nseq, fin)|
+  starting .
+   
+   
+   
+  op preprocessed-init-nxor-incorrect : -> Config . 
+  eq preprocessed-init-nxor-incorrect = 
+  (n[0]: nseq, str), (n[1]: nseq, oth), (n[2]: nseq, oth), (n[3]: nxor, oth), (n[4]: nseq, oth), (n[11]: nseq, fin) |
+  nil | nil | nil |
+  (n[0]: nseq, str)->(n[1]: nseq, oth);
+  (n[1]: nseq, oth)->(n[2]: nseq, oth);
+  (n[1]: nseq, oth)->(n[3]: nxor, oth);
+  (n[2]: nseq, oth)->(n[3]: nxor, oth);
+  (n[3]: nxor, oth)->(n[4]: nseq, oth);
+  (n[4]: nseq, oth)->(n[11]: nseq, fin)|
+  starting .
  
    
 endfm
@@ -375,9 +400,26 @@ fmod GRAPH-EQ is
   eq seq?((n[i]: type1, func1), (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nseq, func2)) ; G2 ) ) = true .
   eq seq?(N1,N2, G) = false [owise] .
   
-  op xor? : Node Graph -> Bool . 
-  eq xor?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nxor, func2)) ; G2 ) ) = true . 
-  eq xor?(N1, G) = false [owise] . 
+  op xor? : Node Node Graph NodeList -> Bool . 
+  eq xor?( (n[i]: type1, func1),(n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nxor, func2)) ; G2 ), CList ) =
+  	if 
+	(isAtLeastOneListElementInList(
+             parents-ifelse(
+                      (n[j]: type, func),
+                      ( G1 ; ((n[i]: type1, func1) -> (n[j]: nxor, func2)) ; G2 )
+                            ),
+             CList ))
+    and 
+    (not isParentListInList(
+             parents-ifelse(
+                      (n[j]: type, func),
+                      ( G1 ; ((n[i]: type1, func1) -> (n[j]: nxor, func2)) ; G2 )
+                            ),
+              CList))
+    then true 
+    else false
+    fi . 
+  eq xor?(N1,N2, G, CList) = false [owise] . 
   
   op startingNode? : Node Graph -> Bool .
   eq startingNode?((n[i]: type, func) , ( G1 ; (n[i]: type1, str)->(n[y]: type2, func2) ; G2 ) ) = true .
@@ -464,13 +506,13 @@ mod GRAPH-RL is
     
     
   rl [step-xor] :
-    (n[i]: nxor, func), AList | Cookies | CList | EList | G | executing
+    (n[i]: nxor, func), AList | Cookies | CList, (n[x]: type1, func1) | EList | G | executing
     => 
-    if xor?((n[i]: nxor, func),G)
+    if xor?( (n[x]: type1, func1) , (n[i]: nxor, func) , G , ( CList, (n[x]: type1, func1) ) )
     then
-    	AList | Cookies | (CList, (n[i]: nxor, func)) | EList | G | executing 
+    	AList | Cookies | (CList, (n[x]: type1, func1), (n[i]: nxor, func)) | EList | G | executing 
 	else 
-    	AList | Cookies | CList | EList, (n[i]: nxor, func) | G | executing 
+    	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nxor, func) | G | executing 
     fi .
 
 
