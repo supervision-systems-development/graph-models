@@ -190,14 +190,42 @@ fmod CONFIG is
     starting .
 
   --- Sequential nodes with or node and one parent is accessed only (with artificial S and F nodes in a correct sequence)
-  op init-nor-correct1 : -> Config .
-  eq init-nor-correct1 = 
+  op init-nor-correct2 : -> Config .
+  eq init-nor-correct2 = 
     seq4 | 
     nil | 
     nil | 
     nil | 
     graph4 |
     starting .
+
+  --- testing or with preprocessed sequence
+  op preprocessed-init-nor-correct : -> Config . 
+  eq preprocessed-init-nor-correct = 
+  (n[0]: nseq, str), (n[1]: nseq, oth), (n[3]: nor, oth), (n[4]: nseq, oth), (n[11]: nseq, fin) |
+  nil | nil | nil |
+  (n[0]: nseq, str)->(n[1]: nseq, oth);
+  (n[1]: nseq, oth)->(n[2]: nseq, oth);
+  (n[1]: nseq, oth)->(n[3]: nor, oth);
+  (n[2]: nseq, oth)->(n[3]: nor, oth);
+  (n[3]: nor, oth)->(n[4]: nseq, oth);
+  (n[4]: nseq, oth)->(n[11]: nseq, fin)|
+  starting .
+  
+  
+  
+  op preprocessed-init-nor-incorrect : -> Config . 
+  eq preprocessed-init-nor-incorrect = 
+  (n[0]: nseq, str), (n[3]: nor, oth), (n[4]: nseq, oth), (n[11]: nseq, fin) |
+  nil | nil | nil |
+  (n[0]: nseq, str)->(n[1]: nseq, oth);
+  (n[1]: nseq, oth)->(n[2]: nseq, oth);
+  (n[1]: nseq, oth)->(n[3]: nor, oth);
+  (n[2]: nseq, oth)->(n[3]: nor, oth);
+  (n[3]: nor, oth)->(n[4]: nseq, oth);
+  (n[4]: nseq, oth)->(n[11]: nseq, fin)|
+  starting .
+  
    
 endfm
 
@@ -275,13 +303,13 @@ fmod GRAPH-EQ is
   eq and?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nand, func2)) ; G2 ) ) = true .
   eq and?(N1, G) = false [owise] .
   
-  op or? : Node Graph -> Bool . 
-  eq or?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nor, func2)) ; G2 ) ) = true . 
-  eq or?(N1, G) = false [owise] . 
+  op or? : Node Node Graph -> Bool . 
+  eq or?((n[i]: type1, func1), (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nor, func2)) ; G2 ) ) = true . 
+  eq or?(N1,N2, G) = false [owise] . 
   
-  op seq? : Node Graph -> Bool . 
-  eq seq?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nseq, func2)) ; G2 ) ) = true .
-  eq seq?(N1, G) = false [owise] .
+  op seq? : Node Node Graph -> Bool . 
+  eq seq?((n[i]: type1, func1), (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nseq, func2)) ; G2 ) ) = true .
+  eq seq?(N1,N2, G) = false [owise] .
   
   op xor? : Node Graph -> Bool . 
   eq xor?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nxor, func2)) ; G2 ) ) = true . 
@@ -317,10 +345,10 @@ mod GRAPH-RL is
     =>
     if startingNode?( (n[i]: nseq, str),G)
 	then
-    AList | Cookies | (CList, (n[i]: nseq, str)) | EList, (n[i]: nseq, str) | G | executing
+    AList | Cookies | (CList, (n[i]: nseq, str)) | EList | G | executing
 	else
     AList | Cookies | CList | EList, (n[i]: nseq, str) | G | starting
- .
+    fi .
 
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
@@ -349,25 +377,25 @@ mod GRAPH-RL is
   --- Consume action: Consume "or" node
   --- Check what type of node we have found
   rl [step-or] :
-    (n[i]: nor, func), AList | Cookies | CList | EList | G | executing
+    (n[i]: nor, func), AList | Cookies |  CList, (n[x]: type1, func1) | EList | G | executing
     => 
-    if or?((n[i]: nor, func),G)
+    if or?((n[x]: type1, func1),(n[i]: nor, func),G)
     then
-    	AList | Cookies | (CList, (n[i]: nor, func)) | EList | G | executing 
+    	AList | Cookies | ( CList, (n[x]: type1, func1), (n[i]: nor, func)) | EList | G | executing 
 	else 
-    	AList | Cookies | CList | EList, (n[i]: nor, func) | G | executing 
+    	AList | Cookies |  CList, (n[x]: type1, func1) | EList, (n[i]: nor, func) | G | executing 
     fi .
 
   --- Consume action: Consume sequential node
   --- Check what type of node we have found
   rl [step-seq] :
-    (n[i]: nseq, func), AList | Cookies | CList | EList | G | executing
+    (n[i]: nseq, func), AList | Cookies | CList, (n[x]: type1, func1) | EList | G | executing
     => 
-    if seq?((n[i]: nseq, func),G)
+    if seq?((n[x]: type1, func1),(n[i]: nseq, func),G)
     then
-    	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
+    	AList | Cookies | (CList, (n[x]: type1, func1), (n[i]: nseq, func)) | EList | G | executing 
 	else 
-    	AList | Cookies | CList | EList, (n[i]: nseq, func) | G | executing 
+    	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nseq, func) | G | executing 
     fi .
     
     
