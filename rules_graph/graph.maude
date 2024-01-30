@@ -2,7 +2,7 @@
 fmod NTYPE is
   
   sort NType .
-  ops genN andN orn xorN unkN : -> NType [ctor] .
+  ops nseq nand nor nxor nunk : -> NType [ctor] .
 
 endfm
 
@@ -18,7 +18,7 @@ endfm
 fmod STATUS is
 
   sort Status .
-  ops correct incorrect executing : -> Status [ctor] .
+  ops correct incorrect executing starting : -> Status [ctor] .
 
 endfm
 
@@ -34,14 +34,14 @@ fmod GRAPH is
   --- Definition of a Graph
   sort Graph .
   op nil : -> Graph [ctor] . --- There was no [ctor]
-  op _;_ : Graph Graph -> Graph [assoc comm id: nil prec 50 ] .
+  op _;;_ : Graph Graph -> Graph [assoc comm id: nil prec 50 ] .
 
   *** A Graph is conformed by Arcs and Nodes ***
-  --- Definition of a List of Nodes
+  --- Definition of a List of Nodes8
   sort NodeList .
   subsort NodeList < Graph . --- List of Nodes should be part of Graph
   op nil : -> NodeList [ctor] . --- Definition of List of Nodes. There was no [ctor]
-  op _,_ : NodeList NodeList -> NodeList [assoc id: nil] .
+  op _;_ : NodeList NodeList -> NodeList [assoc id: nil] .
 
   --- Definition of Nodes
   sort Node .
@@ -55,9 +55,66 @@ fmod GRAPH is
 
 endfm
 
+*** Pre-defined graphs and sequences ***
+fmod SEQUENCES is
+  pr GRAPH .
+
+  *** Graph configurations for testing ***
+  --- Sequential graph
+  op graph1 : -> Graph .
+  eq graph1 = 
+  	(n[0]: nseq, str)->(n[1]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
+    (n[2]: nseq, oth)->(n[11]: nseq, fin) .
+
+  --- Sequential graph
+  op graph2 : -> Graph .
+  eq graph2 = 
+  	(n[0]: nseq, str)->(n[1]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
+    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
+    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
+    (n[4]: nseq, oth)->(n[11]: nseq, fin) .
+  
+  --- And graph
+  op graph3 : -> Graph .
+  eq graph3 = 
+  	(n[0]: nseq, str)->(n[1]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
+    (n[2]: nseq, oth)->(n[4]: nand, oth);;
+    (n[3]: nseq, oth)->(n[4]: nand, oth);;
+    (n[4]: nand, oth)->(n[11]: nseq, fin) .
+
+  --- Or graph
+  op graph4 : -> Graph .
+  eq graph4 = 
+  	(n[0]: nseq, str)->(n[1]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
+    (n[2]: nseq, oth)->(n[4]: nor, oth);;
+    (n[3]: nseq, oth)->(n[4]: nor, oth);;
+    (n[4]: nor, oth)->(n[11]: nseq, fin) .
+
+  *** Action sequences for testing ***
+  op seq1 : -> NodeList .
+  eq seq1 = (n[0]: nseq, str); (n[1]: nseq, oth); (n[2]: nseq, oth); (n[11]: nseq, fin) .
+
+  op seq2 : -> NodeList .
+  eq seq2 = (n[0]: nseq, str); (n[1]: nseq, oth); (n[11]: nseq, fin) .
+
+  op seq3 : -> NodeList .
+  eq seq3 = (n[0]: nseq, str); (n[1]: nseq, oth); (n[2]: nseq, oth); (n[3]: nseq, oth); (n[4]: nseq, oth); (n[11]: nseq, fin) .
+
+  op seq4 : -> NodeList .
+  eq seq4 = (n[0]: nseq, str); (n[1]: nseq, oth); (n[2]: nseq, oth); (n[4]: nseq, oth); (n[11]: nseq, fin) .
+
+endfm
+
 *** Initial configurations ***
 fmod CONFIG is
-  pr GRAPH .
+  pr SEQUENCES .
 
   sort Config .
   op _|_|_|_|_ : NodeList NodeList NodeList Graph Status -> Config [ctor] .
@@ -69,33 +126,75 @@ fmod CONFIG is
   var func : NFunc .
   var i : Int .
 
-  *** Empty configuration ***
-  op init-mt : -> Config .
-  eq init-mt = nil | nil | nil | nil | executing .
+  *** Initial configurations using simple actions and graphs ***
+  --- Sequential nodes (with artificial S and F nodes in a correct sequence)
+  op init-simple-correct : -> Config .
+  eq init-simple-correct = 
+    seq1 | 
+    nil | 
+    nil | 
+    graph1 |
+    starting .
 
-  op init1 : -> Config .
-  eq init1 = 
-    (n[1]: genN, str), (n[2]: genN, fin) | 
+  --- Sequential nodes (with artificial S and F nodes in an incorrect sequence)
+  op init-simple-incorrect : -> Config .
+  eq init-simple-incorrect = 
+    seq2 | 
     nil | 
     nil | 
-    (n[1]: genN, str)->(n[2]: genN, fin) |
-    executing .
+    graph1 |
+    starting .
 
-  op init2 : -> Config .
-  eq init2 = 
-    (n[1]: genN, str), (n[3]: genN, oth), (n[2]: genN, oth), (n[4]: genN, fin) | 
+  --- Sequential nodes (with artificial S and F nodes in a correct sequence)
+  op init-nseq-correct : -> Config .
+  eq init-nseq-correct = 
+    seq3 | 
     nil | 
     nil | 
-    (n[1]: genN, str)->(n[2]: genN, oth); 
-    (n[1]: genN, str)->(n[3]: genN, oth); 
-    (n[2]: genN, oth)->(n[4]: andN, fin);
-    (n[3]: genN, oth)->(n[4]: andN, fin)  |
-    executing .
+    graph2 |
+    starting .
 
+  --- Sequential nodes with and node (with artificial S and F nodes in a correct sequence)
+  op init-nand-correct : -> Config .
+  eq init-nand-correct = 
+    seq3 | 
+    nil | 
+    nil | 
+    graph3 |
+    starting .
+
+  --- Sequential nodes with and node (with artificial S and F nodes in a correct sequence)
+  op init-nand-incorrect : -> Config .
+  eq init-nand-incorrect = 
+    seq4 | 
+    nil | 
+    nil | 
+    graph3 |
+    starting .
+
+  --- Sequential nodes with or node and both parents are accessed (with artificial S and F nodes in a correct sequence)
+  op init-nor-correct1 : -> Config .
+  eq init-nor-correct1 = 
+    seq3 | 
+    nil | 
+    nil | 
+    graph4 |
+    starting .
+
+  --- Sequential nodes with or node and one parent is accessed only (with artificial S and F nodes in a correct sequence)
+  op init-nor-correct1 : -> Config .
+  eq init-nor-correct1 = 
+    seq4 | 
+    nil | 
+    nil | 
+    graph4 |
+    starting .
+   
 endfm
 
 fmod GRAPH-EQ is
   pr CONFIG .
+  pr EXT-BOOL .
 
   *** Variables ***
   var NList NList1 NList2 : NodeList . --- Generic node list
@@ -103,46 +202,81 @@ fmod GRAPH-EQ is
   var CList CList1 CList2 : NodeList . --- Lists of correct actions
   var EList EList1 EList2 : NodeList . --- Lists of incorrect actions
   var G G1 G2 : Graph . --- Graphs
-  var type : NType . --- Node types
-  var func : NFunc . --- Node functions
-  var i  x y : Int . --- Node ids
+  var type type2 type1 type3 : NType . --- Node types
+  var func func2 func1 func3 : NFunc . --- Node functions
+  var i j x y : Int . --- Node ids
   var status : Status . --- Status of the execution
+  var Arc1 Arc2 : Arc . --- arc varables
+  var N1 N2 N3 N4 : Node . --- node variables
 
   *** Equations ***
+  --- Check if last node of Correct List is "fin" node
   op checkStatus : NodeList -> Bool .
   eq checkStatus(nil) = false .
-  eq checkStatus((CList, (n[i]: type, func))) = 
+  eq checkStatus((CList ; (n[i]: type, func))) = 
     if func == fin
     then true
     else false
     fi .
 
- --- Check if parents are in list of correct nodes
- op checkParentsInList : Node NodeList Graph -> Bool .
- eq checkParentsInList((n[i]: type, func), CList, G) =
-    if isParentListInList(parents((n[i]: type, func), G), CList) 
-    then true
-    else false 
+  --- Check if node is type "sequential", "and" or "or"
+  op checkType : Node Graph -> String .
+  eq checkType((n[i]: type, func), ) =
+    if type == nand
+    then "and"
+    else 
+      if type == nor
+      then "or"
+      else "seq"
+      fi
     fi .
-    
- op isParentListInList : NodeList NodeList -> Bool .
- eq isParentListInList(nil, CList) = true .
- eq isParentListInList(((n[x]: type, func), NList), CList) =
-    if (n[x]: type, func) in CList 
-    then isParentListInList(NList, CList)
-    else false 
+
+  --- Return how many parents are in list of correct actions
+  op checkParentsInList : Node NodeList Graph -> String .
+  eq checkParentsInList((n[i]: type, func), CList, G) =
+    if allNodesListInList(parents((n[i]: type, func), G), CList) == true
+    then 
+      "all"
+    else 
+      if someNodesListInList(parents((n[i]: type, func), G), CList) == true
+      then "some"
+      else "none"
+      fi
     fi .
+  
+  --- Check if all nodes are in the target list of nodes
+  op allNodesListInList : NodeList NodeList -> Bool .
+  eq allNodesListInList(nil, CList) = true .
+  eq allNodesListInList(((n[x]: type, func); NList), CList) =
+    ((n[x]: type, func) in CList) and allNodesListInList(NList, CList) .
+  
+  --- Check if at least one of the nodes is in the target list of nodes
+  op someNodesListInList : NodeList NodeList -> Bool .
+  eq someNodesListInList(nil, CList) = false .
+  eq someNodesListInList(((n[x]: type, func); NList), CList) =
+    ((n[x]: type, func) in CList) and someNodesListInList(NList, CList) .
 
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph.
   op parents : Node Graph -> NodeList .
-  eq parents((n[i]: type, func), G) = nil .
-  eq parents((n[i]: type, func), (n[x]: type, func) -> (n[i]: type, func) ; G) =
-    (n[x]: type, func) , parents((n[i]: type, func), G) [owise] .
+  eq parents((n[i]: type, func), (n[x]: type1, func1) -> (n[i]: type, func) ;; G) =
+    (n[x]: type1, func1) ; parents((n[i]: type, func), G) .
+  eq parents((n[i]: type, func), G) = nil [owise] .
+
+  --- To obtain the list of direct children of a node in a graph.
+  op children : Node Graph -> NodeList .
+  eq children((n[i]: type, func), nil) = nil .
+  eq children((n[i]: type, func), (n[i]: type, func) -> (n[x]: type1, func1) ;; G) =
+    (n[x]: type1, func1) ; children((n[i]: type, func), G) .
   
   op _in_ : Node NodeList -> Bool .
-  eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
+  eq (n[i]: type, func) in (NList1 ; (n[i]: type, func) ; NList2) = true .
   eq (n[i]: type, func) in NList1 = false [owise] .
+
+  op isArc : Node Node Graph -> Bool .
+  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), nil) = false .
+  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), G1 ;; (n[x]: type1, func1) -> (n[y]: type2, func2) ;; G2) = true .
+  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), G) = false [owise] .
 
 endfm
 
@@ -155,21 +289,22 @@ mod GRAPH-RL is
   var CList CList1 CList2 : NodeList . --- Lists of correct actions
   var EList EList1 EList2 : NodeList . --- Lists of incorrect actions
   var G G1 G2 : Graph . --- Graphs
-  var type : NType . --- Node types
-  var func : NFunc . --- Node functions
-  var i : Int . --- Node ids
+  var type type1 type2 type3 type4 : NType . --- Node types
+  var func func1 func2 func3 func4 : NFunc . --- Node functions
+  var i j x y z : Int . --- Node ids
   var status : Status . --- Status of the execution
 
-
   *** Rules ***
-  --- Start the execution
+  --- Start the execution: Transition status from "starting" to "executing" and consume starting node
+  --- Nodes str and fin nodes are artificial nodes inserted to control the sequences
   rl [start]: 
-    (n[i]: genN, str), AList | CList | EList | G | executing
+    (n[i]: nseq, str); AList | CList | EList | G | starting  
     =>
-    AList | (CList, (n[i]: genN, str)) | EList | G | executing .
+    AList | (CList ; (n[i]: nseq, str)) | EList | G | executing .
 
-  --- End the execution
-  rl [end]: 
+  --- End the execution: Transition status from "executing" to "correct" or "incorrect"
+  --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
+  rl [end]:  
     nil | CList | EList | G | executing
     =>
     if checkStatus(CList)
@@ -179,23 +314,37 @@ mod GRAPH-RL is
       nil | CList | EList | G | incorrect
     fi .
 
-  --- Consume action when node is and type
-  rl [step-and] :
-    (n[i]: type, func), AList | CList | EList | G | executing
+  --- Consume action: Consume node
+  --- Check what type of node we have found: "sequential", "and" or "or"
+  rl [step] :
+    (n[i]: type, func) ; AList | CList | EList | G | executing
     => 
-    if checkParentsInList((n[i]: type, func), CList, G)
-    then 
-      AList | (CList, (n[i]: genN, func)) | EList | G | executing
+    if checkType((n[i]: type, func), G) == "and" and checkParentsInList((n[i]: type, func), CList, G) == "all"
+    then
+      AList | (CList ; (n[i]: type, func)) | EList | G | executing 
     else
-      (n[i]: type, func), AList | CList | EList | G | executing
+      if checkType((n[i]: type, func), G) == "or" and checkParentsInList((n[i]: type, func), CList, G) == "some"
+      then
+        AList | (CList ; (n[i]: type, func)) | EList | G | executing 
+      else
+        if checkType((n[i]: type, func), G) == "seq" and checkParentsInList((n[i]: type, func), CList, G) == "some"
+        then
+          AList | (CList ; (n[i]: type, func)) | EList | G | executing 
+        else
+          AList | CList | (EList ; (n[i]: type, func)) | G | executing 
+        fi
+      fi
     fi .
-
 endm
 
 
-
-
-
-
-
-
+---red checkParentsInList((n[4]: nseq, oth), (n[2]: nseq, oth) ; (n[3]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[3]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[3]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[4]: nseq, oth) -> (n[11]: nseq, fin)) .
+---red checkParentsInList((n[4]: nseq, oth), (n[2]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[3]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[3]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[4]: nseq, oth) -> (n[11]: nseq, fin)) .
+---red checkParentsInList((n[4]: nseq, oth), (n[11]: nseq, oth) ; (n[3]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[3]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[3]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[4]: nseq, oth) -> (n[11]: nseq, fin)) .
+---red allNodesListInList((n[1]: nseq, oth) ; (n[2]: nseq, oth) ; (n[3]: nseq, oth) ; (n[4]: nseq, oth), (n[2]: nseq, oth) ; (n[3]: nseq, oth)) .
+---red allNodesListInList((n[2]: nseq, oth) ; (n[3]: nseq, oth), (n[1]: nseq, oth) ; (n[2]: nseq, oth) ; (n[3]: nseq, oth) ; (n[4]: nseq, oth)) .
+---red someNodesListInList((n[1]: nseq, oth) ; (n[2]: nseq, oth) ; (n[3]: nseq, oth) ; (n[4]: nseq, oth), (n[2]: nseq, oth) ; (n[3]: nseq, oth)) .
+---red someNodesListInList((n[2]: nseq, oth) ; (n[3]: nseq, oth), (n[1]: nseq, oth) ; (n[2]: nseq, oth) ; (n[3]: nseq, oth) ; (n[4]: nseq, oth)) .
+---red parents((n[4]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[3]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[3]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[4]: nseq, oth) -> (n[11]: nseq, fin)) .
+---red parents((n[2]: nseq, oth), nil) .
+---red isArc((n[1]: nseq, oth), (n[2]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;;  (n[1]: nseq, oth) -> (n[2]: nseq, oth)  ;; (n[2]: nseq, oth) -> (n[11]: nseq, fin)) .
