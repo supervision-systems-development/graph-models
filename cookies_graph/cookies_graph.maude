@@ -34,14 +34,14 @@ fmod GRAPH is
   --- Definition of a Graph
   sort Graph .
   op nil : -> Graph [ctor] . --- There was no [ctor]
-  op _;;_ : Graph Graph -> Graph [assoc comm id: nil prec 50 ] .
+  op _;_ : Graph Graph -> Graph [assoc comm id: nil prec 50 ] .
 
   *** A Graph is conformed by Arcs and Nodes ***
-  --- Definition of a List of Nodes8
+  --- Definition of a List of Nodes
   sort NodeList .
   subsort NodeList < Graph . --- List of Nodes should be part of Graph
   op nil : -> NodeList [ctor] . --- Definition of List of Nodes. There was no [ctor]
-  op _;_ : NodeList NodeList -> NodeList [assoc id: nil] .
+  op _,_ : NodeList NodeList -> NodeList [assoc id: nil] .
 
   --- Definition of Nodes
   sort Node .
@@ -63,52 +63,52 @@ fmod SEQUENCES is
   --- Sequential graph
   op graph1 : -> Graph .
   eq graph1 = 
-  	(n[0]: nseq, str)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
+  	(n[0]: nseq, str)->(n[1]: nseq, oth);
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);
     (n[2]: nseq, oth)->(n[11]: nseq, fin) .
 
   --- Sequential graph
   op graph2 : -> Graph .
   eq graph2 = 
-  	(n[0]: nseq, str)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
+  	(n[0]: nseq, str)->(n[1]: nseq, oth);
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);
+    (n[1]: nseq, oth)->(n[3]: nseq, oth);
+    (n[2]: nseq, oth)->(n[4]: nseq, oth);
+    (n[3]: nseq, oth)->(n[4]: nseq, oth);
     (n[4]: nseq, oth)->(n[11]: nseq, fin) .
   
   --- And graph
   op graph3 : -> Graph .
   eq graph3 = 
-  	(n[0]: nseq, str)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nand, oth);;
-    (n[3]: nseq, oth)->(n[4]: nand, oth);;
+  	(n[0]: nseq, str)->(n[1]: nseq, oth);
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);
+    (n[1]: nseq, oth)->(n[3]: nseq, oth);
+    (n[2]: nseq, oth)->(n[4]: nand, oth);
+    (n[3]: nseq, oth)->(n[4]: nand, oth);
     (n[4]: nand, oth)->(n[11]: nseq, fin) .
 
   --- Or graph
   op graph4 : -> Graph .
   eq graph4 = 
-  	(n[0]: nseq, str)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nor, oth);;
-    (n[3]: nseq, oth)->(n[4]: nor, oth);;
+  	(n[0]: nseq, str)->(n[1]: nseq, oth);
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);
+    (n[1]: nseq, oth)->(n[3]: nseq, oth);
+    (n[2]: nseq, oth)->(n[4]: nor, oth);
+    (n[3]: nseq, oth)->(n[4]: nor, oth);
     (n[4]: nor, oth)->(n[11]: nseq, fin) .
 
   *** Action sequences for testing ***
   op seq1 : -> NodeList .
-  eq seq1 = (n[0]: nseq, str); (n[1]: nseq, oth); (n[2]: nseq, oth); (n[11]: nseq, fin) .
+  eq seq1 = (n[0]: nseq, str), (n[1]: nseq, oth), (n[2]: nseq, oth), (n[11]: nseq, fin) .
 
   op seq2 : -> NodeList .
-  eq seq2 = (n[0]: nseq, str); (n[1]: nseq, oth); (n[11]: nseq, fin) .
+  eq seq2 = (n[0]: nseq, str), (n[1]: nseq, oth), (n[11]: nseq, fin) .
 
   op seq3 : -> NodeList .
-  eq seq3 = (n[0]: nseq, str); (n[1]: nseq, oth); (n[2]: nseq, oth); (n[3]: nseq, oth); (n[4]: nseq, oth); (n[11]: nseq, fin) .
+  eq seq3 = (n[0]: nseq, str), (n[1]: nseq, oth), (n[2]: nseq, oth), (n[3]: nseq, oth), (n[4]: nseq, oth), (n[11]: nseq, fin) .
 
   op seq4 : -> NodeList .
-  eq seq4 = (n[0]: nseq, str); (n[1]: nseq, oth); (n[2]: nseq, oth); (n[4]: nseq, oth); (n[11]: nseq, fin) .
+  eq seq4 = (n[0]: nseq, str), (n[1]: nseq, oth), (n[2]: nseq, oth), (n[4]: nseq, oth), (n[11]: nseq, fin) .
 
 endfm
 
@@ -211,7 +211,7 @@ fmod GRAPH-EQ is
   var G G1 G2 : Graph . --- Graphs
   var type type2 type1 type3 : NType . --- Node types
   var func func2 func1 func3 : NFunc . --- Node functions
-  var i j x y : Int . --- Node ids
+  var i x y : Int . --- Node ids
   var status : Status . --- Status of the execution
   var Arc1 Arc2 : Arc . --- arc varables
   var N1 N2 N3 N4 : Node . --- node variables
@@ -220,84 +220,51 @@ fmod GRAPH-EQ is
   --- Check if last node of Correct List is "fin" node
   op checkStatus : NodeList -> Bool .
   eq checkStatus(nil) = false .
-  eq checkStatus((CList ; (n[i]: type, func))) = 
+  eq checkStatus((CList, (n[i]: type, func))) = 
     if func == fin
     then true
     else false
     fi .
 
-  --- Check if node is type "sequential", "and" or "or"
-  op checkType : NType -> String .
-  eq checkType(type) =
-    if type == nand
-    then "and"
-    else 
-      if type == nor
-      then "or"
-      else "seq"
-      fi
-    fi .
-
-  --- Return how many parents are in list of correct actions
-  op checkParentsInList : Node NodeList Graph -> String .
-  eq checkParentsInList((n[i]: type, func), CList, G) =
-    if allParentListInList(parents((n[i]: type, func), G), CList) == true
-    then 
-      "all"
-    else 
-      if someParentListInList(parents((n[i]: type, func), G), CList) == true
-      then 
-        "some"
-      else
-        "none"
-      fi
-    fi .
-  
-  --- Check if all parents of node are in the list of correct actions
-  op allParentListInList : NodeList NodeList -> Bool .
-  eq allParentListInList(nil, CList) = true .
-  eq allParentListInList(((n[x]: type, func); NList), CList) =
-    if (n[x]: type, func) in CList 
-    then allParentListInList(NList, CList)
-    else false 
-    fi .
-  
-  --- Check if at least one of the parents of node are in the list of correct actions
-  op someParentListInList : NodeList NodeList -> Bool .
-  eq someParentListInList(nil, CList) = true .
-  eq someParentListInList(((n[x]: type, func); NList), CList) =
-    if (n[x]: type, func) in CList 
-    then true
-    else someParentListInList(NList, CList)
-    fi .
-
-  --- Check if only one of the parents of node are in the list of correct actions
-  --- TODO
-
   --- Check in Cookies List the current node we are on and its children
   --- Consume cookie token
   --- if node we are on is child of cookie node, 
-  ---op consumeCookies : Node NodeList Graph -> Bool .
-  ---op consumeCookies((n[i] type, func), nil, G) = false . --- If Cookie List is empty, operator should not let rule match
-  ---op consumeCookies((n[i] type, func), Cookies, G) = false .
-    ---if 
+  op consumeCookies : Node NodeList Graph -> Bool .
+  op consumeCookies((n[i] type, func), nil, G) = false . --- If Cookie List is empty, operator should not let rule match
+  op consumeCookies((n[i] type, func), Cookies, G) = false .
+    if 
 
+  --- Check if parents are in list of correct nodes
+ op checkParentsInList : Node NodeList Graph -> Bool .
+ eq checkParentsInList((n[i]: type, func), CList, G) =
+    if isParentListInList(parents((n[i]: type, func), G), CList) 
+    then true
+    else false 
+    fi .
+    
+ op isParentListInList : NodeList NodeList -> Bool .
+ eq isParentListInList(nil, CList) = true .
+ eq isParentListInList(((n[x]: type, func), NList), CList) =
+    if (n[x]: type, func) in CList 
+    then isParentListInList(NList, CList)
+    else false 
+    fi .
 
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph.
   op parents : Node Graph -> NodeList .
-  eq parents((n[i]: type, func), nil) = nil .
-  eq parents((n[i]: type, func), (n[x]: type1, func1) -> (n[i]: type, func) ;; G) =
-    (n[x]: type1, func1) ; parents((n[i]: type, func), G) [owise] .
+  eq parents((n[i]: type, func), G) = nil .
+  eq parents((n[i]: type, func), (n[x]: type, func) -> (n[i]: type, func) ; G) =
+    (n[x]: type, func) , parents((n[i]: type, func), G) [owise] .
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Node Graph -> NodeList .
-  eq children((n[i]: type, func), nil) = nil .
-  eq children((n[i]: type, func), (n[i]: type, func) -> (n[x]: type1, func1) ;; G) =
-    (n[x]: type1, func1) ; children((n[i]: type, func), G) [owise] .
+  eq children((n[i]: type, func), G) = nil .
+  eq children((n[i]: type, func), G1 ; (n[i]: type, func) -> (n[j]: type, func) ; G2) =
+    (n[j]: type, func) , children((n[i]: type, func), G) [owise] .
   
   op _in_ : Node NodeList -> Bool .
-  eq (n[i]: type, func) in (NList1 ; (n[i]: type, func) ; NList2) = true .
+  eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
   eq (n[i]: type, func) in NList1 = false [owise] .
 
 endfm
@@ -321,9 +288,9 @@ mod GRAPH-RL is
   --- Start the execution: Transition status from "starting" to "executing" and consume starting node
   --- Nodes str and fin nodes are artificial nodes inserted to control the sequences
   rl [start]: 
-    (n[i]: nseq, str); AList | Cookies | CList | EList | G | starting  
+    (n[i]: nseq, str), AList | Cookies | CList | EList | G | starting  
     =>
-    AList | (Cookies ; (n[i]: nseq, str)) | (CList ; (n[i]: nseq, str)) | EList | G | executing .
+    AList | (Cookies, (n[i]: nseq, str)) | (CList, (n[i]: nseq, str)) | EList | G | executing .
 
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
@@ -337,29 +304,25 @@ mod GRAPH-RL is
       nil | Cookies | CList | EList | G | incorrect
     fi .
 
-  --- Consume action: Consume node
-  --- Check what type of node we have found: "sequential", "and" or "or"
-  rl [step] :
-    (n[i]: type, func) ; AList | Cookies | CList | EList | G | executing
+  --- Consume action: Consume "and" node
+  --- Check what type of node we have found
+  rl [step-and] :
+    (n[i]: type, func), AList | Cookies | CList | EList | G | executing
     => 
-    if checkType(type) == "and" and checkParentsInList((n[i]: type, func), CList, G) == "all"
-    then
-      AList | Cookies | (CList ; (n[i]: type, func)) | EList | G | executing 
-    else
-      if checkType(type) == "or" and checkParentsInList((n[i]: type, func), CList, G) == "some"
-      then
-        AList | Cookies | (CList ; (n[i]: type, func)) | EList | G | executing 
-      else
-        if checkType(type) == "seq"
-        then
-          AList | Cookies | (CList ; (n[i]: type, func)) | EList | G | executing 
-        else
-          AList | Cookies | CList | (EList ; (n[i]: type, func)) | G | executing 
-        fi
-      fi
-    fi .
+    AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing .
+
+  --- Consume action: Consume "or" node
+  --- Check what type of node we have found
+  rl [step-or] :
+    (n[i]: type, func), AList | Cookies | CList | EList | G | executing
+    => 
+    AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing .
+
+  --- Consume action: Consume sequential node
+  --- Check what type of node we have found
+  rl [step-seq] :
+    (n[i]: type, func), AList | Cookies | CList | EList | G | executing
+    => 
+    AList | (Cookies, (n[i]: nseq, func))  | (CList, (n[i]: nseq, func)) | EList | G | executing .
+
 endm
-
-
-red checkParentsInList((n[2]: nseq, oth), (n[0]: nseq, str); (n[1]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[11]: nseq, fin)) .
----red someParentListInList((n[0]: nseq, str); (n[1]: nseq, oth), (n[1]: nseq, oth) ; (n[2]: nseq, oth))  .
