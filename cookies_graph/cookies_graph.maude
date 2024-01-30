@@ -211,7 +211,7 @@ fmod GRAPH-EQ is
   var G G1 G2 : Graph . --- Graphs
   var type type2 type1 type3 : NType . --- Node types
   var func func2 func1 func3 : NFunc . --- Node functions
-  var i x y : Int . --- Node ids
+  var i j x y : Int . --- Node ids
   var status : Status . --- Status of the execution
   var Arc1 Arc2 : Arc . --- arc varables
   var N1 N2 N3 N4 : Node . --- node variables
@@ -229,10 +229,10 @@ fmod GRAPH-EQ is
   --- Check in Cookies List the current node we are on and its children
   --- Consume cookie token
   --- if node we are on is child of cookie node, 
-  op consumeCookies : Node NodeList Graph -> Bool .
-  op consumeCookies((n[i] type, func), nil, G) = false . --- If Cookie List is empty, operator should not let rule match
-  op consumeCookies((n[i] type, func), Cookies, G) = false .
-    if 
+ --- op consumeCookies : Node NodeList Graph -> Bool .
+ --- op consumeCookies((n[i] type, func), nil, G) = false . --- If Cookie List is empty, operator should not let rule match
+ --- op consumeCookies((n[i] type, func), Cookies, G) = false .
+    ---if 
 
   --- Check if parents are in list of correct nodes
  op checkParentsInList : Node NodeList Graph -> Bool .
@@ -261,11 +261,30 @@ fmod GRAPH-EQ is
   op children : Node Graph -> NodeList .
   eq children((n[i]: type, func), G) = nil .
   eq children((n[i]: type, func), G1 ; (n[i]: type, func) -> (n[j]: type, func) ; G2) =
-    (n[j]: type, func) , children((n[i]: type, func), G) [owise] .
+    (n[j]: type, func) , children((n[i]: type, func), ( G1 ; G2 )) [owise] .
   
   op _in_ : Node NodeList -> Bool .
   eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
   eq (n[i]: type, func) in NList1 = false [owise] .
+  
+  --- check if there is an Edge in the graph with the recieving node as the Node number and node type
+
+  op and? : Node Graph -> Bool . 
+  eq and?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nand, func2)) ; G2 ) ) = true .
+  eq and?(N1, G) = false [owise] .
+  
+  op or? : Node Graph -> Bool . 
+  eq or?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nor, func2)) ; G2 ) ) = true . 
+  eq or?(N1, G) = false [owise] . 
+  
+  op seq? : Node Graph -> Bool . 
+  eq seq?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nseq, func2)) ; G2 ) ) = true .
+  eq seq?(N1, G) = false [owise] .
+  
+  op xor? : Node Graph -> Bool . 
+  eq xor?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nxor, func2)) ; G2 ) ) = true . 
+  eq xor?(N1, G) = false [owise] . 
+  
 
 endfm
 
@@ -309,20 +328,48 @@ mod GRAPH-RL is
   rl [step-and] :
     (n[i]: type, func), AList | Cookies | CList | EList | G | executing
     => 
-    AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing .
+    if and?((n[i]: type, func),G)
+    then
+    	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
+	else 
+    	(n[i]: type, func), AList | Cookies | CList | EList | G | executing 
+    fi .
 
   --- Consume action: Consume "or" node
   --- Check what type of node we have found
   rl [step-or] :
     (n[i]: type, func), AList | Cookies | CList | EList | G | executing
     => 
-    AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing .
+    if or?((n[i]: type, func),G)
+    then
+    	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
+	else 
+    	(n[i]: type, func), AList | Cookies | CList | EList | G | executing 
+    fi .
 
   --- Consume action: Consume sequential node
   --- Check what type of node we have found
   rl [step-seq] :
     (n[i]: type, func), AList | Cookies | CList | EList | G | executing
     => 
-    AList | (Cookies, (n[i]: nseq, func))  | (CList, (n[i]: nseq, func)) | EList | G | executing .
+    if seq?((n[i]: type, func),G)
+    then
+    	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
+	else 
+    	(n[i]: type, func), AList | Cookies | CList | EList | G | executing 
+    fi .
+    
+    
+  rl [step-xor] :
+    (n[i]: type, func), AList | Cookies | CList | EList | G | executing
+    => 
+    if xor?((n[i]: type, func),G)
+    then
+    	AList | Cookies | (CList, (n[i]: nseq, func)) | EList | G | executing 
+	else 
+    	(n[i]: type, func), AList | Cookies | CList | EList | G | executing 
+    fi .
+
+
 
 endm
