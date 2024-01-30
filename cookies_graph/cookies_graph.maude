@@ -227,6 +227,34 @@ fmod CONFIG is
   starting .
   
    
+  op preprocessed-init-nand-correct : -> Config . 
+  eq preprocessed-init-nand-correct = 
+  (n[0]: nseq, str), (n[1]: nseq, oth), (n[2]: nseq, oth), (n[3]: nor, oth), (n[4]: nseq, oth), (n[11]: nseq, fin) |
+  nil | nil | nil |
+  (n[0]: nseq, str)->(n[1]: nseq, oth);
+  (n[1]: nseq, oth)->(n[2]: nseq, oth);
+  (n[1]: nseq, oth)->(n[3]: nor, oth);
+  (n[2]: nseq, oth)->(n[3]: nor, oth);
+  (n[3]: nor, oth)->(n[4]: nseq, oth);
+  (n[4]: nseq, oth)->(n[11]: nseq, fin)|
+  starting .
+   
+  op preprocessed-init-nand-incorrect : -> Config . 
+  eq preprocessed-init-nand-incorrect = 
+  (n[0]: nseq, str), (n[1]: nseq, oth), (n[3]: nor, oth), (n[4]: nseq, oth), (n[11]: nseq, fin) |
+  nil | nil | nil |
+  (n[0]: nseq, str)->(n[1]: nseq, oth);
+  (n[1]: nseq, oth)->(n[2]: nseq, oth);
+  (n[1]: nseq, oth)->(n[3]: nor, oth);
+  (n[2]: nseq, oth)->(n[3]: nor, oth);
+  (n[3]: nor, oth)->(n[4]: nseq, oth);
+  (n[4]: nseq, oth)->(n[11]: nseq, fin)|
+  starting .
+     
+   
+   
+ 
+   
 endfm
 
 fmod GRAPH-EQ is
@@ -280,12 +308,29 @@ fmod GRAPH-EQ is
     else false 
     fi .
 
+ op isAtLeastOneListElementInList : NodeList NodeList -> Bool . --- checks if at least one element in the first list is in the second list (or)
+ eq isAtLeastOneListElementInList(nil, CList) = true .			--- if the list is empty, then it is in every list and it returns true
+ eq isAtLeastOneListElementInList(((n[x]: type, func), NList), CList) =    --- if the first element of the list is in list
+    if (n[x]: type, func) in CList    --- "in" operator in this case is vague
+    then true   --- then the "or" requirement is fulfilled
+    else isAtLeastOneListElementInList(NList, CList) --- if the first element of a list is not in the second list, then check the rest of the first list
+    fi .
+
+
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph.
   op parents : Node Graph -> NodeList .
   eq parents((n[i]: type, func), G) = nil .
   eq parents((n[i]: type, func), (n[x]: type, func) -> (n[i]: type, func) ; G) =
     (n[x]: type, func) , parents((n[i]: type, func), G) [owise] .
+    
+  op parents-ifelse : Node Graph -> NodeList .
+  eq parents-ifelse(N1, nil) = nil .
+  eq parents-ifelse((n[i]: type, func), (((n[x]: type1, func1)->(n[y]: type2, func2)) ; G)) = 
+  if (y == i)
+  then ( (n[x]: type1, func1) , parents-ifelse((n[i]: type, func), G)  )
+  else (parents-ifelse((n[i]: type, func), G)  )
+  fi .
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Node Graph -> NodeList .
@@ -299,13 +344,25 @@ fmod GRAPH-EQ is
   
   --- check if there is an Edge in the graph with the recieving node as the Node number and node type
 
-  op and? : Node Graph -> Bool . 
-  eq and?( (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nand, func2)) ; G2 ) ) = true .
-  eq and?(N1, G) = false [owise] .
+  op and? : Node Node Graph -> Bool . 
+  eq and?( (n[i]: type1, func1) , (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nand, func2)) ; G2 ) ) = true .
+  eq and?(N1, N2, G) = false [owise] .
   
-  op or? : Node Node Graph -> Bool . 
-  eq or?((n[i]: type1, func1), (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nor, func2)) ; G2 ) ) = true . 
-  eq or?(N1,N2, G) = false [owise] . 
+  op or? : Node Node Graph NodeList -> Bool . 
+  eq or?((n[i]: type1, func1), (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nor, func2)) ; G2 ), CList ) =
+     if
+     isAtLeastOneListElementInList( 
+        parents-ifelse( (n[j]: type, func), ( G1 ; ((n[i]: type1, func1) -> (n[j]: nor, func2)) ; G2 ) ), 
+        CList 
+     )
+     then true
+     else false
+     fi .
+  eq or?(N1,N2, G, CList) = false [owise] .
+  
+  
+  
+  
   
   op seq? : Node Node Graph -> Bool . 
   eq seq?((n[i]: type1, func1), (n[j]: type, func) , ( G1 ; ((n[i]: type1, func1) -> (n[j]: nseq, func2)) ; G2 ) ) = true .
@@ -365,13 +422,13 @@ mod GRAPH-RL is
   --- Consume action: Consume "and" node
   --- Check what type of node we have found
   rl [step-and] :
-    (n[i]: nand, func), AList | Cookies | CList | EList | G | executing
+    (n[i]: nand, func), AList | Cookies | CList, (n[x]: type1, func1)  | EList | G | executing
     => 
-    if and?((n[i]: nand, func),G)
+    if and?((n[x]: type1, func1),(n[i]: nand, func),G)
     then
-    	AList | Cookies | (CList, (n[i]: nand, func)) | EList | G | executing 
+    	AList | Cookies | (CList, (n[x]: type1, func1), (n[i]: nand, func)) | EList | G | executing 
 	else 
-    	AList | Cookies | CList | EList, (n[i]: nand, func) | G | executing 
+    	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nand, func) | G | executing 
     fi .
 
   --- Consume action: Consume "or" node
@@ -379,7 +436,7 @@ mod GRAPH-RL is
   rl [step-or] :
     (n[i]: nor, func), AList | Cookies |  CList, (n[x]: type1, func1) | EList | G | executing
     => 
-    if or?((n[x]: type1, func1),(n[i]: nor, func),G)
+    if or?((n[x]: type1, func1),(n[i]: nor, func),G,( CList, (n[x]: type1, func1) ) )
     then
     	AList | Cookies | ( CList, (n[x]: type1, func1), (n[i]: nor, func)) | EList | G | executing 
 	else 
