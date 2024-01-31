@@ -359,30 +359,19 @@ mod GRAPH-RL is
     fi .
 endm
 
-
----red checkParentsInList((n[4]: nseq, oth), (n[2]: nseq, oth) ; (n[3]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[3]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[3]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[4]: nseq, oth) -> (n[11]: nseq, fin)) .
----red checkParentsInList((n[4]: nseq, oth), (n[2]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[3]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[3]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[4]: nseq, oth) -> (n[11]: nseq, fin)) .
----red checkParentsInList((n[4]: nseq, oth), (n[11]: nseq, oth) ; (n[3]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[3]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[3]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[4]: nseq, oth) -> (n[11]: nseq, fin)) .
----red allNodesListInList((n[1]: nseq, oth) ; (n[2]: nseq, oth) ; (n[3]: nseq, oth) ; (n[4]: nseq, oth), (n[2]: nseq, oth) ; (n[3]: nseq, oth)) .
----red allNodesListInList((n[2]: nseq, oth) ; (n[3]: nseq, oth), (n[1]: nseq, oth) ; (n[2]: nseq, oth) ; (n[3]: nseq, oth) ; (n[4]: nseq, oth)) .
----red someNodesListInList((n[1]: nseq, oth) ; (n[2]: nseq, oth) ; (n[3]: nseq, oth) ; (n[4]: nseq, oth), (n[2]: nseq, oth) ; (n[3]: nseq, oth)) .
----red someNodesListInList((n[2]: nseq, oth) ; (n[3]: nseq, oth), (n[1]: nseq, oth) ; (n[2]: nseq, oth) ; (n[3]: nseq, oth) ; (n[4]: nseq, oth)) .
----red parents((n[4]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[2]: nseq, oth) ;; (n[1]: nseq, oth) -> (n[3]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[3]: nseq, oth) -> (n[4]: nseq, oth) ;; (n[4]: nseq, oth) -> (n[11]: nseq, fin)) .
----red parents((n[2]: nseq, oth), nil) .
----red isArc((n[1]: nseq, oth), (n[2]: nseq, oth), (n[0]: nseq, str) -> (n[1]: nseq, oth) ;;  (n[1]: nseq, oth) -> (n[2]: nseq, oth)  ;; (n[2]: nseq, oth) -> (n[11]: nseq, fin)) .
-
+-------------------------------------------
 rl [step] :
     (n[i]: type, func) ; AList | CList | EList | G | executing
     => 
-    if checkType(type) == "and" and checkParentsInList((n[i]: type, func), CList, G) == "all"
+    if checkType((n[i]: type, func), G) == "and" and checkParentsInList((n[i]: type, func), CList, G) == "all"
     then
       AList | (CList ; (n[i]: type, func)) | EList | G | executing 
     else
-      if checkType(type) == "or" and checkParentsInList((n[i]: type, func), CList, G) == "some"
+      if checkType((n[i]: type, func), G) == "or" and checkParentsInList((n[i]: type, func), CList, G) == "some"
       then
         AList | (CList ; (n[i]: type, func)) | EList | G | executing 
       else
-        if checkType(type) == "seq" and checkParentsInList((n[i]: type, func), CList, G) == "some"
+        if checkType((n[i]: type, func), G) == "seq" and checkParentsInList((n[i]: type, func), CList, G) == "some"
         then
           AList | (CList ; (n[i]: type, func)) | EList | G | executing 
         else
@@ -390,3 +379,4 @@ rl [step] :
         fi
       fi
     fi .
+
