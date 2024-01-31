@@ -468,7 +468,7 @@ mod GRAPH-RL is
     =>
     if startingNode?( (n[i]: nseq, str),G)
 	then
-    AList | (Cookies, (n[i]: nseq, str)) | (CList, (n[i]: nseq, str)) | EList | G | executing
+    AList | (assignCookies( (n[i]: nseq, str),(children-ifelse((n[i]: nseq, str),G)) ) ) | (CList, (n[i]: nseq, str)) | EList | G | executing
 	else
     AList | Cookies | CList | EList, (n[i]: nseq, str) | G | starting
     fi .
@@ -492,7 +492,7 @@ mod GRAPH-RL is
     => 
     if and?((n[x]: type1, func1),(n[i]: nand, func),G, (CList, (n[x]: type1, func1)))
     then
-    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), (n[i]: nand, func) ) | (CList, (n[x]: type1, func1), (n[i]: nand, func)) | EList | G | executing 
+    	AList |( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: nand, func),(children-ifelse((n[i]: nand, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: nand, func)) | EList | G | executing 
 	else 
     	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nand, func) | G | executing 
     fi .
@@ -504,7 +504,7 @@ mod GRAPH-RL is
     => 
     if or?((n[x]: type1, func1),(n[i]: nor, func),G,( CList, (n[x]: type1, func1) ) )
     then
-    	AList | (Cookies, (n[i]: nor, str)) | ( CList, (n[x]: type1, func1), (n[i]: nor, func)) | EList | G | executing 
+    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: nor, func),(children-ifelse((n[i]: nor, func),G))) ) | ( CList, (n[x]: type1, func1), (n[i]: nor, func)) | EList | G | executing 
 	else 
     	AList | Cookies |  CList, (n[x]: type1, func1) | EList, (n[i]: nor, func) | G | executing 
     fi .
@@ -516,7 +516,7 @@ mod GRAPH-RL is
     => 
     if seq?((n[x]: type1, func1),(n[i]: nseq, func),G)
     then
-    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), (n[i]: nseq, func) ) | (CList, (n[x]: type1, func1), (n[i]: nseq, func)) | EList | G | executing 
+    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: nseq, func),(children-ifelse((n[i]: nseq, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: nseq, func)) | EList | G | executing 
 	else 
     	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nseq, func) | G | executing 
     fi .
@@ -527,7 +527,7 @@ mod GRAPH-RL is
     => 
     if xor?( (n[x]: type1, func1) , (n[i]: nxor, func) , G , ( CList, (n[x]: type1, func1) ) )
     then
-    	AList | (Cookies, (n[i]: nxor, str)) | (CList, (n[x]: type1, func1), (n[i]: nxor, func)) | EList | G | executing 
+    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: nxor, func),(children-ifelse((n[i]: nxor, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: nxor, func)) | EList | G | executing 
 	else 
     	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nxor, func) | G | executing 
     fi .
