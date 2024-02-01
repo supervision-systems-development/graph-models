@@ -349,9 +349,9 @@ fmod GRAPH-EQ is
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph.
   op parents : Node Graph -> NodeList .
-  eq parents((n[i]: type, func), G) = nil .
   eq parents((n[i]: type, func), (n[x]: type, func) -> (n[i]: type, func) ; G) =
-    (n[x]: type, func) , parents((n[i]: type, func), G) [owise] .
+    (n[x]: type, func) , parents((n[i]: type, func), G) .
+  eq parents((n[i]: type, func), G) = nil [owise] .
     
   op parents-ifelse : Node Graph -> NodeList .
   eq parents-ifelse(N1, nil) = nil .
@@ -381,9 +381,9 @@ fmod GRAPH-EQ is
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Node Graph -> NodeList .
-  eq children((n[i]: type, func), G) = nil .
   eq children((n[i]: type, func), G1 ; (n[i]: type, func) -> (n[j]: type, func) ; G2) =
-    (n[j]: type, func) , children((n[i]: type, func), ( G1 ; G2 )) [owise] .
+    (n[j]: type, func) , children((n[i]: type, func), ( G1 ; G2 )) .
+  eq children((n[i]: type, func), G) = nil [owise] .
   
   op _in_ : Node NodeList -> Bool .
   eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
