@@ -349,9 +349,9 @@ fmod GRAPH-EQ is
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph.
   op parents : Node Graph -> NodeList .
-  eq parents((n[i]: type, func), G) = nil .
   eq parents((n[i]: type, func), (n[x]: type, func) -> (n[i]: type, func) ; G) =
-    (n[x]: type, func) , parents((n[i]: type, func), G) [owise] .
+    (n[x]: type, func) , parents((n[i]: type, func), G) .
+  eq parents((n[i]: type, func), G) = nil [owise] .
     
   op parents-ifelse : Node Graph -> NodeList .
   eq parents-ifelse(N1, nil) = nil .
@@ -381,9 +381,9 @@ fmod GRAPH-EQ is
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Node Graph -> NodeList .
-  eq children((n[i]: type, func), G) = nil .
   eq children((n[i]: type, func), G1 ; (n[i]: type, func) -> (n[j]: type, func) ; G2) =
-    (n[j]: type, func) , children((n[i]: type, func), ( G1 ; G2 )) [owise] .
+    (n[j]: type, func) , children((n[i]: type, func), ( G1 ; G2 )) .
+  eq children((n[i]: type, func), G) = nil [owise] .
   
   op _in_ : Node NodeList -> Bool .
   eq (n[i]: type, func) in (NList1 , (n[i]: type, func) , NList2) = true .
@@ -492,51 +492,35 @@ mod GRAPH-RL is
 
   --- Consume action: Consume "and" node
   --- Check what type of node we have found
-  rl [step-and] :
-    (n[i]: nand, func), AList | Cookies  | CList, (n[x]: type1, func1)  | EList | G | executing
+  
+  rl [step-combination] :
+    (n[i]: type, func), AList | Cookies  | CList, (n[x]: type1, func1)  | EList | G | executing
     => 
-    if and?((n[x]: type1, func1),(n[i]: nand, func),G, (CList, (n[x]: type1, func1))) and isParentInCookie?((n[i]: nand, func),G,Cookies)
-    then
-    	AList |( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: nand, func),(children-ifelse((n[i]: nand, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: nand, func)) | EList | G | executing 
-	else 
-    	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nand, func) | G | executing 
+    --- and if-else statement
+    if and?((n[x]: type1, func1),(n[i]: type, func),G, (CList, (n[x]: type1, func1))) and isParentInCookie?((n[i]: type, func),G,Cookies)
+    	then
+    	AList |( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: type, func),(children-ifelse((n[i]: type, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: type, func)) | EList | G | executing 
+		else 
+    --- or if-else statement
+    		if or?((n[x]: type1, func1),(n[i]: type, func),G,( CList, (n[x]: type1, func1) ) ) and isParentInCookie?((n[i]: type, func),G,Cookies)
+    			then
+    			AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: type, func),(children-ifelse((n[i]: type, func),G))) ) | ( CList, (n[x]: type1, func1), (n[i]: type, func)) | EList | G | executing 
+				else 
+            	--- sequential if-else statement
+                	if seq?((n[x]: type1, func1),(n[i]: type, func),G) and isParentInCookie?((n[i]: type, func),G,Cookies)
+    					then
+    					AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: type, func),(children-ifelse((n[i]: type, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: type, func)) | EList | G | executing 
+						else 
+    					--- xor if-else statement
+                        	if xor?( (n[x]: type1, func1) , (n[i]: type, func) , G , ( CList, (n[x]: type1, func1) ) ) and isParentInCookie?((n[i]: type, func),G,Cookies)
+    							then
+    							AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: type, func),(children-ifelse((n[i]: type, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: type, func)) | EList | G | executing 
+								else 
+    							AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: type, func) | G | executing 
+    						fi 
+               		fi 
+          	fi
     fi .
-
-  --- Consume action: Consume "or" node
-  --- Check what type of node we have found
-  rl [step-or] :
-    (n[i]: nor, func), AList | Cookies |  CList, (n[x]: type1, func1) | EList | G | executing
-    => 
-    if or?((n[x]: type1, func1),(n[i]: nor, func),G,( CList, (n[x]: type1, func1) ) ) and isParentInCookie?((n[i]: nor, func),G,Cookies)
-    then
-    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: nor, func),(children-ifelse((n[i]: nor, func),G))) ) | ( CList, (n[x]: type1, func1), (n[i]: nor, func)) | EList | G | executing 
-	else 
-    	AList | Cookies |  CList, (n[x]: type1, func1) | EList, (n[i]: nor, func) | G | executing 
-    fi .
-
-  --- Consume action: Consume sequential node
-  --- Check what type of node we have found
-  rl [step-seq] :
-    (n[i]: nseq, func), AList | Cookies | CList, (n[x]: type1, func1) | EList | G | executing
-    => 
-    if seq?((n[x]: type1, func1),(n[i]: nseq, func),G) and isParentInCookie?((n[i]: nseq, func),G,Cookies)
-    then
-    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: nseq, func),(children-ifelse((n[i]: nseq, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: nseq, func)) | EList | G | executing 
-	else 
-    	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nseq, func) | G | executing 
-    fi .
-    
-    
-  rl [step-xor] :
-    (n[i]: nxor, func), AList | Cookies | CList, (n[x]: type1, func1) | EList | G | executing
-    => 
-    if xor?( (n[x]: type1, func1) , (n[i]: nxor, func) , G , ( CList, (n[x]: type1, func1) ) ) and isParentInCookie?((n[i]: nxor, func),G,Cookies)
-    then
-    	AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: nxor, func),(children-ifelse((n[i]: nxor, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: nxor, func)) | EList | G | executing 
-	else 
-    	AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: nxor, func) | G | executing 
-    fi .
-
 
 
 endm

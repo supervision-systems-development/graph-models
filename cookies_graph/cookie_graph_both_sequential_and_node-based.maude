@@ -492,6 +492,37 @@ mod GRAPH-RL is
 
   --- Consume action: Consume "and" node
   --- Check what type of node we have found
+  
+  rl [step-combination] :
+    (n[i]: type, func), AList | Cookies  | CList, (n[x]: type1, func1)  | EList | G | executing
+    => 
+    --- and if-else statement
+    if and?((n[x]: type1, func1),(n[i]: type, func),G, (CList, (n[x]: type1, func1))) and isParentInCookie?((n[i]: type, func),G,Cookies)
+    	then
+    	AList |( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: type, func),(children-ifelse((n[i]: type, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: type, func)) | EList | G | executing 
+		else 
+    --- or if-else statement
+    		if or?((n[x]: type1, func1),(n[i]: type, func),G,( CList, (n[x]: type1, func1) ) ) and isParentInCookie?((n[i]: type, func),G,Cookies)
+    			then
+    			AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: type, func),(children-ifelse((n[i]: type, func),G))) ) | ( CList, (n[x]: type1, func1), (n[i]: type, func)) | EList | G | executing 
+				else 
+            	--- sequential if-else statement
+                	if seq?((n[x]: type1, func1),(n[i]: type, func),G) and isParentInCookie?((n[i]: type, func),G,Cookies)
+    					then
+    					AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: type, func),(children-ifelse((n[i]: type, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: type, func)) | EList | G | executing 
+						else 
+    					--- xor if-else statement
+                        	if xor?( (n[x]: type1, func1) , (n[i]: type, func) , G , ( CList, (n[x]: type1, func1) ) ) and isParentInCookie?((n[i]: type, func),G,Cookies)
+    							then
+    							AList | ( consumeCookies-listbased( (n[x]: type1, func1), Cookies ), assignCookies((n[i]: type, func),(children-ifelse((n[i]: type, func),G))) ) | (CList, (n[x]: type1, func1), (n[i]: type, func)) | EList | G | executing 
+								else 
+    							AList | Cookies | CList, (n[x]: type1, func1) | EList, (n[i]: type, func) | G | executing 
+    						fi 
+               		fi 
+          	fi
+    fi .
+  
+  
   rl [step-and] :
     (n[i]: nand, func), AList | Cookies  | CList, (n[x]: type1, func1)  | EList | G | executing
     => 
