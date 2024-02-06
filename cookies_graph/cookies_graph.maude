@@ -64,6 +64,15 @@ fmod GRAPH is
   subsort Action < ActionList . --- List of Nodes should be part of Graph
   op (a[_]) : Int -> Action [ctor prec 30] . --- Definition of Action. Has Id
 
+  sort CookieList .
+  subsort CookieList < Graph .
+  op nil : -> CookieList [ctor] . --- Definition of List of Nodes. There was no [ctor]
+  op _;_ : CookieList CookieList -> CookieList [ctor assoc id: nil] .
+
+  sort Cookie .
+  subsort Cookie < CookieList .
+  op (c[_,_]) : Int Int -> Cookie [ctor prec 30] .
+
 endfm
 
 *** Pre-defined graphs and sequences ***
@@ -111,12 +120,12 @@ fmod SEQUENCES is
   --- Xor graph
   op graph5 : -> Graph .
   eq graph5 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nxor, oth);;
-    (n[3]: nseq, oth)->(n[4]: nxor, oth);;
-    (n[4]: nxor, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq, start)->(n[1]: nxor, oth);;
+    (n[1]: nxor, oth)->(n[2]: nseq, oth);;
+    (n[1]: nxor, oth)->(n[3]: nseq, oth);;
+    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
+    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
+    (n[4]: nseq, oth)->(n[11]: nseq, fin) .
 
   *** Action sequences for testing ***
   op seq1 : -> ActionList .
@@ -138,10 +147,11 @@ fmod CONFIG is
   pr SEQUENCES .
 
   sort Config .
-  op _|_|_|_|_ : ActionList ActionList ActionList Graph Status -> Config [ctor] .
+  op _|_|_|_|_|_ : ActionList CookieList ActionList ActionList Graph Status -> Config [ctor] .
   
   *** Variables ***
   var AList CList EList : ActionList .
+  var Cookies : CookieList .
   var G : Graph .
   var type : NType .
   var func : NFunc .
@@ -154,6 +164,7 @@ fmod CONFIG is
     seq1 | 
     nil | 
     nil | 
+    nil | 
     graph1 |
     starting .
 
@@ -163,6 +174,7 @@ fmod CONFIG is
     seq2 | 
     nil | 
     nil | 
+    nil | 
     graph1 |
     starting .
 
@@ -170,6 +182,7 @@ fmod CONFIG is
   op init-nseq-correct : -> Config .
   eq init-nseq-correct = 
     seq3 | 
+    nil | 
     nil | 
     nil | 
     graph2 |
@@ -190,6 +203,7 @@ fmod CONFIG is
     seq4 | 
     nil | 
     nil | 
+    nil | 
     graph3 |
     starting .
 
@@ -197,6 +211,7 @@ fmod CONFIG is
   op init-nor-correct1 : -> Config .
   eq init-nor-correct1 = 
     seq3 | 
+    nil | 
     nil | 
     nil | 
     graph4 |
@@ -208,6 +223,7 @@ fmod CONFIG is
     seq4 | 
     nil | 
     nil | 
+    nil | 
     graph4 |
     starting .
 
@@ -217,6 +233,7 @@ fmod CONFIG is
     seq4 | 
     nil | 
     nil | 
+    nil | 
     graph5 |
     starting .
   
@@ -224,6 +241,7 @@ fmod CONFIG is
   op init-nxor-incorrect : -> Config .
   eq init-nxor-incorrect = 
     seq3 | 
+    nil | 
     nil | 
     nil | 
     graph5 |
@@ -236,21 +254,21 @@ fmod GRAPH-EQ is
   pr EXT-BOOL .
 
   *** Variables ***
-  var AList AList1 AList2 : ActionList . --- Lists of user actions
-  var CList CList1 CList2 : ActionList . --- Lists of correct actions
-  var EList EList1 EList2 : ActionList . --- Lists of incorrect actions
-  ---var NList NList1 NList2 : NodeList . --- Generic node list
-  var G G1 G2 : Graph . --- Graphs
+  var AList AList' AList1 AList2 : ActionList . --- Lists of user actions
+  var Cookies Cookies' Cookies1 Cookies2 : CookieList . --- Lists of cookies
+  var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
+  var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
+  var G G' G1 G2 : Graph . --- Graphs
   var type type' type1 type2 type3 : NType . --- Node types
   var func func' func1 func2 func3 : NFunc . --- Node functions
-  var i j x y : Int . --- Node ids
-  var status : Status . --- Status of the execution
+  var i j x y z : Int . --- Node ids
+  var status status' : Status . --- Status of the execution
 
   *** Equations ***
-  --- Check if last node of Correct List is "fin" node
-  op checkStatus : ActionList Graph -> Bool .
-  eq checkStatus(nil, G) = false .
-  eq checkStatus((CList ; (a[i])), G ;; (n[x]: type', func') -> (n[i]: type, func)) = 
+  --- Check if last node of Correct List is "fin" node and cookies only contains final node
+  op checkStatus : CookieList ActionList Graph -> Bool .
+  eq checkStatus(nil, nil, G) = false .
+  eq checkStatus((a[i]), (CList ; (a[i])), G ;; (n[x]: type', func') -> (n[i]: type, func)) = 
     if func == fin
     then true
     else false
@@ -304,17 +322,35 @@ fmod GRAPH-EQ is
     else false
     fi .
 
+  --- Consume cookies from list
+  op consume : CookieList CookieList -> CookieList .
+  eq consume(Cookies1, nil) = nil .
+  eq consume(((a[x,y]) ; AList), Cookies) = 
+    if (a[x,y]) in Cookies
+    then (a[x,y]) ; consume(AList, Cookies)
+    else consume(AList, Cookies)
+    fi .
+
+  --- Add cookies to list
+  op add : ActionList ActionList -> ActionList .
+  eq add(AList, nil) = nil .
+  eq add(((a[x]) ; AList), Cookies) = 
+    if (a[x]) in Cookies
+    then (a[x]) ; consume(AList, Cookies)
+    else add(AList, Cookies)
+    fi .
+
   --- Return how many parents are in list of correct actions
-  op checkParentsInList : Action ActionList Graph -> String .
-  eq checkParentsInList((a[i]), CList, G) =
-    if allActionsListInList(parents((a[i]), G), CList) == true
+  op checkParentsInList : Action  ActionList ActionList Graph -> String .
+  eq checkParentsInList((a[i]), Cookies, CList, G) =
+    if allActionsListInList(parents((a[i]), G), CList) == true and allActionsListInList(parents((a[i]), G), Cookies) == true
     then 
       "all"
     else 
-      if oneActionListInList(parents((a[i]), G), CList) == true
+      if oneActionListInList(parents((a[i]), G), CList) == true and oneActionListInList(parents((a[i]), G), Cookies) == true
       then "one"
       else 
-        if someActionsListInList(parents((a[i]), G), CList) == true
+        if someActionsListInList(parents((a[i]), G), CList) == true and someActionsListInList(parents((a[i]), G), Cookies) == true
         then "some"
         else "none"
         fi
@@ -345,10 +381,20 @@ fmod GRAPH-EQ is
   eq parents((a[i]), (n[x]: type1, func1) -> (n[i]: type, func) ;; G) =
     (a[x]) ; parents((a[i]), G) .
   eq parents((a[i]), G) = nil [owise] .
+
+  --- To obtain the list of direct children of a node in a graph.
+  op children : Action Graph -> ActionList .
+  eq children((a[i]), (n[i]: type, func) -> (n[x]: type', func') ;; G) =
+    (a[x]) ; children((a[i]), G) .
+  eq children((a[i]), G) = nil [owise] .
   
   op _in_ : Action ActionList -> Bool .
   eq (a[i]) in (AList1 ; (a[i]) ; AList2) = true .
   eq (a[i]) in AList1 = false [owise] .
+
+  op _in_ : Cookie CookieList -> Bool .
+  eq (a[i,j]) in (Cookies1 ; (a[i,j]) ; Cookies2) = true .
+  eq (a[i,j]) in Cookies1 = false [owise] .
 
   op isArc : Node Node Graph -> Bool .
   eq isArc((n[x]: type1, func1), (n[y]: type2, func2), nil) = false .
@@ -362,15 +408,15 @@ mod GRAPH-RL is
   inc CONFIG .
 
   *** Variables ***
-  var AList AList1 AList2 : ActionList . --- Lists of user actions
-  var CList CList1 CList2 : ActionList . --- Lists of correct actions
-  var EList EList1 EList2 : ActionList . --- Lists of incorrect actions
-  ---var NList NList1 NList2 : NodeList . --- Generic node list
-  var G G1 G2 : Graph . --- Graphs
+  var AList AList' AList1 AList2 : ActionList . --- Lists of user actions
+  var Cookies Cookies' Cookies1 Cookies2 : CookieList . --- Lists of cookies
+  var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
+  var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
+  var G G' G1 G2 : Graph . --- Graphs
   var type type' type1 type2 type3 : NType . --- Node types
   var func func' func1 func2 func3 : NFunc . --- Node functions
-  var i j x y : Int . --- Node ids
-  var status : Status . --- Status of the execution
+  var i j x y z : Int . --- Node ids
+  var status status' : Status . --- Status of the execution
 
   *** Rules ***
   --- Preliminary setup rule: Insert start and fin nodes into the graph (optional rule)
@@ -380,52 +426,52 @@ mod GRAPH-RL is
   --- Start the execution: Transition status from "starting" to "executing" and consume starting action
   --- Actions start and fin are artificially inserted to control the sequences
   rl [start]: 
-    (a[i]) ; AList | CList | EList | (n[i]: type, start) -> (n[x]: type', func') ;; G | starting  
+    (a[i]) ; AList | Cookies | CList | EList | (n[i]: type, start) -> (n[x]: type', func') ;; G | starting  
     =>
-    AList | (CList ; (a[i])) | EList | (n[i]: type, start) -> (n[x]: type', func') ;; G | executing .
+    AList | (Cookies ; (a[i])) | (CList ; (a[i])) | EList | (n[i]: type, start) -> (n[x]: type', func') ;; G | executing .
 
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
   rl [end]:  
-    nil | CList | EList | G | executing
+    nil | Cookies | CList | EList | G | executing
     =>
-    if checkStatus(CList, G)
+    if checkStatus(Cookies, CList, G)
     then
-      nil | CList | EList | G | correct 
+      nil | Cookies | CList | EList | G | correct 
     else 
-      nil | CList | EList | G | incorrect
+      nil | Cookies | CList | EList | G | incorrect
     fi .
 
   --- Consume action: Consume node
   --- Check what type of node we have found: "sequential", "and", "or" or "xor"
   rl [step] :
-    (a[i]) ; AList | CList | EList | G | executing
+    (a[i]) ; AList | Cookies | CList | EList | G | executing
     => 
     if isAnd((a[i]), G) and checkParentsInList((a[i]), CList, G) == "all"
     then
-      AList | (CList ; (a[i])) | EList | G | executing 
+      AList | consume(parents((a[i]), G), Cookies) ; add(children((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
     else
       if isXor((a[i]), G) and checkParentsInList((a[i]), CList, G) == "one"
       then
-        AList | (CList ; (a[i])) | EList | G | executing 
+        AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
       else
         if isOr((a[i]), G) and checkParentsInList((a[i]), CList, G) == "some"
         then
-          AList | (CList ; (a[i])) | EList | G | executing 
+          AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
         else
           if isOr((a[i]), G) and checkParentsInList((a[i]), CList, G) == "all"
           then
-            AList | (CList ; (a[i])) | EList | G | executing 
+            AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
           else
             if isOr((a[i]), G) and checkParentsInList((a[i]), CList, G) == "one"
             then
-              AList | (CList ; (a[i])) | EList | G | executing 
+              AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
             else 
               if isSeq((a[i]), G) and checkParentsInList((a[i]), CList, G) == "all"
               then
-                AList | (CList ; (a[i])) | EList | G | executing 
+                AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
               else
-                AList | CList | (EList ; (a[i])) | G | executing 
+                AList | Cookies | CList | (EList ; (a[i])) | G | executing 
               fi
             fi
           fi
