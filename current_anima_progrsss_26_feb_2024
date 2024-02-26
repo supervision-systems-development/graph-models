@@ -45,12 +45,13 @@ fmod GRAPH is
 
   --- Definition of Nodes
   sort Node .
-  subsort Node < Graph .
+  ---subsort Node < Graph .
   op (n[_]:_,_) : Int NType NFunc -> Node [ctor prec 30] . --- Definition of Node. Has Id and Type
 
   --- Definition of Arcs
   sort Arc .
   subsort Arc < Graph .
+  op arcnil : -> Arc .
   op _->_ : Node Node -> Arc [ctor prec 30] . --- Definition of Arc. Unites two nodes.
 
   --- Definition of a List of Actions
@@ -169,6 +170,111 @@ fmod CONFIG is
     alnil |
     ( (n[1]: nseq, start) -> (n[2]: nseq, oth) ) |
 	starting .
+    
+    
+  op test-start-end : -> Config .
+  eq test-start-end =
+  	(a[1]) ; (a[2]) |
+    clnil |
+    alnil |
+    alnil |
+    ( (n[1]: nseq, start) -> (n[2]: nseq, fin) ) |
+	starting .
+
+
+  *** Initial configurations using simple actions and graphs ***
+  --- Sequential nodes (with artificial S and F nodes in a correct sequence)
+  op init-simple-correct : -> Config .
+  eq init-simple-correct = 
+    seq1 | 
+    clnil |
+    alnil |
+    alnil |
+    graph1 |
+    starting .
+
+  --- Sequential nodes (with artificial S and F nodes in an incorrect sequence)
+  op init-simple-incorrect : -> Config .
+  eq init-simple-incorrect = 
+    seq2 | 
+    clnil |
+    alnil |
+    alnil |
+    graph1 |
+    starting .
+
+  --- Sequential nodes (with artificial S and F nodes in a correct sequence)
+  op init-nseq-correct : -> Config .
+  eq init-nseq-correct = 
+    seq3 | 
+    clnil |
+    alnil |
+    alnil |
+    graph2 |
+    starting .
+
+  --- Sequential nodes with and node (with artificial S and F nodes in a correct sequence)
+  op init-nand-correct : -> Config .
+  eq init-nand-correct = 
+    seq3 | 
+    clnil |
+    alnil |
+    alnil |
+    graph3 |
+    starting .
+
+  --- Sequential nodes with and node (with artificial S and F nodes in a correct sequence)
+  op init-nand-incorrect : -> Config .
+  eq init-nand-incorrect = 
+    seq4 | 
+    clnil |
+    alnil |
+    alnil |
+    graph3 |
+    starting .
+
+  --- Sequential nodes with or node and both parents are accessed (with artificial S and F nodes in a correct sequence)
+  op init-nor-correct1 : -> Config .
+  eq init-nor-correct1 = 
+    seq3 | 
+    clnil |
+    alnil |
+    alnil |
+    graph4 |
+    starting .
+
+  --- Sequential nodes with or node and one parent is accessed only (with artificial S and F nodes in a correct sequence)
+  op init-nor-correct2 : -> Config .
+  eq init-nor-correct2 = 
+    seq4 | 
+    clnil |
+    alnil |
+    alnil |
+    graph4 |
+    starting .
+
+  --- Sequential nodes with or node and one parent is accessed only (with artificial S and F nodes in a correct sequence)
+  op init-nxor-correct : -> Config .
+  eq init-nxor-correct = 
+    seq4 | 
+    clnil |
+    alnil |
+    alnil |
+    graph5 |
+    starting .
+  
+  --- Sequential nodes with or node and both parents are accessed (with artificial S and F nodes in a correct sequence)
+  op init-nxor-incorrect : -> Config .
+  eq init-nxor-incorrect = 
+    seq3 | 
+    clnil |
+    alnil |
+    alnil |
+    graph5 |
+    starting .
+
+
+
 
 
 
@@ -338,6 +444,7 @@ mod GRAPH-RL is
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
   var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
   var G G' G1 G2 : Graph . --- Graphs
+  var Node1 Node2 Node3 : Node .
   var type type' type1 type2 type3 : NType . --- Node types
   var func func' func1 func2 func3 : NFunc . --- Node functions
   var i j x y z : Int . --- Node ids
@@ -358,14 +465,22 @@ mod GRAPH-RL is
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
   rl [end]:  
-    nil | Cookies | CList | EList | G | executing
+    alnil | Cookies | CList | EList | G | executing
     =>
     if checkStatus(Cookies, CList, G)
     then
-      nil | Cookies | CList | EList | G | correct 
+      alnil | Cookies | CList | EList | G | correct 
     else 
-      nil | Cookies | CList | EList | G | incorrect
+      alnil | Cookies | CList | EList | G | incorrect
     fi .
+
+  rl [step-seq]:
+  	(a[i]) ; AList | Cookies | CList | EList | G ;; (n[x]: type, func) -> (n[i]: nseq, oth) ;; G' | executing
+	=>
+    AList | (Cookies ; (a[i])) | (CList ; (a[i])) | EList | G ;; (n[x]: type, func) -> (n[i]: nseq, oth) ;; G' | executing .
+
+
+
 
   --- Consume action: Consume node
   --- Check what type of node we have found: "sequential", "and", "or" or "xor"
