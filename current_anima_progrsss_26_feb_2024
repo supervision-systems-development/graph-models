@@ -56,7 +56,7 @@ fmod GRAPH is
   --- Definition of a List of Actions
   sort ActionList .
   subsort ActionList < Graph . --- List of Nodes should be part of Graph
----  op nil : -> ActionList [ctor] . --- Definition of List of Nodes. There was no [ctor] --- it was returning an error
+  op alnil : -> ActionList [ctor] . --- Definition of List of Nodes. There was no [ctor] --- it was returning an error
   op _;_ : ActionList ActionList -> ActionList [ctor assoc id: nil] .
 
   --- Definition of actions
@@ -66,7 +66,7 @@ fmod GRAPH is
 
   sort CookieList .
   subsort CookieList < Graph .
-  op nil : -> CookieList [ctor] . --- Definition of List of Nodes. There was no [ctor]
+  op clnil : -> CookieList [ctor] .
   op _;_ : CookieList CookieList -> CookieList [ctor assoc id: nil] .
 
   sort Cookie .
@@ -163,10 +163,10 @@ fmod CONFIG is
 
   op test-start : -> Config .
   eq test-start =
-  	(a[1]) |
-    nil |
-    nil |
-    nil |
+  	(a[1]) ; (a[2]) |
+    clnil |
+    alnil |
+    alnil |
     ( (n[1]: nseq, start) -> (n[2]: nseq, oth) ) |
 	starting .
 
