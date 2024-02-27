@@ -407,14 +407,16 @@ mod GRAPH-RL is
       nil | Cookies | BCookies | CList | EList | G | incorrect
     fi .
 
-
-
-  rl [step-seq] :
-  	(a[i]) ; AList | Cookies | BCookies | CList | EList | G1 ;; Node1 -> (n[i]: nseq, oth) ;; G | executing  
-    =>
-    AList | Cookies | BCookies | (CList ; (a[i])) | EList |  G1 ;; Node1 -> (n[i]: nseq, oth) ;; G | executing .
-
   --- Consume action: Consume node
   --- Check what type of node we have found: "sequential", "and", "or" or "xor"
+  rl [step] :
+     ( a[i] ; AList ) | Cookies | BCookies | CList | EList | G | executing
+    => 
+    if isAnd((a[i]), G) and checkParentsInList((a[i]), Cookies, CList, G) == "all"
+    then
+      AList | consume(parents((a[i]), G), Cookies) ; add(children((a[i]), G), Cookies) | BCookies | (CList ; (a[i])) | EList | G | executing 
+    else 
+      AList | consume(parents((a[i]), G), Cookies) ; add(children((a[i]), G), Cookies) | BCookies | (CList ; (a[i])) | EList | G | executing 
+    fi .
 
 endm
