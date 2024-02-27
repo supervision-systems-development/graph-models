@@ -75,7 +75,7 @@ fmod GRAPH is
   ---
   sort CookieList .
   subsort CookieList < Graph .
-  op nil : -> CookieList [ctor] .
+  op clnil : -> CookieList [ctor] .
   op _;_ : CookieList CookieList -> CookieList [assoc id: nil] .
 
 endfm
@@ -152,7 +152,7 @@ fmod CONFIG is
   pr SEQUENCES .
 
   sort Config .
-  op _|_|_|_|_|_ : ActionList CookieList ActionList ActionList Graph Status -> Config [ctor] . --- input actionlist, cookielist, correct actionlist, incorrect actiounlist, graph, status
+  op _|_|_|_|_|_|_ : ActionList CookieList CookieList ActionList ActionList Graph Status -> Config [ctor] . --- input actionlist, cookielist, correct actionlist, incorrect actiounlist, graph, status
   
   *** Variables ***
   var AList CList EList : ActionList .
@@ -169,7 +169,7 @@ fmod CONFIG is
   op test-start : -> Config .
   eq test-start =
   	(a[1]) ; (a[2])   |
-    nil |
+    clnil | clnil |
     nil |
     nil |
     ( (n[4]: nseq, oth) -> (n[6]: nseq, oth) ;; (n[1]: nseq, start) -> (n[2]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[3]: nseq, oth) ) |
@@ -179,7 +179,7 @@ fmod CONFIG is
   op test-start-end : -> Config .
   eq test-start-end =
   	(a[1]) ; (a[2]) |
-    nil |
+    clnil | clnil |
     nil |
     nil |
     ( (n[1]: nseq, start) -> (n[2]: nseq, fin) ) |
@@ -191,7 +191,7 @@ fmod CONFIG is
   op init-simple-correct : -> Config .
   eq init-simple-correct = 
     seq1 | 
-    nil |
+    clnil | clnil |
     nil |
     nil |
     graph1 |
@@ -365,7 +365,7 @@ mod GRAPH-RL is
 
   *** Variables ***
   var AList AList' AList1 AList2 : ActionList . --- Lists of user actions
-  var Cookies Cookies' Cookies1 Cookies2 : CookieList . --- Lists of cookies
+  var Cookies Cookies' Cookies1 Cookies2 BCookies : CookieList . --- Lists of cookies
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
   var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
   var G G' G1 G2 : Graph . --- Graphs
@@ -383,60 +383,53 @@ mod GRAPH-RL is
   --- Start the execution: Transition status from "starting" to "executing" and consume starting action
   --- Actions start and fin are artificially inserted to control the sequences
   rl [start]: 
-    (a[i]) ; AList | Cookies | CList | EList | (n[i]: type, start) -> Node1 ;; G | starting  
+    (a[i]) ; AList | Cookies | BCookies | CList | EList | (n[i]: type, start) -> Node1 ;; G | starting  
     =>
-    AList | (Cookies ; (a[i])) | (CList ; (a[i])) | EList | (n[i]: type, start) -> Node1 ;; G | executing .
+    AList | (Cookies ; (a[i])) | BCookies | (CList ; (a[i])) | EList | (n[i]: type, start) -> Node1 ;; G | executing .
 
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
   rl [end]:  
-    nil | Cookies | CList | EList | G | executing
+    nil | Cookies | BCookies | CList | EList | G | executing
     =>
     if checkStatus(Cookies, CList, G)
     then
-      nil | Cookies | CList | EList | G | correct 
+      nil | Cookies | BCookies | CList | EList | G | correct 
     else 
-      nil | Cookies | CList | EList | G | incorrect
+      nil | Cookies | BCookies | CList | EList | G | incorrect
     fi .
-
-  rl [step-seq]:
-  	(a[i]) ; AList | Cookies | CList | EList |  G ;; ( Node1 -> (n[i]: nseq, func) ) ;; G' | executing
-	=>
-    AList | (Cookies ; (a[i])) | (CList ; (a[i])) | EList | G ;; ( Node1 -> (n[i]: nseq, func) ) ;; G' | executing .
-
-
 
 
   --- Consume action: Consume node
   --- Check what type of node we have found: "sequential", "and", "or" or "xor"
   rl [step] :
-    (a[i]) ; AList | Cookies | CList | EList | G | executing
+    (a[i]) ; AList | Cookies | BCookies | CList | EList | G | executing
     => 
     if isAnd((a[i]), G) and checkParentsInList((a[i]), Cookies, CList, G) == "all"
     then
-      AList | consume(parents((a[i]), G), Cookies) ; add(children((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
+      AList | consume(parents((a[i]), G), Cookies) ; add(children((a[i]), G), Cookies) | BCookies | (CList ; (a[i])) | EList | G | executing 
     else
       if isXor((a[i]), G) and checkParentsInList((a[i]), Cookies, CList, G) == "one"
       then
-        AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
+        AList | consume(parents((a[i]), G), Cookies) | BCookies | (CList ; (a[i])) | EList | G | executing 
       else
         if isOr((a[i]), G) and checkParentsInList((a[i]), Cookies, CList, G) == "some"
         then
-          AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
+          AList | consume(parents((a[i]), G), Cookies) | BCookies | (CList ; (a[i])) | EList | G | executing 
         else
           if isOr((a[i]), G) and checkParentsInList((a[i]), Cookies, CList, G) == "all"
           then
-            AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
+            AList | consume(parents((a[i]), G), Cookies) | BCookies | (CList ; (a[i])) | EList | G | executing 
           else
             if isOr((a[i]), G) and checkParentsInList((a[i]), Cookies, CList, G) == "one"
             then
-              AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
+              AList | consume(parents((a[i]), G), Cookies) | BCookies | (CList ; (a[i])) | EList | G | executing 
             else 
               if isSeq((a[i]), G) and checkParentsInList((a[i]), Cookies, CList, G) == "all"
               then
-                AList | consume(parents((a[i]), G), Cookies) | (CList ; (a[i])) | EList | G | executing 
+                AList | consume(parents((a[i]), G), Cookies) | BCookies | (CList ; (a[i])) | EList | G | executing 
               else
-                AList | Cookies | CList | (EList ; (a[i])) | G | executing 
+                AList | Cookies | BCookies | CList | (EList ; (a[i])) | G | executing 
               fi
             fi
           fi
