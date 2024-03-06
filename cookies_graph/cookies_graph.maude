@@ -493,7 +493,7 @@ mod GRAPH-RL is
   var Cookies Cookies' Cookies1 Cookies2 BCookies BCookies2 BCookies1 BCookies3 : CookieList . --- Lists of cookies
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
   var TupleCookies TupleCookies' TupleCookies1 TupleCookies2 TupleBCookies TupleBCookies2 TupleBCookies1 TupleBCookies3 : TupleList . --- Lists of cookies
-  var TuplePossibleCookies, TupleRealCookies, TupleBlockedCookies : TupleList . 
+  var TuplePossibleCookies TupleRealCookies TupleBlockedCookies : TupleList . 
   var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
   var G G' G1 G2 : Graph . --- Graphs
   var Node1 Node2 Node3 : Node .
@@ -535,8 +535,8 @@ mod GRAPH-RL is
     if isAnd((a[i]), G) and forAllParentsHaveACookie(a[i], parents(a[i], G), TupleCookies)
     then
       AList | 
-      subtractTuple(TupleCookies, listOfAllPossibleCookies(a[i], G) ) & subtractTuple(futureCookies(a[i] , TupleBCookies)) | 
-      subtractTuple(TupleBCookies , futureCookies(a[i],G) ) | (CList ; (a[i])) | EList | G | executing 
+      tupleSubtraction( TupleCookies, listOfAllPossibleCookies( a[i] , G ) ) & tupleSubtraction( futureCookies( a[i] , G ), TupleBCookies ) | 
+      tupleSubtraction( TupleBCookies , futureCookies( a[i] , G ) ) | (CList ; (a[i])) | EList | G | executing 
     else
       if isXor((a[i]), G) 
       then
@@ -546,8 +546,8 @@ mod GRAPH-RL is
         	and forAtLeastOneParentExistsACookie( a[i] , parents( a[i] , G ) , TupleCookies) ---or here, at least one parent is present in Cookie
         then
           AList |
-          subtractTuple(TupleCookies, tupleIntersect( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) & tupleSubtract( futureCookies(a[i],G) , ( TupleBCookies & tupleSubtract( listOfAllPossibleCookies(a[i], G) , tupleIntersect( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) ) )  |
-          subtractTuple( TupleBCookies & tupleSubtract( listOfAllPossibleCookies(a[i], G) , tupleIntersect( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) , futureCookies(a[i], G) )|
+          tupleSubtraction(TupleCookies, tupleListIntersection( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) & tupleSubtraction( futureCookies(a[i],G) , ( TupleBCookies & tupleSubtraction( listOfAllPossibleCookies(a[i], G) , tupleListIntersection( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) ) )  |
+          tupleSubtraction( TupleBCookies & tupleSubtraction( listOfAllPossibleCookies(a[i], G) , tupleListIntersection( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) , futureCookies(a[i], G) )|
           (CList ; (a[i])) |
           EList
           | G | executing 
@@ -559,8 +559,6 @@ mod GRAPH-RL is
                 AList | TupleCookies | TupleBCookies | CList | (EList ; (a[i])) | G | executing 
               fi
             fi
-          fi
-        fi
       fi
     fi .
     
