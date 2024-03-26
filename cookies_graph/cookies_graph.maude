@@ -78,6 +78,9 @@ fmod GRAPH is
   op clnil : -> CookieList [ctor] .
   op _;_ : CookieList CookieList -> CookieList [assoc id: nil] .
   
+  ----sort ActiveCookieList .
+  
+  
   var i j x y z : Int .
   var tuple1 tuple2 tuple3 : Tuple .
   var TList TList1 TList2 TList3 : TupleList .
@@ -88,7 +91,7 @@ fmod GRAPH is
 
   sort TupleList .
   op nil : -> TupleList [ctor] .
-  op _&_ : Tuple Tuple -> TupleList [assoc id: nil] .
+  op _&_ : TupleList TupleList -> TupleList [assoc id: nil] .
   
 
   
@@ -246,7 +249,8 @@ fmod CONFIG is
 
 
 
-
+  op test-tuple-list : -> TupleList .
+  eq test-tuple-list = ( t( 2 & 1 ) & t( 4 & 1 ) & t( 3 & 1 ) & t( 1 & 1 ) & t( 5 & 1 ) & t( 6 & 1 ) & t( 7 & 1 ) & t( 8 & 1 ) & t( 9 & 1 ) ) .
 
 
 endfm
@@ -420,8 +424,8 @@ fmod GRAPH-EQ is
   op activateCookie : Int TupleList -> TupleList .
   eq activateCookie( x , TList ) = 
   if tupleInTupleList( t( x & 1 ) , TList ) then 
-    removeTupleFromTupleList( ( t( x & 1) ) , TList  ) & ( t( x & 1 ) )
-    else ( TList & t( x & 1 ) )
+    ((removeTupleFromTupleList( ( t( x & 1) ) , TList  )) & ( t( x & 1 ) ) )
+    else ( ( TList & t( x & 1 ) ) )
     fi .
     
   op isCookieActive : Int TupleList -> Bool .
@@ -432,9 +436,15 @@ fmod GRAPH-EQ is
   
   op deactivateCookie : Int TupleList -> TupleList .
   eq deactivateCookie( x , TList ) = 
-  if tupleInTupleList( t( x & 1 ) , TList ) then removeTupleFromTupleList( t( x & 1 )  , TList )
+  if tupleInTupleList( ( t( x & 1 ) ) , TList ) then removeTupleFromTupleList( t( x & 1 )  , TList )
   else TList 
   fi .
+  
+  
+  --- deactivate cookies in the first list in the scond list
+  op deactivateCookieList : TupleList TupleList -> TupleList .
+  eq deactivateCookieList( ( ( t( x & 1) & ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
+  eq deactivateCookieList( nil , TList ) = TList .
   
   
   
