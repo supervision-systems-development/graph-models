@@ -189,6 +189,9 @@ fmod SEQUENCES is
 
   op seq4 : -> ActionList .
   eq seq4 = (a[0]) ; (a[1]) ; (a[2]) ; (a[4]) ; (a[11]) .
+  
+  op seqSimpleLoop : -> ActionList . 
+  eq seqSimpleLoop = (a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[1] ; a[2] ; a[5] ; a[6] ; a[4] ; a[5] ; a[2] ; a[3] ; a[1] ; a[3] ; a[4] ; a[5] ; a[6] ; a[11]) .
 
 endfm
 
@@ -242,6 +245,16 @@ fmod CONFIG is
     nil |
     graph2 |
     starting .
+    
+  op test-simple-loop : -> Config .
+  eq test-simple-loop = 
+  	seqSimpleLoop | 
+    nil |
+    nil |
+    nil |
+    graphLoop |
+    starting .
+    
 
 
 
@@ -296,6 +309,20 @@ fmod GRAPH-EQ is
         fi
       fi
     fi .
+    
+  --- get action function
+  op checkFunc : Action Graph -> String .
+  eq checkFunc((a[i]), (n[x]: type', func') -> (n[i]: type, func) ;; G) =
+    if func == start
+    then "start"
+    else 
+      if func == fin
+      then "fin"
+      else "oth"
+      fi
+    fi .
+
+
 
   --- Check if requirements for "and" are met
   op isAnd : Action Graph -> Bool .
@@ -328,6 +355,8 @@ fmod GRAPH-EQ is
     then true
     else false
     fi .
+    
+
 
   --- Consume cookies from list
   op consume : CookieList CookieList -> CookieList .
@@ -675,7 +704,7 @@ mod GRAPH-RL is
   rl [end]:  
     nil | TupleCookies | CList | EList | G | executing
     =>
-    if true --- checkStatus(Cookies, CList, G)
+    if checkFunc(lastAction(CList), G) == "fin"
     then
       nil | TupleCookies | CList | EList | G | correct 
     else 
@@ -686,15 +715,15 @@ mod GRAPH-RL is
   rl [step] :
     (a[i]) ; AList | TupleCookies | CList | EList | G | executing
     => 
-    if isAnd((a[i]), G) and isCookieNotActive(i, TupleCookies)
+    if isAnd((a[i]), G) and isCookieNotActive(i, loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ))
     then
       AList | activateCookie( i , loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ) )  | (CList ; (a[i])) | EList | G | executing 
     else
-      if isXor((a[i]), G) and isCookieNotActive(i, TupleCookies)
+      if isXor((a[i]), G) and isCookieNotActive(i, loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ))
       then
         AList | activateCookie(i, loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
       else
-        if isOr((a[i]), G) and isCookieNotActive(i, TupleCookies)
+        if isOr((a[i]), G) and isCookieNotActive(i, loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ))
         then
           AList |
 		  activateCookie(i, loopFilter( lastAction(CList) , (a[i]) , G, TupleCookies ) ) |
@@ -702,7 +731,7 @@ mod GRAPH-RL is
           EList
           | G | executing 
         else
-              if isSeq((a[i]), G) and isCookieNotActive(i, TupleCookies)
+              if isSeq((a[i]), G) and isCookieNotActive(i, loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ))
               then
                 AList | activateCookie(i, loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
               else
