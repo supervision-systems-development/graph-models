@@ -197,7 +197,7 @@ fmod CONFIG is
   pr SEQUENCES .
 
   sort Config .
-  op _|_|_|_|_|_|_ : ActionList TupleList TupleList ActionList ActionList Graph Status -> Config [ctor] . --- input actionlist, cookielist, correct actionlist, incorrect actiounlist, graph, status
+  op _|_|_|_|_|_ : ActionList TupleList ActionList ActionList Graph Status -> Config [ctor] . --- input actionlist, cookielist, correct actionlist, incorrect actiounlist, graph, status
   
   *** Variables ***
   var AList CList EList : ActionList .
@@ -218,7 +218,6 @@ fmod CONFIG is
     nil | 
     nil |
     nil |
-    nil |
     ( (n[4]: nseq, oth) -> (n[6]: nseq, oth) ;; (n[1]: nseq, start) -> (n[2]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[3]: nseq, oth) ) |
 	starting .
     
@@ -227,7 +226,6 @@ fmod CONFIG is
   eq test-start-end =
   	(a[1]) ; (a[2]) |
     nil | 
-    nil |
     nil |
     nil |
     ( (n[1]: nseq, start) -> (n[2]: nseq, fin) ) |
@@ -240,7 +238,6 @@ fmod CONFIG is
   eq init-simple-correct = 
     seq3 | 
     nil | 
-    nil |
     nil |
     nil |
     graph2 |
@@ -447,7 +444,9 @@ fmod GRAPH-EQ is
   eq deactivateCookieList( nil , TList ) = TList .
   
   
-  
+  op deactivateActionCookies : ActionList TupleList -> TupleList .
+  eq deactivateActionCookies( ( a[x] ; AList1 ) , TList ) = deactivateActionCookies(AList1 , deactivateCookie(x, TList)) .
+  eq deactivateActionCookies( nil , TList ) = TList .
   
 
 
@@ -467,6 +466,7 @@ fmod GRAPH-EQ is
   else 
     ( a[x] ; actionListSubtraction(AList1, AList2)  ) 
     fi .
+  eq actionListSubtraction(nil, AList2) = nil .
   
   ---- tuple based functions
   --- works! for checks if at least one parent of an action from the parentlist actionlist does have a cookie 
@@ -548,6 +548,7 @@ fmod GRAPH-EQ is
   eq futureCookiesList( Action1  , nil ) = nil .
   eq futureCookiesList( ( a[x] ) , ( ( a[y] ) ; AList1 ) ) = ( ( t( x & y ) ) & futureCookiesList(a[x],AList1) ) .
 
+  --- if the search from the initial NodeList (a[0]) reaches the next node (subsequent node) before the previous node (the first argument), then it is a loop.
   --- Previous Node, Subsequent Node, List of Current Nodes, List of Checked Nodes, Graph
   op BFSLoopDetect : Action Action ActionList ActionList Graph -> Bool .
   eq BFSLoopDetect( a[x] , a[y] , AList1 , AList2 , G ) =
@@ -558,6 +559,82 @@ fmod GRAPH-EQ is
            BFSLoopDetect( a[x] , a[y] , ( actionListSubtraction( ( listChildren( AList1 , G ) ) , AList2 ) ) , ( AList1 ; AList2 ) , G )
    fi  
    fi .
+
+
+  --- if the search for a loop detects a loop
+  --- all paths from the (subsequent) first detected node to the (previous) node have to be deactivated again.
+  --- essentially, deactivate all nodes on a path from graph 1 to graph 2
+  --- collect all nodes on every step
+  --- if the final node is reached and the (previous) node has not been found, then return an empty list
+  --- if the previous node has been reached, then return all nodes as 
+  --- from node 1, collect all child nodes [2 3 4 8], add them to the list of visited nodes. 
+  --- for each child node, collect all child nodes that are not in the list of visited nodes, add them to the list of visited nodes.  
+  --- if a child node is 1, return the list of path
+  --- 
+  --- depth first search, each instance has a list of visited nodes, if more than one child node - for each child node launch instance
+  --- if child node in visited nodes, return empty list
+  --- if child node is not in visited nodes: 
+  --- 	if child node is our target node, return list of visited nodes. 
+  --- 	add child node to visited nodes, set child node to current node
+  
+  --- when return, remove duplicates and pass further back. 
+  
+  --- current node, target node, graph, list of visited nodes
+  op DFSSubgraphSearch : Action Action Graph ActionList -> ActionList .
+  eq DFSSubgraphSearch( a[x] , a[y] , G , AList1 ) =
+  checkIfCorrectNode( a[x] , a[y] , children(a[x],G) , G , ( a[x] ; AList1 ) ) .
+  
+ 
+  --- current node, target node, list of children (of the current node), Graph, visited nodes
+  op checkIfCorrectNode : Action Action ActionList Graph ActionList -> ActionList .
+  eq checkIfCorrectNode( a[x] , a[y] , ( ( a[i] ) ; AList2 ) , G , AList1 ) = 
+  if ( ( a[i] ) in AList1 ) then ( nil ; checkIfCorrectNode( a[x] , a[y] , AList2, G , AList1 ) ) else 
+  	if ( i == y ) then ( AList1 ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) ) else
+    ( DFSSubgraphSearch( a[i] , a[y] , G , AList1 ) ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) )
+    fi 
+  fi .
+  eq checkIfCorrectNode( a[x] , a[y] , nil , G , AList1 ) = nil .
+
+  op removeDuplicatesHelper : ActionList ActionList -> ActionList .
+  eq removeDuplicatesHelper((Action1 ; AList1) , AList2) = 
+  if (Action1 in AList2) then removeDuplicatesHelper(AList1, AList2) else removeDuplicatesHelper(AList1, (Action1 ; AList2)) fi .
+  eq removeDuplicatesHelper(nil, AList2) = AList2 .
+
+  op removeDuplicates : ActionList -> ActionList .
+  eq removeDuplicates(AList1) = removeDuplicatesHelper(AList1, nil) .
+
+  --- gets all paths between first and second argument in graph, including first argument but excluding last argument
+  op getAllPathsBetween : Action Action Graph -> ActionList .
+  eq getAllPathsBetween(a[x] , a[y] , G) = removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil )) .
+  
+  
+  op getAllPathsForLoopDeactivation : Action Action Graph -> ActionList .
+  eq getAllPathsForLoopDeactivation(a[x] , a[y] , G) = ( actionListSubtraction( removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil )) , ( a[x] ; nil ) ) ; a[y] ) .
+  
+  
+  
+  --- check if it is a loop while transitioning from first argument to second
+  op loopFilter : Action Action Graph TupleList -> TupleList .
+  eq loopFilter(Action1 , Action2 , G , TList1) =
+  if detectLoop(Action1, Action2, G) then 
+  deactivateActionCookies( getAllPathsForLoopDeactivation( Action2 , Action1 , G) , TList1 ) 
+  else TList1
+  fi .
+
+
+  ---detects loop given the first node is 0
+  op detectLoop : Action Action Graph -> Bool .
+  eq detectLoop( Action1 , Action2 , G ) = BFSLoopDetect( Action1 , Action2 , (a[0]) , nil , G ) . 
+  
+  op lastAction : ActionList -> Action .
+  eq lastAction( ( AList1 ; Action1 ) ) = Action1 .
+  eq lastAction(nil) = nil .
+  
+  op isCookieNotActive : Int TupleList -> Bool .
+  eq isCookieNotActive( x , TList ) =
+  if tupleInTupleList ( t( x & 1 ) , TList ) then false
+  else true
+  fi .
   
 endfm
 
@@ -589,51 +666,47 @@ mod GRAPH-RL is
   
 
   rl [start]: 
-    (a[i]) ; AList | TupleCookies | TupleBCookies | CList | EList | (n[i]: type, start) -> Node1 ;; G | starting  
+    (a[i]) ; AList | TupleCookies | CList | EList | G | starting  
     =>
-    AList | TupleCookies & futureCookies(a[i], G) | TupleBCookies | (CList ; (a[i])) | EList | (n[i]: type, start) -> Node1 ;; G | executing .
+    AList | activateCookie( i , TupleCookies) | (CList ; (a[i])) | EList | G | executing .
 
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
   rl [end]:  
-    nil | TupleCookies | TupleBCookies | CList | EList | G | executing
+    nil | TupleCookies | CList | EList | G | executing
     =>
     if true --- checkStatus(Cookies, CList, G)
     then
-      nil | TupleCookies | TupleBCookies | CList | EList | G | correct 
+      nil | TupleCookies | CList | EList | G | correct 
     else 
-      nil | TupleCookies | TupleBCookies | CList | EList | G | incorrect
+      nil | TupleCookies | CList | EList | G | incorrect
     fi .
 
     
   rl [step] :
-    (a[i]) ; AList | TupleCookies | TupleBCookies | CList | EList | G | executing
+    (a[i]) ; AList | TupleCookies | CList | EList | G | executing
     => 
-    if isAnd((a[i]), G) and forAllParentsHaveACookie(a[i], parents(a[i], G), TupleCookies)
+    if isAnd((a[i]), G) and isCookieNotActive(i, TupleCookies)
     then
-      AList | 
-      tupleSubtraction( TupleCookies, listOfAllPossibleCookies( a[i] , G ) ) & tupleSubtraction( futureCookies( a[i] , G ), TupleBCookies ) | 
-      tupleSubtraction( TupleBCookies , futureCookies( a[i] , G ) ) | (CList ; (a[i])) | EList | G | executing 
+      AList | activateCookie( i , loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ) )  | (CList ; (a[i])) | EList | G | executing 
     else
-      if isXor((a[i]), G) 
+      if isXor((a[i]), G) and isCookieNotActive(i, TupleCookies)
       then
-        AList | TupleCookies | TupleBCookies | (CList ; (a[i])) | EList | G | executing 
+        AList | activateCookie(i, loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
       else
-        if isOr((a[i]), G) 
-        	and forAtLeastOneParentExistsACookie( a[i] , parents( a[i] , G ) , TupleCookies) ---or here, at least one parent is present in Cookie
+        if isOr((a[i]), G) and isCookieNotActive(i, TupleCookies)
         then
           AList |
-          tupleSubtraction(TupleCookies, tupleListIntersection( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) & tupleSubtraction( futureCookies(a[i],G) , ( TupleBCookies & tupleSubtraction( listOfAllPossibleCookies(a[i], G) , tupleListIntersection( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) ) )  |
-          tupleSubtraction( TupleBCookies & tupleSubtraction( listOfAllPossibleCookies(a[i], G) , tupleListIntersection( TupleCookies , listOfAllPossibleCookies(a[i], G) ) ) , futureCookies(a[i], G) )|
-          (CList ; (a[i])) |
+		  activateCookie(i, loopFilter( lastAction(CList) , (a[i]) , G, TupleCookies ) ) |
+          CList |
           EList
           | G | executing 
         else
-              if isSeq((a[i]), G) 
+              if isSeq((a[i]), G) and isCookieNotActive(i, TupleCookies)
               then
-                AList | TupleCookies & futureCookies(a[i], G) | TupleBCookies | (CList ; (a[i])) | EList | G | executing 
+                AList | activateCookie(i, loopFilter( lastAction(CList) , (a[i]) , G , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
               else
-                AList | TupleCookies | TupleBCookies | CList | (EList ; (a[i])) | G | executing 
+                AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
               fi
             fi
       fi
