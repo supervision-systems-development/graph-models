@@ -656,6 +656,11 @@ mod GRAPH-RL is
     else 
       nil | TupleCookies | CList | EList | G | incorrect
     fi .
+    
+  rl [extracasewithend]:
+    nil | TupleCookies | CList | EList | G | starting
+    =>
+    nil | TupleCookies | CList | EList | G | incorrect .
 
     
   rl [step] :
