@@ -93,21 +93,8 @@ fmod GRAPH is
   op nil : -> TupleList [ctor] .
   op _&_ : TupleList TupleList -> TupleList [assoc id: nil] .
   
-
-  
   op first : Tuple -> Int .
   eq first(t( x & y )) = x .
-  
-  
-  
-  
-  op firstTuple : TupleList -> Tuple .
-  eq firstTuple( tuple1 & tuple2 ) = tuple1 .
-  eq firstTuple(nil) = nil .
-  
-  op removeLastTuple : TupleList -> TupleList .
-  eq removeLastTuple( TList & t( x & y ) ) = TList .
-  eq removeLastTuple(nil) = nil .
   
 endfm
 
@@ -255,9 +242,6 @@ fmod CONFIG is
     graphLoop |
     starting .
     
-
-
-
 
   op test-tuple-list : -> TupleList .
   eq test-tuple-list = ( t( 2 & 1 ) & t( 4 & 1 ) & t( 3 & 1 ) & t( 1 & 1 ) & t( 5 & 1 ) & t( 6 & 1 ) & t( 7 & 1 ) & t( 8 & 1 ) & t( 9 & 1 ) ) .
@@ -472,11 +456,9 @@ fmod GRAPH-EQ is
   eq deactivateCookieList( ( ( t( x & 1) & ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
   eq deactivateCookieList( nil , TList ) = TList .
   
-  
   op deactivateActionCookies : ActionList TupleList -> TupleList .
   eq deactivateActionCookies( ( a[x] ; AList1 ) , TList ) = deactivateActionCookies(AList1 , deactivateCookie(x, TList)) .
   eq deactivateActionCookies( nil , TList ) = TList .
-  
 
 
   op _in_ : Cookie CookieList -> Bool .
@@ -496,48 +478,7 @@ fmod GRAPH-EQ is
     ( a[x] ; actionListSubtraction(AList1, AList2)  ) 
     fi .
   eq actionListSubtraction(nil, AList2) = nil .
-  
-  ---- tuple based functions
-  --- works! for checks if at least one parent of an action from the parentlist actionlist does have a cookie 
-  --- forAtLeastOneParentExistsACookie(a[4] , parents(a[4], graph4) , ( t( 1 & 2 ) & t( 3 & 4 ) ) )
-  op forAtLeastOneParentExistsACookie : Action ActionList TupleList -> Bool .
-  eq forAtLeastOneParentExistsACookie(Action1, AList, nil) = false .
-  eq forAtLeastOneParentExistsACookie(Action1, nil, TList) = false .
-  eq forAtLeastOneParentExistsACookie(Action1, nil, nil) = false .
-  eq forAtLeastOneParentExistsACookie( a[x] , ( a[y] ; AList1 ) , TList ) = 
-  if tupleInTupleList( ( t( y & x ) ) , TList ) then true
-  else forAtLeastOneParentExistsACookie( a[x] , AList1 , TList ) fi .
-  
-  
-  
-  
-  
-  
 
-  ---- input is the action, the list of parents and the list of cookies.
-  --- for checks if all parents of an action from the parentlist actionlist does have a cookie 
-  --- forAtLeastOneParentExistsACookie(a[4] , parents(a[4], graph4) , ( t( 1 & 2 ) & t( 3 & 4 ) ) )
-  op forAllParentsHaveACookie : Action ActionList TupleList -> Bool .
-  eq forAllParentsHaveACookie(Action1, AList, nil) = false .
-  eq forAllParentsHaveACookie(Action1, nil, TList) = false .
-  eq forAllParentsHaveACookie(Action1, nil, nil) = false .
-  eq forAllParentsHaveACookie( a[x] , ( a[y] ; AList1 ) , TList ) = 
-  tupleInTupleList( ( t( y & x ) ) , TList ) and forAllParentsHaveACookie( a[x] , AList1 , TList ) .
-  
-  
-  
-  --- list of all possible cookies that can make the action possible
-  --- essentially list of all possible input edges
-  --- forAtLeastOneParentExistsACookie(a[4] , parents(a[4], graph4) , ( listOfAllPossibleCookies(a[4], graph4) ) )
-  op listOfAllPossibleCookies : Action Graph -> TupleList .
-  eq listOfAllPossibleCookies( a[x] , G ) = listOfAllPossibleCookiesParentsList(a[x], ( parents(a[x], G) ) , nil) .
-  ---helper function for the list of all possible functions function. 
-  op listOfAllPossibleCookiesParentsList : Action ActionList TupleList -> TupleList .
-  eq listOfAllPossibleCookiesParentsList(Action1, nil, TList1) = TList1 .
-  eq listOfAllPossibleCookiesParentsList( a[x] , ( a[y] ; AList ) , TList1 ) = 
-     listOfAllPossibleCookiesParentsList( a[x] , ( AList ) , ( ( t( y & x ) ) & TList1 ) ) .
-     
-     
   --- intersection of two tuple lists 
   --- tupleListIntersection(( t( 2 & 2 ) & t( 3 & 4 ) ), ( t( 1 & 2 ) & t( 3 & 4 ) ))
   op tupleListIntersection : TupleList TupleList -> TupleList .
@@ -565,17 +506,6 @@ fmod GRAPH-EQ is
   fi . 
   eq tupleSubtraction( nil , TList3 ) = nil .
   
-  
-  --- future cookies
-  --- generated from the current node and all possible future paths
-  ---futureCookies( a[1] , graph4 )
-  op futureCookies : Action Graph -> TupleList .  
-  eq futureCookies( Action1 , G ) = futureCookiesList(Action1 , children(Action1, G)) .
-  
-  
-  op futureCookiesList : Action ActionList -> TupleList .
-  eq futureCookiesList( Action1  , nil ) = nil .
-  eq futureCookiesList( ( a[x] ) , ( ( a[y] ) ; AList1 ) ) = ( ( t( x & y ) ) & futureCookiesList(a[x],AList1) ) .
 
   --- if the search from the initial NodeList (a[0]) reaches the next node (subsequent node) before the previous node (the first argument), then it is a loop.
   --- Previous Node, Subsequent Node, List of Current Nodes, List of Checked Nodes, Graph
@@ -636,10 +566,8 @@ fmod GRAPH-EQ is
   op getAllPathsBetween : Action Action Graph -> ActionList .
   eq getAllPathsBetween(a[x] , a[y] , G) = removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil )) .
   
-  
   op getAllPathsForLoopDeactivation : Action Action Graph -> ActionList .
-  eq getAllPathsForLoopDeactivation(a[x] , a[y] , G) = ( actionListSubtraction( removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil )) , ( a[x] ; nil ) ) ; a[y] ) .
-  
+  eq getAllPathsForLoopDeactivation(a[x] , a[y] , G) = ( removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil ))  ; a[y] ) .
   
   
   --- check if it is a loop while transitioning from first argument to second
@@ -649,7 +577,6 @@ fmod GRAPH-EQ is
   deactivateActionCookies( getAllPathsForLoopDeactivation( Action2 , Action1 , G) , TList1 ) 
   else TList1
   fi .
-
 
   ---detects loop given the first node is 0
   op detectLoop : Action Action Graph -> Bool .
