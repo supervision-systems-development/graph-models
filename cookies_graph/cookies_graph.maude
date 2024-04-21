@@ -430,11 +430,11 @@ fmod GRAPH-EQ is
   ---op activateCookie : Int TupleList -> TupleList .
   ---eq activateCookie( x , TList ) = activateCookieTuple
   
-  
+  --- activates cookie if not already active
   op activateCookie : Int TupleList -> TupleList .
   eq activateCookie( x , TList ) = 
   if tupleInTupleList( t( x & 1 ) , TList ) then 
-    ((removeTupleFromTupleList( ( t( x & 1) ) , TList  )) & ( t( x & 1 ) ) )
+    TList
     else ( ( TList & t( x & 1 ) ) )
     fi .
     
@@ -456,6 +456,7 @@ fmod GRAPH-EQ is
   eq deactivateCookieList( ( ( t( x & 1) & ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
   eq deactivateCookieList( nil , TList ) = TList .
   
+  ---seems to work, deactivates ACTION LIST from COOKIE LIST and returns COOKIE LIST
   op deactivateActionCookies : ActionList TupleList -> TupleList .
   eq deactivateActionCookies( ( a[x] ; AList1 ) , TList ) = deactivateActionCookies(AList1 , deactivateCookie(x, TList)) .
   eq deactivateActionCookies( nil , TList ) = TList .
@@ -566,6 +567,8 @@ fmod GRAPH-EQ is
   op getAllPathsBetween : Action Action Graph -> ActionList .
   eq getAllPathsBetween(a[x] , a[y] , G) = removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil )) .
   
+  
+  ---MAIN function for use in RULES
   op getAllPathsForLoopDeactivation : Action Action Graph -> ActionList .
   eq getAllPathsForLoopDeactivation(a[x] , a[y] , G) = ( removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil ))  ; a[y] ) .
   
@@ -578,6 +581,7 @@ fmod GRAPH-EQ is
   else TList1
   fi .
 
+  --- MAIN function to use in RULES
   ---detects loop given the first node is 0
   op detectLoop : Action Action Graph -> Bool .
   eq detectLoop( Action1 , Action2 , G ) = BFSLoopDetect( Action1 , Action2 , (a[0]) , nil , G ) . 
