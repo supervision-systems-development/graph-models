@@ -84,6 +84,7 @@ fmod GRAPH is
   var i j x y z : Int .
   var tuple1 tuple2 tuple3 : Tuple .
   var TList TList1 TList2 TList3 : TupleList .
+  var AList1 : ActionList .
   
   sort Tuple .
   subsort Tuple < TupleList .
@@ -95,6 +96,12 @@ fmod GRAPH is
   
   op first : Tuple -> Int .
   eq first(t( x & y )) = x .
+  
+  op firstAction : ActionList -> Action .
+  eq firstAction( ( a[i] ; AList1 ) ) = a[i] .
+  
+  op firstActionInt : ActionList -> Int .
+  eq firstActionInt( ( a[i] ; AList1 ) ) = i .
   
 endfm
 
@@ -267,6 +274,7 @@ fmod GRAPH-EQ is
   var tuple1 tuple2 tuple3 tuple4 : Tuple . --- tuple variables
   var TList TList1 TList2 TList3 TList4 : TupleList . --- tuple list
   var Action Action1 Action2 : Action .
+  var Bool1 Bool2 Bool3 Bool4 : Bool .
 
   *** Equations ***
   --- Check if last node of Correct List is "fin" node and cookies only contains final node
@@ -606,6 +614,34 @@ fmod GRAPH-EQ is
   if tupleInTupleList ( t( x & 1 ) , TList ) then false
   else true
   fi .
+ 
+  op allParentCookiesActiveHelper : ActionList TupleList Graph -> Bool .
+  eq allParentCookiesActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) and allParentCookiesActiveHelper( AList1 , TList1, G ) .
+  eq allParentCookiesActiveHelper( nil, TList1, G ) = true .
+  
+  --- action , cookies, graph
+  op allParentCookiesActive : Action TupleList Graph -> Bool .
+  eq allParentCookiesActive( a[i] , TList1 , G ) = allParentCookiesActiveHelper( parents(a[i] , G ) , TList1 , G ) .
+  eq allParentCookiesActive( Action1 , nil , G ) = false .
+  
+  
+  op atLeastOneParentCookieActiveHelper : ActionList TupleList Graph -> Bool .
+  eq atLeastOneParentCookieActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or allParentCookiesActiveHelper( AList1 , TList1, G ) .
+  eq atLeastOneParentCookieActiveHelper( nil, TList1, G ) = false .
+  
+  op atLeastOneParentCookieActive : Action TupleList Graph -> Bool .
+  eq atLeastOneParentCookieActive( a[i] , TList1 , G ) = atLeastOneParentCookieActiveHelper( parents(a[i] , G ) , TList1 , G ) .
+  eq atLeastOneParentCookieActive( Action1 , nil , G ) = false .
+ 
+  
+  op xorParentCookieActiveHelper : ActionList Bool TupleList Graph -> Bool .
+  eq xorParentCookieActiveHelper( ( a[i] ; AList1 ) , Bool1 , TList1 , G ) = isCookieActive( i , TList1 ) xor allParentCookiesActiveHelper( AList1 , TList1, G ) .
+  eq xorParentCookieActiveHelper( nil, Bool1 , TList1, G ) = Bool1 .
+
+  op xorParentCookieActive : Action TupleList Graph -> Bool .
+  eq xorParentCookieActive( a[i] , TList1 , G ) = xorParentCookieActiveHelper( parents( a[i] , G ) , isCookieActive( firstActionInt( ( parents( a[i] , G ) ) ) , TList1 ) , TList1 , G ) .
+  eq xorParentCookieActive( Action1 , nil , G ) = false .
+  
   
 endfm
 
@@ -668,13 +704,13 @@ mod GRAPH-RL is
     => 
     if detectLoop( lastAction(CList) , a[i] , G ) then (a[i]) ; AList | TupleCookies | CList | EList | G | incorrect
     else
-      if isAnd((a[i]), G) and isCookieNotActive(i, TupleCookies) then AList | activateCookie( i , TupleCookies )  | (CList ; (a[i])) | EList | G | executing 
+      if isAnd((a[i]), G) and isCookieNotActive(i, TupleCookies) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , TupleCookies )  | (CList ; (a[i])) | EList | G | executing 
       else
-      if isXor((a[i]), G) and isCookieNotActive( i , TupleCookies ) then AList | activateCookie( i , TupleCookies ) | (CList ; (a[i])) | EList | G | executing 
+      if isXor((a[i]), G) and isCookieNotActive( i , TupleCookies ) and xorParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , TupleCookies ) | (CList ; (a[i])) | EList | G | executing 
         else
-          if isOr((a[i]), G) and isCookieNotActive (i , TupleCookies ) then AList | activateCookie( i , TupleCookies ) | ( CList ; a[i] ) | EList | G | executing
+          if isOr((a[i]), G) and isCookieNotActive (i , TupleCookies ) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , TupleCookies ) | ( CList ; a[i] ) | EList | G | executing
           else
-                if isSeq((a[i]), G) and isCookieNotActive( i , TupleCookies ) then AList | activateCookie(i, TupleCookies ) | (CList ; (a[i])) | EList | G | executing 
+                if isSeq((a[i]), G) and isCookieNotActive( i , TupleCookies ) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie(i, TupleCookies ) | (CList ; (a[i])) | EList | G | executing 
                 else
                   AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
                 fi
