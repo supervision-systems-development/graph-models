@@ -170,6 +170,16 @@ fmod SEQUENCES is
     (n[2]: nseq, oth)->(n[4]: nseq, oth);;
     (n[3]: nseq, oth)->(n[4]: nseq, oth);;
     (n[4]: nseq, oth)->(n[11]: nseq, fin) .
+    
+  op graph51 : -> Graph .
+  eq graph51 = 
+  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[2]: nxor, oth);;
+    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
+    (n[2]: nxor, oth)->(n[4]: nseq, oth);;
+    (n[3]: nseq, oth)->(n[2]: nxor, oth);;
+    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
+    (n[4]: nseq, oth)->(n[11]: nseq, fin) .
 
   *** Action sequences for testing ***
   op seq1 : -> ActionList .
@@ -207,7 +217,23 @@ fmod CONFIG is
 
   *** Initial configurations using simple actions and graphs ***
 
-
+  op testxorfalse : -> Config .
+  eq testxorfalse =
+  	seq3 |
+    nil |
+    nil |
+    nil |
+    graph5 |
+    starting .
+    
+  op testxortrue : -> Config .
+  eq testxortrue =
+  	seq3 |
+    nil |
+    nil |
+    nil |
+    graph51 |
+    starting .
 
   op test-start : -> Config .
   eq test-start =
@@ -626,11 +652,11 @@ fmod GRAPH-EQ is
   
   
   op atLeastOneParentCookieActiveHelper : ActionList TupleList Graph -> Bool .
-  eq atLeastOneParentCookieActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or allParentCookiesActiveHelper( AList1 , TList1, G ) .
+  eq atLeastOneParentCookieActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or atLeastOneParentCookieActiveHelper( AList1 , TList1, G ) .
   eq atLeastOneParentCookieActiveHelper( nil, TList1, G ) = false .
   
   op atLeastOneParentCookieActive : Action TupleList Graph -> Bool .
-  eq atLeastOneParentCookieActive( a[i] , TList1 , G ) = atLeastOneParentCookieActiveHelper( parents(a[i] , G ) , TList1 , G ) .
+  eq atLeastOneParentCookieActive( a[i] , TList1 , G ) = atLeastOneParentCookieActiveHelper( parents( a[i] , G ) , TList1 , G ) .
   eq atLeastOneParentCookieActive( Action1 , nil , G ) = false .
  
   
@@ -710,7 +736,7 @@ mod GRAPH-RL is
         else
           if isOr((a[i]), G) and isCookieNotActive (i , TupleCookies ) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , TupleCookies ) | ( CList ; a[i] ) | EList | G | executing
           else
-                if isSeq((a[i]), G) and isCookieNotActive( i , TupleCookies ) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie(i, TupleCookies ) | (CList ; (a[i])) | EList | G | executing 
+                if isSeq((a[i]), G) and isCookieNotActive( i , TupleCookies ) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , TupleCookies ) | (CList ; (a[i])) | EList | G | executing 
                 else
                   AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
                 fi
