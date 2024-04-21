@@ -456,6 +456,7 @@ fmod GRAPH-EQ is
   eq deactivateCookieList( ( ( t( x & 1) & ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
   eq deactivateCookieList( nil , TList ) = TList .
   
+  --- MAIN function to use with rules
   ---seems to work, deactivates ACTION LIST from COOKIE LIST and returns COOKIE LIST
   op deactivateActionCookies : ActionList TupleList -> TupleList .
   eq deactivateActionCookies( ( a[x] ; AList1 ) , TList ) = deactivateActionCookies(AList1 , deactivateCookie(x, TList)) .
@@ -624,12 +625,14 @@ mod GRAPH-RL is
   --- Start the execution: Transition status from "starting" to "executing" and consume starting action
   --- Actions start and fin are artificially inserted to control the sequences
   
-
+  --- works correctly
+  --- the starting node DOES NOT CHECK node function
   rl [start]: 
-    (a[i]) ; AList | TupleCookies | CList | EList | G | starting  
+    a[i] ; AList | TupleCookies | CList | EList | G | starting  
     =>
-    AList | activateCookie( i , TupleCookies) | (CList ; (a[i])) | EList | G | executing .
+    AList | activateCookie( i , TupleCookies) | ( CList ; (a[i]) ) | EList | G | executing .
 
+  --- works correctly
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
   rl [end]:  
