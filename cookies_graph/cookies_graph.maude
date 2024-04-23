@@ -188,6 +188,23 @@ fmod SEQUENCES is
     (n[2]: nseq, oth)->(n[1]: nor, oth);;
     (n[2]: nseq, oth)->(n[11]: nseq, fin) .
     
+  op multiLoopGraph : -> Graph .
+  eq multiLoopGraph =
+  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
+    (n[1]: nseq, oth)->(n[3]: nor, oth);;
+    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
+    (n[3]: nor, oth)->(n[4]: nseq, oth);;
+    (n[4]: nseq, oth)->(n[5]: nseq, oth);;
+    (n[5]: nseq, oth)->(n[6]: nor, oth);;
+    (n[6]: nor, oth)->(n[11]: nseq, fin);;
+    (n[5]: nseq, oth)->(n[1]: nseq, oth);;
+    (n[6]: nor, oth)->(n[8]: nseq, oth);;
+    (n[8]: nseq, oth)->(n[9]: nseq, oth);;
+    (n[9]: nseq, oth)->(n[6]: nor, oth);;
+    (n[8]: nseq, oth)->(n[3]: nor, oth) .
+    
+  
   *** Action sequences for testing ***
   op seq1 : -> ActionList .
   eq seq1 = (a[0]) ; (a[1]) ; (a[2]) ; (a[11]) .
@@ -206,6 +223,9 @@ fmod SEQUENCES is
 
   op smallLoopSeq : -> ActionList .
   eq smallLoopSeq = (a[0] ; a[1] ; a[2] ; a[1] ; a[2] ; a[11]) .
+  
+  op multiLoopSeq : -> ActionList .
+  eq multiLoopSeq = ( a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[8] ; a[3] ; a[4] ; a[9] ; a[4] ; a[5] ; a[6] ; a[8] ; a[9] ; a[6] ; a[11] ) .
   
   
   op test64-seq : -> ActionList .
