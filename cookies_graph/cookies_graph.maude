@@ -207,6 +207,10 @@ fmod SEQUENCES is
   op smallLoopSeq : -> ActionList .
   eq smallLoopSeq = (a[0] ; a[1] ; a[2] ; a[1] ; a[2] ; a[11]) .
   
+  
+  op test64-seq : -> ActionList .
+  eq test64-seq = ( a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[4] ; a[5] ; a[6] ; a[11] ) .
+  
 endfm
 
 *** Initial configurations ***
@@ -229,7 +233,7 @@ fmod CONFIG is
   
   op simpleLoopTest : -> Config .
   eq simpleLoopTest = 
-  	smallLoopSeq |
+    smallLoopSeq |
     nil |
     nil |
     nil |
@@ -297,6 +301,15 @@ fmod CONFIG is
   op test-simple-loop : -> Config .
   eq test-simple-loop = 
   	seqSimpleLoop | 
+    nil |
+    nil |
+    nil |
+    graphLoop |
+    starting .
+    
+  op test64 : -> Config .
+  eq test64 =
+    test64-seq |
     nil |
     nil |
     nil |
@@ -756,7 +769,7 @@ mod GRAPH-RL is
   rl [step] :
     (a[i]) ; AList | TupleCookies | CList | EList | G | executing
     => 
-    if detectLoop( lastAction(CList) , a[i] , G ) then
+    if detectLoop( lastAction(CList) , a[i] , G ) and isCookieNotActive(i, deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) then
      if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) )  | (CList ; (a[i])) | EList | G | executing 
       else
       if isXor((a[i]), G) and xorParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
@@ -786,4 +799,3 @@ mod GRAPH-RL is
       fi 
     fi .
 endm
-
