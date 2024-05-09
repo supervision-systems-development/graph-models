@@ -94,6 +94,7 @@ fmod GRAPH is
   op nil : -> TupleList [ctor] .
   op _&_ : TupleList TupleList -> TupleList [assoc id: nil] .
   
+ 
   op first : Tuple -> Int .
   eq first(t( x & y )) = x .
   
@@ -173,13 +174,13 @@ fmod SEQUENCES is
     
   op graph51 : -> Graph .
   eq graph51 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
+  	(n[0]: nseq, oth)->(n[1]: nseq, oth);;
     (n[1]: nseq, oth)->(n[2]: nxor, oth);;
     (n[1]: nseq, oth)->(n[3]: nseq, oth);;
     (n[2]: nxor, oth)->(n[4]: nseq, oth);;
     (n[3]: nseq, oth)->(n[2]: nxor, oth);;
     (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[11]: nseq, fin) .
+    (n[4]: nseq, oth)->(n[11]: nseq, oth) .
     
   op smallLoopGraph : -> Graph .
   eq smallLoopGraph = 
@@ -363,6 +364,7 @@ fmod GRAPH-EQ is
   var TList TList1 TList2 TList3 TList4 : TupleList . --- tuple list
   var Action Action1 Action2 : Action .
   var Bool1 Bool2 Bool3 Bool4 : Bool .
+  var Node1 Node2 Node3 : Node .
 
   *** Equations ***
   --- Check if last node of Correct List is "fin" node and cookies only contains final node
@@ -794,6 +796,122 @@ fmod GRAPH-EQ is
   op isAtLeastOneXorParentChildActive : Action TupleList Graph -> Bool .
   eq isAtLeastOneXorParentChildActive( a[i] , TList1 , G ) = isAtLeastOneXorParentChildActiveHelper( parents( a[i], G ) , TList1 , G ) .
   
+  
+  --- in order to add starting and ending nodes to graphs and sequences, they will be added artificially 
+  --- reserved values for starting and ending nodes will be -5 for starting (because it resembles S) and -7 for ending (because it resembles F)
+  --- in case of sequences, we will check if a sequence has -5 at start, if it does, then we leave it, if not, we add -5 to start
+  --- 			then we check if it has -7 in the end. If it does, we leave it as is, if it doesn't, we add -7
+  --- a significant issue with artificial ending nodes is that it might not be reached in case of special rules
+  --- in case of graphs, we will check if a graph has a -5 node with starting attribute. If it does, we leave it as is. If it doesn't, we 
+  --- check if it has a starting node. If it has a starting node, we add an arc connecting -5 to the first starting node, removing the starting attribute
+  --- after that we check if it has -7 as an ending node. If it does, we leave it as is. If it doesn't, we check if it has an ending node
+  --- if it doesn't have an ending node, we add it after the node with the ending node
+  op normalizeSequence : ActionList -> ActionList .
+  eq normalizeSequence( AList1 ) = 
+  if ( firstAction( AList1 ) == ( a[-5] ) )
+  	then --- if -5 is present in AList1
+  		if ( lastAction( AList1 ) == ( a[-7] ) )  
+        	then --- if both -5 and -7 are present in AList1
+            	AList1
+            else --- if -5 is present in AList1 but -7 is not present in AList1
+                addFinalAction( AList1 )
+        fi
+    else --- if -5 is NOT present in AList1
+  		if ( lastAction( AList1 ) == ( a[-7] ) ) 
+        	then --- if -5 is NOT present and -7 is present in AList1
+            	addStartingAction( AList1 )
+            else --- if -5 is NOT present in AList1 and -7 is NOT present in AList1
+                addStartingAction( addFinalAction( AList1 ) )
+        fi
+  fi .
+  
+  op lastAction : ActionList -> Action .
+  eq lastAction( AList1 ; ( a[x] ) ) = a[x] .
+  eq lastAction( nil ) = nil .
+  
+  op firstAction : ActionList -> Action .
+  eq firstAction( ( a[x] ) ; AList1 ) = a[x] .
+  eq firstAction( nil ) = nil .
+  
+  op addFinalAction : ActionList -> ActionList .
+  eq addFinalAction( AList1 ) = ( AList1 ; a[-7] ) .
+  
+  op addStartingAction : ActionList -> ActionList .
+  eq addStartingAction( AList1 ) = ( a[-5] ; AList1 ) .
+  
+  
+  
+  op normalizeGraph : Graph -> Graph .
+  eq normalizeGraph( G ) =
+  if arcLeftExists( (n[-5]: nseq, oth) , G ) then 
+  		if arcRightExists( (n[-7]: nseq, oth) , G ) then
+        		G
+        else 
+        		addFinalNode( G )
+        fi 
+  else 
+    	if arcRightExists( (n[-7]: nseq, oth) , G ) then
+        		addStartingNode( G )
+        else 
+        		addStartingNode ( addFinalNode( G ) )
+  		fi 
+  fi .
+  
+ 
+  op arcRightExists : Node Graph -> Bool . 
+  eq arcRightExists( Node2 , Node1 -> Node2 ;; G2  ) = true .
+  eq arcRightExists( Node2, G ) = false [owise] .
+  
+  
+  op arcLeftExists : Node Graph -> Bool . 
+  eq arcLeftExists( Node1 , G1 ;; Node1 -> Node2 ;; G2  ) = true .
+  eq arcLeftExists( Node1, G ) = false [owise] .
+  
+  
+  op addFinalNode : Graph -> Graph .
+  eq addFinalNode( G1 ) = if 
+  		arcRightExists( (n[-7]: nseq, fin) , addFinalNodeHelper(G1, nil) ) then addFinalNodeHelper(G1, nil)
+        else 
+        addFinalNodeToLastNode( G1 )
+        fi .
+        
+  
+  op addFinalNodeHelper : Graph Graph -> Graph .
+  eq addFinalNodeHelper( ( (n[i]: type', func') -> (n[x]: type, func) ;; G2 ) , G ) = 
+  if func == fin
+  		then addFinalNodeHelper( G2 , ( ( G ;; (n[i]: type', func') -> (n[x]: type, oth) ) ;; (n[x]: type, oth) -> (n[-7]: nseq, fin) )  )
+  else addFinalNodeHelper( G2, ( G ;; (n[i]: type', func') -> (n[x]: type, func) ) ) fi .
+  eq addFinalNodeHelper( nil , G ) = G .
+  
+  op addFinalNodeToLastNode : Graph -> Graph .
+  eq addFinalNodeToLastNode( G ;; (n[i]: type', func') -> (n[x]: type, func) ) = 
+  ( ( G ;; (n[i]: type', func') -> (n[x]: type, func) ) ;; (n[x]: type, func) -> (n[-7]: nseq, fin) ) .
+  eq addFinalNodeToLastNode( nil ) = nil .
+  
+  
+  
+  
+  op addStartingNode : Graph -> Graph .
+  eq addStartingNode( G1 ) = if 
+  		arcLeftExists( (n[-5]: nseq, start) , addStartingNodeHelper( G1, nil ) ) then addStartingNodeHelper( G1 , nil )
+        else 
+        addStartingNodeToFirstNode( G1 )
+        fi .
+  
+  op addStartingNodeHelper : Graph Graph -> Graph .
+  eq addStartingNodeHelper( ( (n[i]: type', func') -> (n[x]: type, func) ;; G2 ) , G ) = 
+  if func' == start
+  		then addStartingNodeHelper( G2 , (n[-5]: nseq, start) -> (n[i]: type', oth) ;; (n[i]: type', oth) -> (n[x]: type, oth) ;; G )
+  else addStartingNodeHelper( G2, ( (n[i]: type', func') -> (n[x]: type, func) ;; G ) ) fi .
+  eq addStartingNodeHelper( nil, G ) = G .
+  
+  op addStartingNodeToFirstNode : Graph -> Graph .
+  eq addStartingNodeToFirstNode( (n[i]: type', func') -> (n[x]: type, func) ;; G ) = 
+  (n[-5]: nseq, start) -> (n[i]: type', func') ;; ( (n[i]: type', func') -> (n[x]: type, func) ;; G ) .
+  eq addStartingNodeToFirstNode( nil ) = nil . 
+ 
+ 
+ 
 endfm
 
 mod GRAPH-RL is
