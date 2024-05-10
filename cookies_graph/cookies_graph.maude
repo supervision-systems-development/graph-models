@@ -358,7 +358,7 @@ fmod GRAPH-EQ is
   var G G' G1 G2 : Graph . --- Graphs
   var type type' type1 type2 type3 : NType . --- Node types
   var func func' func1 func2 func3 : NFunc . --- Node functions
-  var i j x y z c : Int . --- Node ids
+  var i j x y z c n : Int . --- Node ids
   var status status' : Status . --- Status of the execution
   var tuple1 tuple2 tuple3 tuple4 : Tuple . --- tuple variables
   var TList TList1 TList2 TList3 TList4 : TupleList . --- tuple list
@@ -823,12 +823,21 @@ fmod GRAPH-EQ is
   op blockActionListCookies : ActionList TupleList -> TupleList .
   eq blockActionListCookies( ( a[i] ; AList1 ) , TList ) = blockActionListCookies( AList1 , blockCookie( i , TList) ) .
   eq blockActionListCookies( nil , TList ) = TList . 
+  
+  op removeAction : Action ActionList -> ActionList .
+  eq removeAction( a[i] , ( a[n] ; AList1 ) ) = if (i == n) then removeAction(a[i] , AList1) else a[n] ; removeAction(a[i] , AList1) fi .
+  eq removeAction( a[i] , nil ) = nil .
+  
 
-  op blockBothCookiesIfParentIsXor : Action Graph TupleList -> TupleList . 
-  eq blockBothCookiesIfParentIsXor( ( a[i] ) , G , TList ) = 
-  if isXorInList( parents( a[i] , G ) , G ) then blockCookie( i , blockActionListCookies( getXorListInActionList( parents( a[i] , G ) , G ) , TList ) )
+  op blockParentAndSiblingCookiesIfParentIsXor : Action Graph TupleList -> TupleList . 
+  eq blockParentAndSiblingCookiesIfParentIsXor( ( a[i] ) , G , TList ) = 
+  if isXorInList( parents( a[i] , G ) , G ) then blockActionListCookies( removeAction( a[i] , listChildren(getXorListInActionList( parents( a[i] , G ) , G ), G ) )  , blockActionListCookies( getXorListInActionList( parents( a[i] , G ) , G ) , TList ) )
   else TList fi .
 
+  
+  
+  
+  
   
   
   --- in order to add starting and ending nodes to graphs and sequences, they will be added artificially 
