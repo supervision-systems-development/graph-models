@@ -812,7 +812,7 @@ fmod GRAPH-EQ is
 
   
   op isXorInList : ActionList Graph -> Bool .
-  eq isXorInList( ( a[i] ; AList1 ) , G ) = isXor( a[i] , G ) or isXorInList( ( a[i] ; AList1 ) , G ) .
+  eq isXorInList( ( a[i] ; AList1 ) , G ) = isXor( a[i] , G ) or isXorInList(  AList1  , G ) .
   eq isXorInList( nil , G ) = false .
   
   op getXorListInActionList : ActionList Graph -> ActionList .
