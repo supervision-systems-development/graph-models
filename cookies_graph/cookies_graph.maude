@@ -947,6 +947,9 @@ fmod GRAPH-EQ is
   eq addStartingNodeToFirstNode( (n[i]: type', func') -> (n[x]: type, func) ;; G ) = 
   (n[-5]: nseq, start) -> (n[i]: type', func') ;; ( (n[i]: type', func') -> (n[x]: type, func) ;; G ) .
   eq addStartingNodeToFirstNode( nil ) = nil . 
+  
+  op genCFG : ActionList Graph -> Config .
+  eq genCFG( AList , G ) = ( normalizeSequence( AList ) | nil | nil | nil | normalizeGraph( G ) | starting ) .
 
  
  
