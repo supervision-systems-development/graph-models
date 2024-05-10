@@ -732,7 +732,7 @@ fmod GRAPH-EQ is
   --- MAIN function to use in RULES
   ---detects loop given the first node is 0
   op detectLoop : Action Action Graph -> Bool .
-  eq detectLoop( Action1 , Action2 , G ) = BFSLoopDetect( Action1 , Action2 , (a[0]) , nil , G ) .
+  eq detectLoop( Action1 , Action2 , G ) = BFSLoopDetect( Action1 , Action2 , (a[-5]) , nil , G ) .
   eq detectLoop( nil , Action2 , G) = false .
   eq detectLoop( Action1 , nil , G) = true .
   
