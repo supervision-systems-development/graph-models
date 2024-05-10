@@ -550,6 +550,13 @@ fmod GRAPH-EQ is
     TList
     else ( ( TList & t( x & -1 ) ) )
     fi .
+   
+  op blockActionCookie : Action TupleList -> TupleList .
+  eq blockActionCookie( a[i] , TList ) = 
+  if tupleInTupleList( t( i & -1 ) , TList ) then 
+    TList
+    else ( ( TList & t( i & -1 ) ) )
+    fi .
     
   op isCookieActive : Int TupleList -> Bool .
   eq isCookieActive( x , TList ) =
@@ -796,6 +803,33 @@ fmod GRAPH-EQ is
   op isAtLeastOneXorParentChildActive : Action TupleList Graph -> Bool .
   eq isAtLeastOneXorParentChildActive( a[i] , TList1 , G ) = isAtLeastOneXorParentChildActiveHelper( parents( a[i], G ) , TList1 , G ) .
   
+  op isAtLeastOneParentBlocked : Action TupleList Graph -> Bool .
+  eq isAtLeastOneParentBlocked( a[i] , ( ( t( x & y) ) & TList1 ) , G ) =
+  if ( y == -1 ) and ( ( a[x] ) in parents( a[i] , G ) ) then true 
+  else isAtLeastOneParentBlocked( a[i] , TList1 , G ) 
+  fi .
+  eq isAtLeastOneParentBlocked( a[i] , nil , G ) = false .
+
+  
+  op isXorInList : ActionList Graph -> Bool .
+  eq isXorInList( ( a[i] ; AList1 ) , G ) = isXor( a[i] , G ) or isXorInList( ( a[i] ; AList1 ) , G ) .
+  eq isXorInList( nil , G ) = false .
+  
+  op getXorListInActionList : ActionList Graph -> ActionList .
+  eq getXorListInActionList( ( a[i] ; AList1 ) , G ) = 
+  if isXor( a[i] , G ) then ( a[i] ; getXorListInActionList( AList1 , G ) ) else getXorListInActionList( AList1 , G ) fi .
+  eq getXorListInActionList( nil , G ) = nil .
+  
+  op blockActionListCookies : ActionList TupleList -> TupleList .
+  eq blockActionListCookies( ( a[i] ; AList1 ) , TList ) = blockActionListCookies( AList1 , blockCookie( i , TList) ) .
+  eq blockActionListCookies( nil , TList ) = TList . 
+
+  op blockBothCookiesIfParentIsXor : Action Graph TupleList -> TupleList . 
+  eq blockBothCookiesIfParentIsXor( ( a[i] ) , G , TList ) = 
+  if isXorInList( parents( a[i] , G ) , G ) then blockCookie( i , blockActionListCookies( getXorListInActionList( parents( a[i] , G ) , G ) , TList ) )
+  else TList fi .
+
+  
   
   --- in order to add starting and ending nodes to graphs and sequences, they will be added artificially 
   --- reserved values for starting and ending nodes will be -5 for starting (because it resembles S) and -7 for ending (because it resembles F)
@@ -909,7 +943,7 @@ fmod GRAPH-EQ is
   eq addStartingNodeToFirstNode( (n[i]: type', func') -> (n[x]: type, func) ;; G ) = 
   (n[-5]: nseq, start) -> (n[i]: type', func') ;; ( (n[i]: type', func') -> (n[x]: type, func) ;; G ) .
   eq addStartingNodeToFirstNode( nil ) = nil . 
- 
+
  
  
 endfm
@@ -971,10 +1005,11 @@ mod GRAPH-RL is
   rl [step] :
     (a[i]) ; AList | TupleCookies | CList | EList | G | executing
     => 
-    if detectLoop( lastAction(CList) , a[i] , G ) and isCookieNotActive(i, deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) and isCookieNotBlocked(i, unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) then
+   if ( not isAtLeastOneParentBlocked( a[i] , TupleCookies, G ) ) and ( not isCookieBlocked( i , TupleCookies ) ) then
+    if detectLoop( lastAction(CList) , a[i] , G ) and isCookieNotActive(i, deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) then
      if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )  | (CList ; (a[i])) | EList | G | executing 
       else
-      if isXor((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockCookie( i , activateCookie( i ,deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) ) | (CList ; (a[i])) | EList | G | executing 
+      if isXor((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockCookie( i , activateCookie( i , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) | (CList ; (a[i])) | EList | G | executing 
         else
           if isOr((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) | ( CList ; a[i] ) | EList | G | executing
           else
@@ -989,7 +1024,7 @@ mod GRAPH-RL is
      if isCookieNotActive(i, TupleCookies) then
       if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , TupleCookies )  | (CList ; (a[i])) | EList | G | executing 
       else
-      if isXor((a[i]), G) and isCookieNotBlocked( i , TupleCookies ) then AList | blockCookie( i , activateCookie( i , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
+      if isXor((a[i]), G) then AList | blockCookie( i , activateCookie( i , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
         else
           if isOr((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | activateCookie( i , TupleCookies ) | ( CList ; a[i] ) | EList | G | executing
           else
@@ -1001,5 +1036,7 @@ mod GRAPH-RL is
         fi
       fi
       else AList | TupleCookies | CList | (EList ; (a[i])) | G | executing fi
-    fi .
+    fi
+   else AList | TupleCookies | CList | (EList ; (a[i])) | G | executing
+   fi .
 endm
