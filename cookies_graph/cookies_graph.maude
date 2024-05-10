@@ -1020,7 +1020,7 @@ mod GRAPH-RL is
         else
           if isOr((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) ) | ( CList ; a[i] ) | EList | G | executing
           else
-                if isSeq((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) ) | (CList ; (a[i])) | EList | G | executing 
+                if isSeq((a[i]), G) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) ) | (CList ; (a[i])) | EList | G | executing 
                 else
                   AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
                 fi
@@ -1035,7 +1035,7 @@ mod GRAPH-RL is
         else
           if isOr((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) ) | ( CList ; a[i] ) | EList | G | executing
           else
-                if isSeq((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
+                if isSeq((a[i]), G)  then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
                 else
                   AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
                 fi
