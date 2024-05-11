@@ -191,7 +191,6 @@ fmod SEQUENCES is
     
   op multiLoopGraph : -> Graph .
   eq multiLoopGraph =
-  	(n[-1]: nseq, start)->(n[0]: nseq, start);;
   	(n[0]: nseq, start)->(n[1]: nseq, oth);;
     (n[1]: nseq, oth)->(n[2]: nseq, oth);;
     (n[1]: nseq, oth)->(n[3]: nor, oth);;
@@ -206,8 +205,22 @@ fmod SEQUENCES is
     (n[9]: nseq, oth)->(n[6]: nor, oth);;
     (n[8]: nseq, oth)->(n[3]: nor, oth) .
     
+  op xorTestingGraph : -> Graph .
+  eq xorTestingGraph = (n[1]: nseq, start) -> (n[2]: nseq, oth);;
+    (n[2]: nseq, oth) -> (n[3]: nxor, oth);;
+    (n[3]: nxor, oth) -> (n[4]: nseq, oth);;
+    (n[3]: nxor, oth) -> (n[5]: nseq, oth);;
+    (n[5]: nseq, oth) -> (n[6]: nor, oth);;
+    (n[4]: nseq, oth) -> (n[6]: nor, oth);;
+    (n[6]: nor, oth) -> (n[7]: nseq, fin);;
+    (n[6]: nor, oth) -> (n[2]: nseq, oth) .
+    
   
   *** Action sequences for testing ***
+  
+  op xorTestingSeq1 : -> ActionList .
+  eq xorTestingSeq1 = (a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[5]) ; (a[6]) ; (a[2]) ; (a[3]) ; (a[5]) ; (a[4]) ; (a[6]) ; (a[7]) .
+  
   op seq1 : -> ActionList .
   eq seq1 = (a[0]) ; (a[1]) ; (a[2]) ; (a[11]) .
 
@@ -232,6 +245,7 @@ fmod SEQUENCES is
   
   op test64-seq : -> ActionList .
   eq test64-seq = ( a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[4] ; a[5] ; a[6] ; a[11] ) .
+  
   
 endfm
 
@@ -696,12 +710,44 @@ fmod GRAPH-EQ is
   --- current node, target node, list of children (of the current node), Graph, visited nodes
   op checkIfCorrectNode : Action Action ActionList Graph ActionList -> ActionList .
   eq checkIfCorrectNode( a[x] , a[y] , ( ( a[i] ) ; AList2 ) , G , AList1 ) = 
-  if ( ( a[i] ) in AList1 ) then ( nil ; checkIfCorrectNode( a[x] , a[y] , AList2, G , AList1 ) ) else 
-  	if ( i == y ) then ( AList1 ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) ) else
-    ( DFSSubgraphSearch( a[i] , a[y] , G , AList1 ) ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) )
+  if ( ( a[i] ) in AList1 ) --- if current node is in the list of visited nodes
+  	then ( nil ; checkIfCorrectNode( a[x] , a[y] , AList2, G , AList1 ) )  --- then skip current node
+  else 
+  	if ( i == y ) --- if target node is our current node, then 
+    	then ( AList1 ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) ) 
+        	else( DFSSubgraphSearch( a[i] , a[y] , G , AList1 ) ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) )
     fi 
   fi .
   eq checkIfCorrectNode( a[x] , a[y] , nil , G , AList1 ) = nil .
+  
+  
+  
+  ---- due to the complexity of previous implementation of the DFS subgraph search it is easier to reimplement it than to try to figure out how it works
+  ---- we have current node and the next node and we need to add all nodes between the next node and the current node. 
+  ---- we receive the next node and the current node
+  ---- the current node will be the stop node
+  ---- the next node will be the first node we receive, combined with the list of already visited nodes on this path
+  ---- when we receive the first node, we check if it is in the list of visited nodes. if it is, we terminate. 
+  ---- if it is not, we add this node to the list of alredy fivisited nodes and for each child node we do the same
+  ---- if the first node turns out to be our current node, we return all nodes in the return. 
+
+ --- current node ,  searching node , visited nodes - returns nodes
+  op DFS2 : Action Action ActionList Graph -> ActionList .
+  eq DFS2( a[i] , a[i] , AList , G) = ( a[i] ; AList ) .
+  eq DFS2( a[i] , a[n] , AList , G) = 
+  if ( a[i] in AList ) then
+  	nil
+  else
+  	---for all children of a[i]:
+    	----append DFS2( a[child] , a[n] , ( a[i] ; ( a[x] ; AList ) ) , G)
+  	forAllChildren( children(a[i], G) , a[n] , ( a[i] ; AList ) , G )
+  fi .
+        
+  ---- children , target node , visited nodes , graph 
+  op forAllChildren : ActionList Action ActionList Graph -> ActionList .
+  eq forAllChildren( ( a[x] ; AList ) , a[n] , AList1 , G) = ( ( DFS2( a[x] , a[n] , AList1 , G) ) ; ( forAllChildren( AList , a[n] , AList1 , G) ) ) .
+  eq forAllChildren( nil , a[n] , AList1 , G ) = nil .
+  
 
   op removeDuplicatesHelper : ActionList ActionList -> ActionList .
   eq removeDuplicatesHelper((Action1 ; AList1) , AList2) = 
@@ -713,12 +759,16 @@ fmod GRAPH-EQ is
 
   --- gets all paths between first and second argument in graph, including first argument but excluding last argument
   op getAllPathsBetween : Action Action Graph -> ActionList .
-  eq getAllPathsBetween(a[x] , a[y] , G) = removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil )) .
+  eq getAllPathsBetween(a[x] , a[y] , G) = removeDuplicates(DFSSubgraphSearch( a[x] , a[y] ,  nil , G )) .
   
   
-  ---MAIN function for use in RULES
+  ---- OLD IMPLEMENTATION ---MAIN function for use in RULES 
   op getAllPathsForLoopDeactivation : Action Action Graph -> ActionList .
-  eq getAllPathsForLoopDeactivation(a[x] , a[y] , G) = ( removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil ))  ; a[y] ) .
+  ----eq getAllPathsForLoopDeactivation(a[x] , a[y] , G) = ( removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil ))  ; a[y] ) .
+  eq getAllPathsForLoopDeactivation( a[x] , a[y] , G) = removeDuplicates(  DFS2( a[y] , a[x] , nil, G )  ) .
+  
+  op allPaths : Action Action Graph -> ActionList .
+  eq allPaths( a[x] , a[y] , G ) = DFS2( a[x] , a[y] , nil , G ) .
   
   
   --- check if it is a loop while transitioning from first argument to second
@@ -951,8 +1001,7 @@ fmod GRAPH-EQ is
   op genCFG : ActionList Graph -> Config .
   eq genCFG( AList , G ) = ( normalizeSequence( AList ) | nil | nil | nil | normalizeGraph( G ) | starting ) .
 
- 
- 
+
 endfm
 
 mod GRAPH-RL is
@@ -1012,15 +1061,15 @@ mod GRAPH-RL is
   rl [step] :
     (a[i]) ; AList | TupleCookies | CList | EList | G | executing
     => 
-   if ( not isAtLeastOneParentBlocked( a[i] , TupleCookies, G ) ) and ( not isCookieBlocked( i , TupleCookies ) ) then
+   if not ( ( isAtLeastOneParentBlocked( a[i] , TupleCookies, G ) ) and ( isCookieBlocked( i , TupleCookies ) ) ) then
     if detectLoop( lastAction(CList) , a[i] , G ) and isCookieNotActive(i, deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) then
-     if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) )  | (CList ; (a[i])) | EList | G | executing 
+     if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )   | (CList ; (a[i])) | EList | G | executing 
       else
-      if isXor((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) | (CList ; (a[i])) | EList | G | executing 
+      if isXor((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )  | (CList ; (a[i])) | EList | G | executing 
         else
-          if isOr((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) ) | ( CList ; a[i] ) | EList | G | executing
+          if isOr((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )  | ( CList ; a[i] ) | EList | G | executing
           else
-                if isSeq((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , unblockActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) ) ) | (CList ; (a[i])) | EList | G | executing 
+                if isSeq((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )  | (CList ; (a[i])) | EList | G | executing 
                 else
                   AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
                 fi
