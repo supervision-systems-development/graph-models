@@ -94,14 +94,10 @@ fmod GRAPH is
   op nil : -> TupleList [ctor] .
   op _&_ : TupleList TupleList -> TupleList [assoc id: nil] .
   
- 
-  op first : Tuple -> Int .
-  eq first(t( x & y )) = x .
-  
-  op firstAction : ActionList -> Action .
+  op firstAction : ActionList -> Action .  --- this one is being used 
   eq firstAction( ( a[i] ; AList1 ) ) = a[i] .
   
-  op firstActionInt : ActionList -> Int .
+  op firstActionInt : ActionList -> Int .  --- this one is being used too
   eq firstActionInt( ( a[i] ; AList1 ) ) = i .
   
 endfm
@@ -1052,12 +1048,6 @@ mod GRAPH-RL is
       nil | TupleCookies | CList | EList | G | incorrect
     fi .
     
-  rl [extracasewithend]:
-    nil | TupleCookies | CList | EList | G | starting
-    =>
-    nil | TupleCookies | CList | EList | G | incorrect .
-
-    
   rl [step] :
     (a[i]) ; AList | TupleCookies | CList | EList | G | executing
     => 
@@ -1065,30 +1055,18 @@ mod GRAPH-RL is
     if detectLoop( lastAction(CList) , a[i] , G ) and isCookieNotActive(i, deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) then
      if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )   | (CList ; (a[i])) | EList | G | executing 
       else
-      if isXor((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )  | (CList ; (a[i])) | EList | G | executing 
+      if atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )  | (CList ; (a[i])) | EList | G | executing 
         else
-          if isOr((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )  | ( CList ; a[i] ) | EList | G | executing
-          else
-                if isSeq((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleCookies ) ) )  | (CList ; (a[i])) | EList | G | executing 
-                else
                   AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
-                fi
-              fi
         fi
       fi 
     else
      if isCookieNotActive(i, TupleCookies) then
       if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) )  | (CList ; (a[i])) | EList | G | executing 
       else
-      if isXor((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) )  | (CList ; (a[i])) | EList | G | executing 
+      if atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) )  | (CList ; (a[i])) | EList | G | executing 
         else
-          if isOr((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) ) | ( CList ; a[i] ) | EList | G | executing
-          else
-                if isSeq((a[i]), G) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) ) | (CList ; (a[i])) | EList | G | executing 
-                else
-                  AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
-                fi
-              fi
+        	AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
         fi
       fi
       else AList | TupleCookies | CList | (EList ; (a[i])) | G | executing fi
