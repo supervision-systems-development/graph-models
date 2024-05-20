@@ -1,23 +1,19 @@
-# graph-models
+# Automatic Student Supervisor System
 
-# Sorts:
+## Sorts:
 
-  Graph:       a set of arcs
+  Graph: a set of arcs
   
-  Arc:         two nodes connected with a directional vertex
+  Arc: two nodes connected with a directional vertex
   
-  Node:        a graph node with a unique id with a function (start, fin, oth) and a type (nseq, nand, nor, nxor)
+  Node: a graph node with a unique id with a function (start, fin, oth) and a type (nseq, nand, nor, nxor)
 
-  Action:      an action that indicates the unique id of a node, but does not indicate its function or type
+  Action: an action that indicates the unique id of a node, but does not indicate its function or type
 
-  ActionList:  a list of actions
-
-  Tuple:       a tuple with two Int values, used to represent cookies
-
-  TupleList:   a list of tuples
+  ActionList: a list of actions
 
 
-# Functions:
+## Functions:
 
   first : Tuple -> Int
   
@@ -39,9 +35,8 @@
 
   Used to check the type of the node by action – essentially retrieves the node type from the graph by ID using the action ID, which matches the node ID.
 
-  isStartingNode : Action Graph -> Bool
-
-  Used to check whether the function of the element at the start of the sequence is "starting"
+  <b>isStartingNode</b> : Action Graph -> Bool
+  <ul><li>Indicates if the first action in the action list corresponds to the starting node</li></ul>
 
   checkFunc : Action Graph -> String
 
@@ -100,8 +95,10 @@
   Returns a list of all children from a lsit of actions representing a list of nodes. Used for the graph traversal.
 
   _in_ : Action ActionList -> Bool
+  Checks if an action is present in the list of actions. 
 
-  Checks if an action is in an actionlist. 
+  _in_ : Indicator IndicatorList -> Bool .
+  Checks if an indicator is present in the list of indicators. 
 
   tupleInTupleList : Tuple TupleList -> Bool
 
@@ -111,9 +108,9 @@
 
   Removes a tuple from a list of tuples. 
 
-  activateCookie : Int TupleList -> TupleList
-
-  Activates a cookies, creates a tuple representing that cookie node ID and adds it to the existing list. 
+  activateIndicator : Int IndicatorList -> IndicatorList .
+  <ul><li>Given an id and the list of indicators, activates an indicator and updates the list. If the indicator was already active, it remains active.</li></ul>
+  
 
   isCookieActive : Int TupleList -> Bool
 
