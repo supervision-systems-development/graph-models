@@ -87,11 +87,11 @@ fmod GRAPH is
   
   sort Tuple .
   subsort Tuple < TupleList .
-  op t(_&_) : Int Int -> Tuple [ctor] .
+  op t(_,_) : Int Int -> Tuple [ctor] .
 
   sort TupleList .
   op nil : -> TupleList [ctor] .
-  op _&_ : TupleList TupleList -> TupleList [assoc id: nil] .
+  op _,_ : TupleList TupleList -> TupleList [assoc id: nil] .
   
   op firstAction : ActionList -> Action .  --- this one is being used 
   eq firstAction( ( a[i] ; AList1 ) ) = a[i] .
@@ -179,6 +179,7 @@ fmod SEQUENCES is
     
   op smallLoopGraph : -> Graph .
   eq smallLoopGraph = 
+    (n[-5]: nseq) -> (n[0]: nseq);;
     (n[0]: nseq)->(n[1]: nor);;
     (n[1]: nor)->(n[2]: nseq);;
     (n[2]: nseq)->(n[1]: nor);;
@@ -214,7 +215,7 @@ fmod SEQUENCES is
   *** Action sequences for testing ***
   
   op xorTestingSeq1 : -> ActionList .
-  eq xorTestingSeq1 = (a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[5]) ; (a[6]) ; (a[2]) ; (a[3]) ; (a[5]) ; (a[4]) ; (a[6]) ; (a[7]) .
+  eq xorTestingSeq1 =  (a[-5]) ;(a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[5]) ; (a[6]) ; (a[2]) ; (a[3]) ; (a[5]) ; (a[4]) ; (a[6]) ; (a[7]) .
   
   op seq1 : -> ActionList .
   eq seq1 = (a[0]) ; (a[1]) ; (a[2]) ; (a[11]) .
@@ -232,10 +233,10 @@ fmod SEQUENCES is
   eq seqSimpleLoop = (a[-1] ; a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[1] ; a[2] ; a[5] ; a[6] ; a[4] ; a[5] ; a[2] ; a[3] ; a[1] ; a[3] ; a[4] ; a[5] ; a[6] ; a[11]) .
 
   op smallLoopSeq : -> ActionList .
-  eq smallLoopSeq = (a[0] ; a[1] ; a[2] ; a[1] ; a[2] ; a[11]) .
+  eq smallLoopSeq = ( a[-5] ; a[0] ; a[1] ; a[2] ; a[1] ; a[2] ; a[11]) .
   
   op multiLoopSeq : -> ActionList .
-  eq multiLoopSeq = ( a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[8] ; a[3] ; a[4] ; a[9] ; a[4] ; a[5] ; a[6] ; a[8] ; a[9] ; a[6] ; a[11] ) .
+  eq multiLoopSeq = ( a[-5] ; a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[8] ; a[3] ; a[4] ; a[9] ; a[4] ; a[5] ; a[6] ; a[8] ; a[9] ; a[6] ; a[11] ) .
   
   
   op test64-seq : -> ActionList .
@@ -349,7 +350,7 @@ fmod CONFIG is
     
 
   op test-tuple-list : -> TupleList .
-  eq test-tuple-list = ( t( 2 & 1 ) & t( 4 & 1 ) & t( 3 & 1 ) & t( 1 & 1 ) & t( 5 & 1 ) & t( 6 & 1 ) & t( 7 & 1 ) & t( 8 & 1 ) & t( 9 & 1 ) ) .
+  eq test-tuple-list = ( t( 2 , 1 ) , t( 4 , 1 ) , t( 3 , 1 ) , t( 1 , 1 ) , t( 5 , 1 ) , t( 6 , 1 ) , t( 7 , 1 ) , t( 8 , 1 ) , t( 9 , 1 ) ) .
 
 
 endfm
@@ -532,15 +533,15 @@ fmod GRAPH-EQ is
   eq (a[i]) in AList1 = false [owise] .
   
   op tupleInTupleList : Tuple TupleList -> Bool .
-  eq tupleInTupleList( ( t( x & y ) ) , ( t( z & i) & TList1 ) ) = 
+  eq tupleInTupleList( ( t( x , y ) ) , ( t( z , i) , TList1 ) ) = 
   if ( x == z ) and ( y == i ) then true
-  else tupleInTupleList( ( t( x & y ) ) , TList1)
+  else tupleInTupleList( ( t( x , y ) ) , TList1)
   fi .
   eq tupleInTupleList(tuple2, TList2) = false [owise] .
 
 
   op removeTupleFromTupleList : Tuple TupleList -> TupleList .
-  eq removeTupleFromTupleList( tuple1 , ( TList1 & tuple1 & TList2 ) ) = ( TList1 & TList2 ) .
+  eq removeTupleFromTupleList( tuple1 , ( TList1 , tuple1 , TList2 ) ) = ( TList1 , TList2 ) .
   
   ---op activateCookie : Int TupleList -> TupleList .
   ---eq activateCookie( x , TList ) = activateCookieTuple
@@ -548,34 +549,34 @@ fmod GRAPH-EQ is
   --- activates cookie if not already active
   op activateCookie : Int TupleList -> TupleList .
   eq activateCookie( x , TList ) = 
-  if tupleInTupleList( t( x & 1 ) , TList ) then 
+  if tupleInTupleList( t( x , 1 ) , TList ) then 
     TList
-    else ( ( TList & t( x & 1 ) ) )
+    else ( ( TList , t( x , 1 ) ) )
     fi .
     
   op blockCookie : Int TupleList -> TupleList .
   eq blockCookie( x , TList ) = 
-  if tupleInTupleList( t( x & -1 ) , TList ) then 
+  if tupleInTupleList( t( x , -1 ) , TList ) then 
     TList
-    else ( ( TList & t( x & -1 ) ) )
+    else ( ( TList , t( x , -1 ) ) )
     fi .
    
   op blockActionCookie : Action TupleList -> TupleList .
   eq blockActionCookie( a[i] , TList ) = 
-  if tupleInTupleList( t( i & -1 ) , TList ) then 
+  if tupleInTupleList( t( i , -1 ) , TList ) then 
     TList
-    else ( ( TList & t( i & -1 ) ) )
+    else ( ( TList , t( i , -1 ) ) )
     fi .
     
   op isCookieActive : Int TupleList -> Bool .
   eq isCookieActive( x , TList ) =
-  if tupleInTupleList ( t( x & 1 ) , TList ) then true
+  if tupleInTupleList ( t( x , 1 ) , TList ) then true
   else false
   fi .
   
   op isCookieBlocked : Int TupleList -> Bool .
   eq isCookieBlocked( x , TList ) =
-  if tupleInTupleList ( t( x & -1 ) , TList ) then true
+  if tupleInTupleList ( t( x , -1 ) , TList ) then true
   else false
   fi .
   
@@ -583,25 +584,25 @@ fmod GRAPH-EQ is
   
   op deactivateCookie : Int TupleList -> TupleList .
   eq deactivateCookie( x , TList ) = 
-  if tupleInTupleList( ( t( x & 1 ) ) , TList ) then removeTupleFromTupleList( t( x & 1 )  , TList )
+  if tupleInTupleList( ( t( x , 1 ) ) , TList ) then removeTupleFromTupleList( t( x , 1 )  , TList )
   else TList 
   fi .
   
   
   op unblockCookie : Int TupleList -> TupleList .
   eq unblockCookie( x , TList ) = 
-  if tupleInTupleList( ( t( x & -1 ) ) , TList ) then removeTupleFromTupleList( t( x & -1 )  , TList )
+  if tupleInTupleList( ( t( x , -1 ) ) , TList ) then removeTupleFromTupleList( t( x , -1 )  , TList )
   else TList 
   fi .
   
   
   --- deactivate cookies in the first list in the scond list
   op deactivateCookieList : TupleList TupleList -> TupleList .
-  eq deactivateCookieList( ( ( t( x & 1) & ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
+  eq deactivateCookieList( ( ( t( x , 1) , ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
   eq deactivateCookieList( nil , TList ) = TList .
   
   op unblockCookieList : TupleList TupleList -> TupleList .
-  eq unblockCookieList( ( ( t( x & -1) & ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
+  eq unblockCookieList( ( ( t( x , -1) , ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
   eq unblockCookieList( nil , TList ) = TList .
   
   --- MAIN function to use with rules
@@ -643,11 +644,11 @@ fmod GRAPH-EQ is
   eq actionListSubtraction(nil, AList2) = nil .
 
   --- intersection of two tuple lists 
-  --- tupleListIntersection(( t( 2 & 2 ) & t( 3 & 4 ) ), ( t( 1 & 2 ) & t( 3 & 4 ) ))
+  --- tupleListIntersection(( t( 2 , 2 ) , t( 3 , 4 ) ), ( t( 1 , 2 ) , t( 3 , 4 ) ))
   op tupleListIntersection : TupleList TupleList -> TupleList .
-  eq tupleListIntersection( ( tuple1 & TList1 ) , TList2 ) = 
+  eq tupleListIntersection( ( tuple1 , TList1 ) , TList2 ) = 
   if ( tupleInTupleList( tuple1 , TList2 ) )
-  then ( tuple1 & tupleListIntersection( TList1 , TList2 ) )
+  then ( tuple1 , tupleListIntersection( TList1 , TList2 ) )
   else tupleListIntersection( TList1 , TList2 )
   fi .
   eq tupleListIntersection(nil, TList2) = nil .
@@ -656,16 +657,16 @@ fmod GRAPH-EQ is
   
   
   --- Tuple 1 - Tuple 2 - subtract second tuple from first tuple
-  --- tupleSubtraction(( t( 1 & 2 ) & t( 3 & 4 ) ), ( t( 1 & 2 ) & t( 3 & 4 ) ))
-  --- tupleSubtraction(( t( 1 & 2 ) & t( 3 & 4 ) ), ( t( 3 & 4 ) ))
+  --- tupleSubtraction(( t( 1 , 2 ) , t( 3 , 4 ) ), ( t( 1 , 2 ) , t( 3 , 4 ) ))
+  --- tupleSubtraction(( t( 1 , 2 ) , t( 3 , 4 ) ), ( t( 3 , 4 ) ))
   op tupleSubtraction : TupleList TupleList -> TupleList .
-  eq tupleSubtraction( ( tuple1 & TList1 ) , TList3 ) =
+  eq tupleSubtraction( ( tuple1 , TList1 ) , TList3 ) =
   if 
   ( tupleInTupleList( tuple1, TList3 ) )
   then
   ( tupleSubtraction( TList1 , TList3 ) )
   else
-  ( tuple1 & tupleSubtraction( TList1 , TList3 ) )
+  ( tuple1 , tupleSubtraction( TList1 , TList3 ) )
   fi . 
   eq tupleSubtraction( nil , TList3 ) = nil .
   
@@ -847,13 +848,13 @@ fmod GRAPH-EQ is
   
   op isCookieNotActive : Int TupleList -> Bool .
   eq isCookieNotActive( x , TList ) =
-  if tupleInTupleList ( t( x & 1 ) , TList ) then false
+  if tupleInTupleList ( t( x , 1 ) , TList ) then false
   else true
   fi .
   
   op isCookieNotBlocked : Int TupleList -> Bool .
   eq isCookieNotBlocked( x , TList ) =
-  if tupleInTupleList ( t( x & -1 ) , TList ) then false
+  if tupleInTupleList ( t( x , -1 ) , TList ) then false
   else true
   fi .
  
@@ -909,7 +910,7 @@ fmod GRAPH-EQ is
   eq isAtLeastOneXorParentChildActive( a[i] , TList1 , G ) = isAtLeastOneXorParentChildActiveHelper( parents( a[i], G ) , TList1 , G ) .
   
   op isAtLeastOneParentBlocked : Action TupleList Graph -> Bool .
-  eq isAtLeastOneParentBlocked( a[i] , ( ( t( x & y) ) & TList1 ) , G ) =
+  eq isAtLeastOneParentBlocked( a[i] , ( ( t( x , y) ) , TList1 ) , G ) =
   if ( y == -1 ) and ( ( a[x] ) in parents( a[i] , G ) ) then true 
   else isAtLeastOneParentBlocked( a[i] , TList1 , G ) 
   fi .
