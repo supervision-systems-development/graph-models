@@ -174,6 +174,16 @@ fmod SEQUENCES is
     (n[9]: nseq) -> (n[6]: nor) ;;
     (n[8]: nseq) -> (n[3]: nor) .
   
+  ---
+  op andGraph : -> Graph .
+  eq andGraph =
+    (n[-5]: nseq) -> (n[1]: nseq) ;;
+    (n[1]: nseq) -> (n[2]: nseq) ;;
+    (n[1]: nseq) -> (n[3]: nseq) ;;
+    (n[2]: nseq) -> (n[4]: nand) ;;
+    (n[3]: nseq) -> (n[4]: nand) ;;
+    (n[4]: nand) -> (n[-7]: nseq) .
+
   *** Action sequences for testing ***
   op seq1 : -> ActionList .
   eq seq1 = (a[-5]) ; (a[1]) ; (a[2]) ; (a[-7]) .
@@ -186,6 +196,13 @@ fmod SEQUENCES is
 
   op seq4 : -> ActionList .
   eq seq4 = (a[-5]) ; (a[1]) ; (a[2]) ; (a[4]) ; (a[-7]) .
+
+  ***
+  op allInd : -> IndicatorList .
+  eq allInd = (i[-5]: 1) ; (i[1]: 1) ; (i[2]: 1) ; (i[3]: 1) .
+
+  op someInd : -> IndicatorList .
+  eq someInd = (i[-5]: 1) ; (i[1]: 1) ; (i[2]: 1) .
   
 endfm
 
@@ -305,20 +322,20 @@ fmod GRAPH-EQ is
   --- To obtain the list of direct parents of a node in a graph. -- returns parents
   op parents : Action Graph -> ActionList .
   eq parents((a[x]), (n[y]: type') -> (n[x]: type) ;; G) =
-    (a[x]) ; parents((a[x]), G) .
+    (a[y]) ; parents((a[x]), G) .
   eq parents((a[x]), G) = nil [owise] .
 
   --- Check if all actions are in the target list of active actions
   op allIndicatorsActive : ActionList IndicatorList -> Bool .
   eq allIndicatorsActive(nil, IList) = true .
   eq allIndicatorsActive(((a[x]) ; AList), IList) =
-    isActive(getIndicator((a[x]), IList)) and (getIndicator((a[x]), IList) in IList) and allIndicatorsActive(AList, IList) .
+    (not getIndicator((a[x]), IList) == (i[x]: 0)) and (getIndicator((a[x]), IList) in IList) and allIndicatorsActive(AList, IList) .
   
   --- Check if at least one of the actions is in the target list of active actions
   op someIndicatorsActive : ActionList IndicatorList -> Bool .
   eq someIndicatorsActive(nil, IList) = false .
   eq someIndicatorsActive(((a[x]) ; AList), IList) =
-    isActive(getIndicator((a[x]), IList)) and (getIndicator((a[x]), IList) in IList) or someIndicatorsActive(AList, IList) .
+    (not getIndicator((a[x]), IList) == (i[x]: 0)) and (getIndicator((a[x]), IList) in IList) or someIndicatorsActive(AList, IList) .
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Action Graph -> ActionList .
@@ -333,6 +350,7 @@ fmod GRAPH-EQ is
   ---
   op getIndicator : Action IndicatorList -> Indicator .
   eq getIndicator((a[x]), IList ; (i[x]: y) ; IList') = (i[x]: y) .
+  eq getIndicator((a[x]), IList) = (i[x]: 0) [owise] .
 
   ---
   op isActive : Indicator -> Bool .
@@ -404,7 +422,12 @@ mod GRAPH-RL is
   
 endm
 
----red getIndicator((a[-5]), (i[0, 1]) ; (i[1, 1]) ; (i[2, 0])) .
----red allIndicatorsActive(((a[1]) ; (a[2])), (i[0, 1]) ; (i[1, 1]) ; (i[2, 1]) ; (i[3, 0]) ; (i[4, 0])) .
----red someIndicatorsActive(((a[-5]) ; (a[1])), ((i[0, 0]) ; (i[1, 0]) ; (i[2, 0]))) .
-
+*** Testing functions ***
+---red checkType((a[4]), andGraph) .
+---red checkType((a[4]), andGraph) == "and" .
+---red not (checkType((a[3]), andGraph) == "and") .
+---red getIndicator((a[2]) ; (a[3]), allInd) .
+---red not (getIndicator((a[3]), someInd) == (i[3]: 0)) .
+---red parents((a[4]), andGraph) .
+---red allIndicatorsActive((a[3]), someInd) .
+---red activeParents((a[4]), someInd, andGraph) .
