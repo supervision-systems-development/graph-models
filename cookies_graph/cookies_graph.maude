@@ -412,8 +412,8 @@ fmod GRAPH-EQ is
   eq isStartingNode( Action1, G) = false [owise] .
     
   --- get action function
-  op checkFunc : Action Graph -> String .
-  eq checkFunc((a(i)), (n[x]: type') -> (n[i]: type) ;; G) =
+  op checkFunc : Action -> String .
+  eq checkFunc((a(i))) =
     if i == (-5)
     then "start"
     else 
@@ -1107,7 +1107,7 @@ mod GRAPH-RL is
   rl [end]:  
     nil | TupleCookies | CList | EList | G | executing
     =>
-    if checkFunc(lastAction(CList), G) == "fin"
+    if checkFunc(lastAction(CList)) == "fin"
     then
       nil | TupleCookies | CList | EList | G | correct 
     else 
