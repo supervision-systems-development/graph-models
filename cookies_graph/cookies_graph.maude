@@ -403,13 +403,13 @@ fmod GRAPH-EQ is
       fi
     fi .
     
-  op isStartingNode : Action Graph -> Bool . 
-  eq isStartingNode( a(i) , G1 ;; (n[i]: type') -> (n[x]: type) ;; G2  ) = 
+  op isStartingNode : Action -> Bool . 
+  eq isStartingNode( a(i) ) = 
   	if i == (-5)
     then true
     else false
     fi .
-  eq isStartingNode( Action1, G) = false [owise] .
+  eq isStartingNode( Action1 ) = false [owise] .
     
   --- get action function
   op checkFunc : Action -> String .
@@ -1096,7 +1096,7 @@ mod GRAPH-RL is
   --- the starting node DOES NOT CHECK node function
   rl [start]: 
     a(i) ; AList | TupleCookies | CList | EList | G | starting  
-    => if isStartingNode( a(i) , G ) then
+    => if isStartingNode( a(i) ) then
     AList | activateCookie( i , TupleCookies) | ( CList ; (a(i)) ) | EList | G | executing
 	else 
     AList | TupleCookies | CList | ( EList ; (a(i)) ) | G | starting 
