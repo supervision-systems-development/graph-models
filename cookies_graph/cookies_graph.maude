@@ -179,10 +179,11 @@ fmod SEQUENCES is
     
   op smallLoopGraph : -> Graph .
   eq smallLoopGraph = 
-    (n[-5]: nseq) -> (n[0]: nseq);;
-    (n[0]: nseq)->(n[1]: nor);;
+    (n[-5]: nseq) -> (n[0]: nxor);;
+	(n[0]: nxor) -> (n[11]: nseq);;
+    (n[0]: nxor)->(n[1]: nor);;
     (n[1]: nor)->(n[2]: nseq);;
-    (n[2]: nseq)->(n[1]: nor);;
+    (n[2]: nseq)->(n[0]: nxor);;
     (n[2]: nseq)->(n[11]: nseq) .
     
   op multiLoopGraph : -> Graph .
@@ -233,7 +234,7 @@ fmod SEQUENCES is
   eq seqSimpleLoop = (a(-1) ; a(0) ; a(1) ; a(2) ; a(4) ; a(5) ; a(1) ; a(2) ; a(5) ; a(6) ; a(4) ; a(5) ; a(2) ; a(3) ; a(1) ; a(3) ; a(4) ; a(5) ; a(6) ; a(11)) .
 
   op smallLoopSeq : -> ActionList .
-  eq smallLoopSeq = ( a(-5) ; a(0) ; a(1) ; a(2) ; a(1) ; a(2) ; a(11)) .
+  eq smallLoopSeq = ( a(-5) ; a(0) ; a(1) ; a(2) ; a(0) ; a(1) ; a(2) ; a(11)) .
   
   op multiLoopSeq : -> ActionList .
   eq multiLoopSeq = ( a(-5) ; a(0) ; a(1) ; a(2) ; a(4) ; a(5) ; a(6) ; a(8) ; a(3) ; a(4) ; a(9) ; a(4) ; a(5) ; a(6) ; a(8) ; a(9) ; a(6) ; a(11) ) .
@@ -582,10 +583,18 @@ fmod GRAPH-EQ is
   
   
   
-  op deactivateCookie : Int TupleList -> TupleList .
-  eq deactivateCookie( x , TList ) = 
-  if tupleInTupleList( ( t( x , 1 ) ) , TList ) then removeTupleFromTupleList( t( x , 1 )  , TList )
-  else TList 
+  op resetCookie : Int TupleList -> TupleList .
+  eq resetCookie( x , TList ) = 
+  if tupleInTupleList( ( t( x , 1 ) ) , TList ) then 
+  	if  tupleInTupleList( ( t( x , -1 ) ) , TList ) then removeTupleFromTupleList( t( x , 1 )  , removeTupleFromTupleList( t( x , -1 )  , TList ) )
+  		else 
+        	removeTupleFromTupleList( t( x , 1 )  , TList)
+    fi
+  else
+  	if  tupleInTupleList( ( t( x , -1 ) ) , TList ) then removeTupleFromTupleList( t( x , -1 )  , TList )
+  		else 
+        	TList
+    fi
   fi .
   
   
@@ -597,19 +606,20 @@ fmod GRAPH-EQ is
   
   
   --- deactivate cookies in the first list in the scond list
-  op deactivateCookieList : TupleList TupleList -> TupleList .
-  eq deactivateCookieList( ( ( t( x , 1) , ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
-  eq deactivateCookieList( nil , TList ) = TList .
+  op resetCookieList : TupleList TupleList -> TupleList .
+  eq resetCookieList( ( ( t( x , 1) , ( TList1 ) ) ) , ( TList ) ) = resetCookieList( TList1 , resetCookie( x , TList ) ) . 
+  eq resetCookieList( ( ( t( x , -1) , ( TList1 ) ) ) , ( TList ) ) = resetCookieList( TList1 , unblockCookie( x , TList ) ) . 
+  eq resetCookieList( nil , TList ) = TList .
   
   op unblockCookieList : TupleList TupleList -> TupleList .
-  eq unblockCookieList( ( ( t( x , -1) , ( TList1 ) ) ) , ( TList ) ) = deactivateCookieList( TList1 , deactivateCookie( x , TList ) ) . 
+  eq unblockCookieList( ( ( t( x , -1) , ( TList1 ) ) ) , ( TList ) ) = resetCookieList( TList1 , resetCookie( x , TList ) ) . 
   eq unblockCookieList( nil , TList ) = TList .
   
   --- MAIN function to use with rules
   ---seems to work, deactivates ACTION LIST from COOKIE LIST and returns COOKIE LIST
-  op deactivateActionCookies : ActionList TupleList -> TupleList .
-  eq deactivateActionCookies( ( a(x) ; AList1 ) , TList ) = deactivateActionCookies(AList1 , deactivateCookie(x, TList)) .
-  eq deactivateActionCookies( nil , TList ) = TList .
+  op resetActionCookies : ActionList TupleList -> TupleList .
+  eq resetActionCookies( ( a(x) ; AList1 ) , TList ) = resetActionCookies(AList1 , resetCookie(x, TList)) .
+  eq resetActionCookies( nil , TList ) = TList .
   
   
   --- MAIN function to use with rules
@@ -762,13 +772,13 @@ fmod GRAPH-EQ is
   if ( a(i) in AList ) then
   	nil
   else
-  	if ( isCookieBlocked( i , TList1 ) and isAtLeastOneParentBlocked( a(i) , TList1 , G ) ) then
-    	nil
-    else
+ --- 	if ( isCookieBlocked( i , TList1 ) and isAtLeastOneParentBlocked( a(i) , TList1 , G ) ) then
+ ---   	nil
+ ---   else
   	---for all children of a(i):
     	----append DFS2( a[child] , a(n) , ( a(i) ; ( a(x) ; AList ) ) , G)
   		forAllChildren3( children(a(i), G) , a(n) , ( a(i) ; AList ) , G , TList1 )
-    fi
+ ---   fi
   fi .
         
   ---- children , target node , visited nodes , graph 
@@ -780,8 +790,8 @@ fmod GRAPH-EQ is
   ------
   --- MAIN function to use in rule - detects a subgraph from Argument 1 to Arugument 2 that is not blocked, if it exists - TRUE, it it does not exist - FALSE
   --- is there a not blocked subgraph from Argument 1 to Argument 2 in Argumnent 3 with TupleList4
-  op detectNotBlockedLoop : Action Action Graph TupleList -> Bool .
-  eq detectNotBlockedLoop( Action1 , Action2 , G , TList1 ) =
+  op enteringLoop : Action Action Graph TupleList -> Bool .
+  eq enteringLoop( Action1 , Action2 , G , TList1 ) =
   if ( DFS3( Action1 , Action2 , nil , G , TList1 ) == nil )
   	then false
   else 
@@ -790,8 +800,8 @@ fmod GRAPH-EQ is
     else false
     fi
   fi .
-  eq detectNotBlockedLoop( nil , Action2 , G , TList1 ) = false .
-  eq detectNotBlockedLoop( Action1 , nil , G , TList2 ) = true .
+  eq enteringLoop( nil , Action2 , G , TList1 ) = false .
+  eq enteringLoop( Action1 , nil , G , TList2 ) = true .
   
   ---- get all actions for deactivating a loop in the current rule (arguments already switched) 
   --- if the edge exists
@@ -827,20 +837,7 @@ fmod GRAPH-EQ is
   eq allPaths( a(x) , a(y) , G ) = DFS2( a(x) , a(y) , nil , G ) .
   
   
-  --- check if it is a loop while transitioning from first argument to second
-  op loopFilter : Action Action Graph TupleList -> TupleList .
-  eq loopFilter(Action1 , Action2 , G , TList1) =
-  if detectLoop(Action1, Action2, G) then 
-  deactivateActionCookies( getAllPathsForLoopDeactivation( Action2 , Action1 , G) , TList1 ) 
-  else TList1
-  fi .
 
-  --- MAIN function to use in RULES
-  ---detects loop given the first node is 0
-  op detectLoop : Action Action Graph -> Bool .
-  eq detectLoop( Action1 , Action2 , G ) = BFSLoopDetect( Action1 , Action2 , (a(-5)) , nil , G ) .
-  eq detectLoop( nil , Action2 , G) = false .
-  eq detectLoop( Action1 , nil , G) = true .
   
   op lastAction : ActionList -> Action .
   eq lastAction( ( AList1 ; Action1 ) ) = Action1 .
@@ -1118,10 +1115,10 @@ mod GRAPH-RL is
     => 
    if not ( ( isAtLeastOneParentBlocked( a(i) , TupleCookies, G ) ) and ( isCookieBlocked( i , TupleCookies ) ) ) then
      if isCookieActive(i, TupleCookies) then
-       if detectNotBlockedLoop( lastAction(CList) , a(i) , G , TupleCookies ) and isCookieNotActive(i, deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) then
-     		if isAnd((a(i)), G) and allParentCookiesActive( a(i) , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )   | (CList ; (a(i))) | EList | G | executing 
+       if enteringLoop( lastAction(CList) , a(i) , G , TupleCookies ) and isCookieNotActive(i, resetActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) then
+     		if isAnd((a(i)), G) and allParentCookiesActive( a(i) , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , resetActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )   | (CList ; (a(i))) | EList | G | executing 
       		else
-      			if ( isNotAnd( a(i) , G ) and atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )  | (CList ; (a(i))) | EList | G | executing 
+      			if ( isNotAnd( a(i) , G ) and atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , resetActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )  | (CList ; (a(i))) | EList | G | executing 
         		else
             		AList | TupleCookies | CList | (EList ; (a(i))) | G | executing 
         		fi
@@ -1143,3 +1140,5 @@ mod GRAPH-RL is
    else AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
    fi .
 endm
+
+search simpleLoopTest =>* InputActionList | CookieT | CorrectActionList | IncorrectActionList | G | Status .                             
