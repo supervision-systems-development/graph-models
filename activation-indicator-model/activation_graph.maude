@@ -6,14 +6,6 @@ fmod NTYPE is
 
 endfm
 
-*** Definition of Node function ***
-fmod NFUNC is
-
-  sort NFunc .
-  ops start fin oth : -> NFunc [ctor] .
-
-endfm
-
 *** Definition of execution status ***
 fmod STATUS is
 
@@ -28,7 +20,6 @@ fmod GRAPH is
   pr INT .
   pr STRING .
   pr NTYPE .
-  pr NFUNC .
   pr STATUS .
 
   --- Definition of a Graph
@@ -39,7 +30,7 @@ fmod GRAPH is
   --- Definition of Nodes
   sort Node .
   ---subsort Node < Graph .
-  op (n[_]:_,_) : Int NType NFunc -> Node [ctor prec 30] . --- Definition of Node. Has Id, Type and Function
+  op (n[_]:_) : Int NType -> Node [ctor prec 30] . --- Definition of Node. Has Id, Type and Function
 
   --- Definition of Arcs
   sort Arc .
@@ -61,7 +52,7 @@ fmod GRAPH is
   --- 
   sort Indicator .
   subsort Indicator < IndicatorList .
-  op (i[_,_]) : Int Int -> Indicator [ctor prec 30] . --- Definition of Activation Indicator. Has Id of action and Indicator value (0, 1, -1) 
+  op (i[_]:_) : Int Int -> Indicator [ctor prec 30] . --- Definition of Activation Indicator. Has Id of action and Indicator value (0, 1, -1) 
 
   ---
   sort IndicatorList .
@@ -78,122 +69,123 @@ fmod SEQUENCES is
   --- Sequential graph
   op graph1 : -> Graph .
   eq graph1 = 
-  	(n[0]: nseq, start) ->(n[1]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[2]: nseq, oth) ;;
-    (n[2]: nseq, oth) ->(n[11]: nseq, fin) .
+  	(n[-5]: nseq) ->(n[1]: nseq) ;;
+    (n[1]: nseq) ->(n[2]: nseq) ;;
+    (n[2]: nseq) ->(n[-7]: nseq) .
 
   --- Sequential graph
   op graph2 : -> Graph .
   eq graph2 = 
-  	(n[0]: nseq, start) ->(n[1]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[2]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[3]: nseq, oth) ;;
-    (n[2]: nseq, oth) ->(n[4]: nseq, oth) ;;
-    (n[3]: nseq, oth) ->(n[4]: nseq, oth) ;;
-    (n[4]: nseq, oth) ->(n[11]: nseq, fin) .
+  	(n[-5]: nseq) ->(n[1]: nseq) ;;
+    (n[1]: nseq) ->(n[2]: nseq) ;;
+    (n[1]: nseq) ->(n[3]: nseq) ;;
+    (n[2]: nseq) ->(n[4]: nseq) ;;
+    (n[3]: nseq) ->(n[4]: nseq) ;;
+    (n[4]: nseq) ->(n[-7]: nseq) .
   
   --- And graph
   op graph3 : -> Graph .
   eq graph3 = 
-  	(n[0]: nseq, start) ->(n[1]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[2]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[3]: nseq, oth) ;;
-    (n[2]: nseq, oth) ->(n[4]: nand, oth) ;;
-    (n[3]: nseq, oth) ->(n[4]: nand, oth) ;;
-    (n[4]: nand, oth) ->(n[11]: nseq, fin) .
+  	(n[-5]: nseq) ->(n[1]: nseq) ;;
+    (n[1]: nseq) ->(n[2]: nseq) ;;
+    (n[1]: nseq) ->(n[3]: nseq) ;;
+    (n[2]: nseq) ->(n[4]: nand) ;;
+    (n[3]: nseq) ->(n[4]: nand) ;;
+    (n[4]: nand) ->(n[-7]: nseq) .
 
   --- Or graph
   op graph4 : -> Graph .
   eq graph4 = 
-  	(n[0]: nseq, start) ->(n[1]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[2]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[3]: nseq, oth) ;;
-    (n[2]: nseq, oth) ->(n[4]: nor, oth) ;;
-    (n[3]: nseq, oth) ->(n[4]: nor, oth) ;;
-    (n[4]: nor, oth) ->(n[11]: nseq, fin) .
+  	(n[-5]: nseq) ->(n[1]: nseq) ;;
+    (n[1]: nseq) ->(n[2]: nseq) ;;
+    (n[1]: nseq) ->(n[3]: nseq) ;;
+    (n[2]: nseq) ->(n[4]: nor) ;;
+    (n[3]: nseq) ->(n[4]: nor) ;;
+    (n[4]: nor) ->(n[-7]: nseq) .
 
   --- Xor graph
   op graph5 : -> Graph .
   eq graph5 = 
-  	(n[0]: nseq, oth) ->(n[1]: nxor, oth) ;;
-    (n[1]: nxor, oth) ->(n[2]: nseq, oth) ;;
-    (n[1]: nxor, oth) ->(n[3]: nseq, oth) ;;
-    (n[2]: nseq, oth) ->(n[4]: nseq, oth) ;;
-    (n[3]: nseq, oth) ->(n[4]: nseq, oth) ;;
-    (n[4]: nseq, oth) ->(n[11]: nseq, fin) .
+  	(n[-5]: nseq) ->(n[1]: nxor) ;;
+    (n[1]: nxor) ->(n[2]: nseq) ;;
+    (n[1]: nxor) ->(n[3]: nseq) ;;
+    (n[2]: nseq) ->(n[4]: nseq) ;;
+    (n[3]: nseq) ->(n[4]: nseq) ;;
+    (n[4]: nseq) ->(n[-7]: nseq) .
   
   --- Xor graph
   op graph6 : -> Graph .
   eq graph6 = 
-  	(n[0]: nseq, oth) ->(n[1]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[2]: nxor, oth) ;;
-    (n[1]: nseq, oth) ->(n[3]: nseq, oth) ;;
-    (n[2]: nxor, oth) ->(n[4]: nseq, oth) ;;
-    (n[3]: nseq, oth) ->(n[2]: nxor, oth) ;;
-    (n[3]: nseq, oth) ->(n[4]: nseq, oth) ;;
-    (n[4]: nseq, oth) ->(n[11]: nseq, oth) .
+  	(n[-5]: nseq) ->(n[1]: nseq) ;;
+    (n[1]: nseq) ->(n[2]: nxor) ;;
+    (n[1]: nseq) ->(n[3]: nseq) ;;
+    (n[2]: nxor) ->(n[4]: nseq) ;;
+    (n[3]: nseq) ->(n[2]: nxor) ;;
+    (n[3]: nseq) ->(n[4]: nseq) ;;
+    (n[4]: nseq) ->(n[-7]: nseq) .
 
   --- Xor graph
   op xorTestingGraph : -> Graph .
-  eq xorTestingGraph = (n[1]: nseq, start) -> (n[2]: nseq, oth) ;;
-    (n[2]: nseq, oth) -> (n[3]: nxor, oth) ;;
-    (n[3]: nxor, oth) -> (n[4]: nseq, oth) ;;
-    (n[3]: nxor, oth) -> (n[5]: nseq, oth) ;;
-    (n[5]: nseq, oth) -> (n[6]: nor, oth) ;;
-    (n[4]: nseq, oth) -> (n[6]: nor, oth) ;;
-    (n[6]: nor, oth) -> (n[7]: nseq, fin) ;;
-    (n[6]: nor, oth) -> (n[2]: nseq, oth) .
+  eq xorTestingGraph = 
+    (n[1]: nseq) -> (n[2]: nseq) ;;
+    (n[2]: nseq) -> (n[3]: nxor) ;;
+    (n[3]: nxor) -> (n[4]: nseq) ;;
+    (n[3]: nxor) -> (n[5]: nseq) ;;
+    (n[5]: nseq) -> (n[6]: nor) ;;
+    (n[4]: nseq) -> (n[6]: nor) ;;
+    (n[6]: nor) -> (n[7]: nseq) ;;
+    (n[6]: nor) -> (n[2]: nseq) .
   
   --- Graph with loop
   op smallLoopGraph : -> Graph .
   eq smallLoopGraph = 
-    (n[0]: nseq, start) ->(n[1]: nor, oth) ;;
-    (n[1]: nor, oth) ->(n[2]: nseq, oth) ;;
-    (n[2]: nseq, oth) ->(n[1]: nor, oth) ;;
-    (n[2]: nseq, oth) ->(n[11]: nseq, fin) .
+    (n[-5]: nseq) ->(n[1]: nor) ;;
+    (n[1]: nor) ->(n[2]: nseq) ;;
+    (n[2]: nseq) ->(n[1]: nor) ;;
+    (n[2]: nseq) ->(n[-7]: nseq) .
 
   --- Graph with loop
   op graphLoop : -> Graph .
   eq graphLoop = 
-  	(n[0]: nseq, start) ->(n[1]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[2]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[3]: nseq, oth) ;;
-    (n[2]: nseq, oth) ->(n[4]: nseq, oth) ;;
-    (n[3]: nseq, oth) ->(n[4]: nseq, oth) ;;
-    (n[4]: nseq, oth) ->(n[5]: nseq, oth) ;;
-    (n[5]: nseq, oth) ->(n[6]: nseq, oth) ;;
-    (n[6]: nseq, oth) ->(n[11]: nseq, fin) ;;
-    (n[5]: nseq, oth) ->(n[1]: nseq, oth) .
+  	(n[-5]: nseq) ->(n[1]: nseq) ;;
+    (n[1]: nseq) ->(n[2]: nseq) ;;
+    (n[1]: nseq) ->(n[3]: nseq) ;;
+    (n[2]: nseq) ->(n[4]: nseq) ;;
+    (n[3]: nseq) ->(n[4]: nseq) ;;
+    (n[4]: nseq) ->(n[5]: nseq) ;;
+    (n[5]: nseq) ->(n[6]: nseq) ;;
+    (n[6]: nseq) ->(n[-7]: nseq) ;;
+    (n[5]: nseq) ->(n[1]: nseq) .
   
   --- Graph with loop
   op multiLoopGraph : -> Graph .
   eq multiLoopGraph =
-  	(n[0]: nseq, start) ->(n[1]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[2]: nseq, oth) ;;
-    (n[1]: nseq, oth) ->(n[3]: nor, oth) ;;
-    (n[2]: nseq, oth) ->(n[4]: nseq, oth) ;;
-    (n[3]: nor, oth) ->(n[4]: nseq, oth) ;;
-    (n[4]: nseq, oth) ->(n[5]: nseq, oth) ;;
-    (n[5]: nseq, oth) ->(n[6]: nor, oth) ;;
-    (n[6]: nor, oth) ->(n[11]: nseq, fin) ;;
-    (n[5]: nseq, oth) ->(n[1]: nseq, oth) ;;
-    (n[6]: nor, oth) ->(n[8]: nseq, oth) ;;
-    (n[8]: nseq, oth) ->(n[9]: nseq, oth) ;;
-    (n[9]: nseq, oth) ->(n[6]: nor, oth) ;;
-    (n[8]: nseq, oth) ->(n[3]: nor, oth) .
+  	(n[-5]: nseq) -> (n[1]: nseq) ;;
+    (n[1]: nseq) -> (n[2]: nseq) ;;
+    (n[1]: nseq) -> (n[3]: nor) ;;
+    (n[2]: nseq) -> (n[4]: nseq) ;;
+    (n[3]: nor) -> (n[4]: nseq) ;;
+    (n[4]: nseq) -> (n[5]: nseq) ;;
+    (n[5]: nseq) -> (n[6]: nor) ;;
+    (n[6]: nor) -> (n[-7]: nseq) ;;
+    (n[5]: nseq) -> (n[1]: nseq) ;;
+    (n[6]: nor) -> (n[8]: nseq) ;;
+    (n[8]: nseq) -> (n[9]: nseq) ;;
+    (n[9]: nseq) -> (n[6]: nor) ;;
+    (n[8]: nseq) -> (n[3]: nor) .
   
   *** Action sequences for testing ***
   op seq1 : -> ActionList .
-  eq seq1 = (a[0]) ; (a[1]) ; (a[2]) ; (a[11]) .
+  eq seq1 = (a[-5]) ; (a[1]) ; (a[2]) ; (a[-7]) .
 
   op seq2 : -> ActionList .
-  eq seq2 = (a[0]) ; (a[1]) ; (a[11]) .
+  eq seq2 = (a[-5]) ; (a[1]) ; (a[-7]) .
 
   op seq3 : -> ActionList .
-  eq seq3 = (a[0]) ; (a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[11]) .
+  eq seq3 = (a[-5]) ; (a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[-7]) .
 
   op seq4 : -> ActionList .
-  eq seq4 = (a[0]) ; (a[1]) ; (a[2]) ; (a[4]) ; (a[11]) .
+  eq seq4 = (a[-5]) ; (a[1]) ; (a[2]) ; (a[4]) ; (a[-7]) .
   
 endfm
 
@@ -235,17 +227,16 @@ fmod GRAPH-EQ is
   var EList EList' : ActionList . --- Lists of incorrect actions
   var G G' G1 G2 : Graph . --- Graphs
   var type type' : NType . --- Node types
-  var func func' : NFunc . --- Node functions
   var x y z n m : Int . --- Node ids
 
   *** Equations ***
-  ---
+  --- Check if the node is starting (-5) or fin (-7). If neither, is considered "other"
   op checkFunction : Action Graph -> String . 
-  eq checkFunction(a[x], G1 ;; (n[x]: type, func) -> (n[y]: type', func') ;; G2) = 
-  	if func == start
+  eq checkFunction((a[x]), G1 ;; (n[x]: type) -> (n[y]: type') ;; G2) = 
+  	if x == -5
     then "start"
     else 
-      if func == fin
+      if x == -7
       then "fin"
       else "oth"
       fi
@@ -253,7 +244,7 @@ fmod GRAPH-EQ is
   
   --- Check if node is type "sequential", "and", "or" or "xor"
   op checkType : Action Graph -> String .
-  eq checkType((a[x]), G1 ;; (n[x]: type, func) -> (n[y]: type', func') ;; G2) =
+  eq checkType((a[x]), G1 ;; (n[x]: type) -> (n[y]: type') ;; G2) =
     if type == nand
     then "and"
     else 
@@ -275,25 +266,30 @@ fmod GRAPH-EQ is
   --- Activates indicator if not already active
   op activateIndicator : Int IndicatorList -> IndicatorList .
   eq activateIndicator(x, IList) = 
-  if (i[x, 1]) in IList
+  if (i[x]: 1) in IList
   then 
     IList
   else 
-    if (i[x, -1]) in IList --- If blocked, keep blocked
+    if (i[x]: -1) in IList --- If blocked, keep blocked
     then
       IList
     else 
-      if (i[x, 0]) in IList
-        then
-          (i[x, 1]) ; removeInactive(x, IList) 
-        else
-          IList
-        fi
+      (i[x]: 1) ; IList
     fi
   fi .
 
+  --- Return how many parents are in list of correct actions
   op activeParents : Action IndicatorList Graph -> String .
-  
+  eq activeParents((a[x]), IList, G) =
+    if allIndicatorsActive(parents((a[x]), G), IList) == true
+    then 
+      "all"
+    else 
+      if someIndicatorsActive(parents((a[x]), G), IList) == true
+      then "some"
+      else "none"
+      fi
+    fi .
 
   *** Auxiliary Equations ***
   --- Action in List of Actions 
@@ -303,12 +299,48 @@ fmod GRAPH-EQ is
 
   --- Indicator in List of Indicators
   op _in_ : Indicator IndicatorList -> Bool .
-  eq (i[x,y]) in (IList ; (i[x,y]) ; IList') = true .
-  eq (i[x,y]) in IList = false [owise] .
+  eq (i[x]: y) in (IList ; (i[x]: y) ; IList') = true .
+  eq (i[x]: y) in IList = false [owise] .
+
+  --- To obtain the list of direct parents of a node in a graph. -- returns parents
+  op parents : Action Graph -> ActionList .
+  eq parents((a[x]), (n[y]: type') -> (n[x]: type) ;; G) =
+    (a[x]) ; parents((a[x]), G) .
+  eq parents((a[x]), G) = nil [owise] .
+
+  --- Check if all actions are in the target list of active actions
+  op allIndicatorsActive : ActionList IndicatorList -> Bool .
+  eq allIndicatorsActive(nil, IList) = true .
+  eq allIndicatorsActive(((a[x]) ; AList), IList) =
+    isActive(getIndicator((a[x]), IList)) and (getIndicator((a[x]), IList) in IList) and allIndicatorsActive(AList, IList) .
+  
+  --- Check if at least one of the actions is in the target list of active actions
+  op someIndicatorsActive : ActionList IndicatorList -> Bool .
+  eq someIndicatorsActive(nil, IList) = false .
+  eq someIndicatorsActive(((a[x]) ; AList), IList) =
+    isActive(getIndicator((a[x]), IList)) and (getIndicator((a[x]), IList) in IList) or someIndicatorsActive(AList, IList) .
+
+  --- To obtain the list of direct children of a node in a graph.
+  op children : Action Graph -> ActionList .
+  eq children((a[x]), (n[x]: type) -> (n[x]: type') ;; G) =
+    (a[x]) ; children((a[x]), G) .
+  eq children((a[x]), G) = nil [owise] .
 
   --- Remove inactive indicator to substitute for active indicator
   op removeInactive : Int IndicatorList -> IndicatorList .
-  eq removeInactive(x, IList ; (i[x, 0]) ; IList') = (IList ; IList') .
+  eq removeInactive(x, IList ; (i[x]: 0) ; IList') = (IList ; IList') .
+
+  ---
+  op getIndicator : Action IndicatorList -> Indicator .
+  eq getIndicator((a[x]), IList ; (i[x]: y) ; IList') = (i[x]: y) .
+
+  ---
+  op isActive : Indicator -> Bool .
+  eq isActive((i[x]: y)) =
+    if y == 1
+    then true
+    else false
+    fi .
 
 endfm
 
@@ -323,7 +355,6 @@ mod GRAPH-RL is
   var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
   var G G' : Graph . --- Graphs
   var type type' : NType . --- Node types
-  var func func' : NFunc . --- Node functions
   var x y z : Int . --- Node ids
 
   *** Rules ***
@@ -359,16 +390,21 @@ mod GRAPH-RL is
   rl [step] :
     (a[x]) ; AList | IList | CList | EList | G | executing
     => 
-    if checkType((a[x]), G) == "nand" and activeParents(a[i], IList, G) == "all"
+    if checkType((a[x]), G) == "and" and activeParents((a[x]), IList, G) == "all"
     then 
-      AList | blockParentAndSiblingCookiesIfParentIsXor(a[i], G, activateCookie(i, deactivateActionCookies(getActionsForLoopDeactivation(lastAction(CList), a[i], G, TupleCookies), TupleCookies)))   | (CList ; (a[i])) | EList | G | executing 
+      AList | IList | (CList ; (a[x])) | EList | G | executing 
     else
-      if not (checkType((a[x]), G) == "nand") and activeParents(a[i], IList, G) == "some"
+      if not (checkType((a[x]), G) == "and") and activeParents((a[x]), IList, G) == "some"
       then 
-        AList | blockParentAndSiblingCookiesIfParentIsXor(a[i], G, activateCookie(i, deactivateActionCookies(getActionsForLoopDeactivation(lastAction(CList), a[i], G, TupleCookies), TupleCookies)))  | (CList ; (a[i])) | EList | G | executing 
+        AList | IList | (CList ; (a[x])) | EList | G | executing 
       else
-          AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
+        AList | IList | CList | (EList ; (a[x])) | G | executing 
       fi
-    fi
+    fi .
   
 endm
+
+---red getIndicator((a[-5]), (i[0, 1]) ; (i[1, 1]) ; (i[2, 0])) .
+---red allIndicatorsActive(((a[1]) ; (a[2])), (i[0, 1]) ; (i[1, 1]) ; (i[2, 1]) ; (i[3, 0]) ; (i[4, 0])) .
+---red someIndicatorsActive(((a[-5]) ; (a[1])), ((i[0, 0]) ; (i[1, 0]) ; (i[2, 0]))) .
+
