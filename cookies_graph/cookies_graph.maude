@@ -8,7 +8,6 @@ endfm
 
 *** Definition of Node function ***
 fmod NFUNC is
-
   sort NFunc .
   ops start fin oth : -> NFunc [ctor] .
 
@@ -46,7 +45,7 @@ fmod GRAPH is
   --- Definition of Nodes
   sort Node .
   ---subsort Node < Graph .
-  op (n[_]:_,_) : Int NType NFunc -> Node [ctor prec 30] . --- Definition of Node. Has Id and Type
+  op (n[_]:_) : Int NType -> Node [ctor prec 30] . --- Definition of Node. Has Id and Type
 
   --- Definition of Arcs
   sort Arc .
@@ -110,106 +109,106 @@ fmod SEQUENCES is
   --- Sequential graph
   op graph1 : -> Graph .
   eq graph1 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[2]: nseq)->(n[11]: nseq) .
 
   --- Sequential graph
   op graph2 : -> Graph .
   eq graph2 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[11]: nseq) .
     
       --- Sequential graph
   op graphLoop : -> Graph .
   eq graphLoop = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[5]: nseq, oth);;
-    (n[5]: nseq, oth)->(n[6]: nseq, oth);;
-    (n[6]: nseq, oth)->(n[11]: nseq, fin);;
-    (n[5]: nseq, oth)->(n[1]: nseq, oth) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[5]: nseq);;
+    (n[5]: nseq)->(n[6]: nseq);;
+    (n[6]: nseq)->(n[11]: nseq);;
+    (n[5]: nseq)->(n[1]: nseq) .
   
   
   --- And graph
   op graph3 : -> Graph .
   eq graph3 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nand, oth);;
-    (n[3]: nseq, oth)->(n[4]: nand, oth);;
-    (n[4]: nand, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nand);;
+    (n[3]: nseq)->(n[4]: nand);;
+    (n[4]: nand)->(n[11]: nseq) .
 
   --- Or graph
   op graph4 : -> Graph .
   eq graph4 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nor, oth);;
-    (n[3]: nseq, oth)->(n[4]: nor, oth);;
-    (n[4]: nor, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nor);;
+    (n[3]: nseq)->(n[4]: nor);;
+    (n[4]: nor)->(n[11]: nseq) .
 
   --- Xor graph
   op graph5 : -> Graph .
   eq graph5 = 
-  	(n[0]: nseq, oth)->(n[1]: nxor, oth);;
-    (n[1]: nxor, oth)->(n[2]: nseq, oth);;
-    (n[1]: nxor, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nxor);;
+    (n[1]: nxor)->(n[2]: nseq);;
+    (n[1]: nxor)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[11]: nseq) .
     
   op graph51 : -> Graph .
   eq graph51 = 
-  	(n[0]: nseq, oth)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nxor, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nxor, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[2]: nxor, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[11]: nseq, oth) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nxor);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nxor)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[2]: nxor);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[11]: nseq) .
     
   op smallLoopGraph : -> Graph .
   eq smallLoopGraph = 
-    (n[0]: nseq, start)->(n[1]: nor, oth);;
-    (n[1]: nor, oth)->(n[2]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[1]: nor, oth);;
-    (n[2]: nseq, oth)->(n[11]: nseq, fin) .
+    (n[0]: nseq)->(n[1]: nor);;
+    (n[1]: nor)->(n[2]: nseq);;
+    (n[2]: nseq)->(n[1]: nor);;
+    (n[2]: nseq)->(n[11]: nseq) .
     
   op multiLoopGraph : -> Graph .
   eq multiLoopGraph =
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nor, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nor, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[5]: nseq, oth);;
-    (n[5]: nseq, oth)->(n[6]: nor, oth);;
-    (n[6]: nor, oth)->(n[11]: nseq, fin);;
-    (n[5]: nseq, oth)->(n[1]: nseq, oth);;
-    (n[6]: nor, oth)->(n[8]: nseq, oth);;
-    (n[8]: nseq, oth)->(n[9]: nseq, oth);;
-    (n[9]: nseq, oth)->(n[6]: nor, oth);;
-    (n[8]: nseq, oth)->(n[3]: nor, oth) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nor);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nor)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[5]: nseq);;
+    (n[5]: nseq)->(n[6]: nor);;
+    (n[6]: nor)->(n[11]: nseq);;
+    (n[5]: nseq)->(n[1]: nseq);;
+    (n[6]: nor)->(n[8]: nseq);;
+    (n[8]: nseq)->(n[9]: nseq);;
+    (n[9]: nseq)->(n[6]: nor);;
+    (n[8]: nseq)->(n[3]: nor) .
     
   op xorTestingGraph : -> Graph .
-  eq xorTestingGraph = (n[1]: nseq, start) -> (n[2]: nseq, oth);;
-    (n[2]: nseq, oth) -> (n[3]: nxor, oth);;
-    (n[3]: nxor, oth) -> (n[4]: nseq, oth);;
-    (n[3]: nxor, oth) -> (n[5]: nseq, oth);;
-    (n[5]: nseq, oth) -> (n[6]: nor, oth);;
-    (n[4]: nseq, oth) -> (n[6]: nor, oth);;
-    (n[6]: nor, oth) -> (n[7]: nseq, fin);;
-    (n[6]: nor, oth) -> (n[2]: nseq, oth) .
+  eq xorTestingGraph = (n[1]: nseq) -> (n[2]: nseq);;
+    (n[2]: nseq) -> (n[3]: nxor);;
+    (n[3]: nxor) -> (n[4]: nseq);;
+    (n[3]: nxor) -> (n[5]: nseq);;
+    (n[5]: nseq) -> (n[6]: nor);;
+    (n[4]: nseq) -> (n[6]: nor);;
+    (n[6]: nor) -> (n[7]: nseq);;
+    (n[6]: nor) -> (n[2]: nseq) .
     
   
   *** Action sequences for testing ***
@@ -305,7 +304,7 @@ fmod CONFIG is
     nil | 
     nil |
     nil |
-    ( (n[4]: nseq, oth) -> (n[6]: nseq, oth) ;; (n[1]: nseq, start) -> (n[2]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[3]: nseq, oth) ) |
+    ( (n[4]: nseq) -> (n[6]: nseq) ;; (n[1]: nseq) -> (n[2]: nseq) ;; (n[2]: nseq) -> (n[3]: nseq) ) |
 	starting .
     
     
@@ -315,7 +314,7 @@ fmod CONFIG is
     nil | 
     nil |
     nil |
-    ( (n[1]: nseq, start) -> (n[2]: nseq, fin) ) |
+    ( (n[1]: nseq) -> (n[2]: nseq) ) |
 	starting .
 
 
@@ -380,15 +379,15 @@ fmod GRAPH-EQ is
   --- Check if last node of Correct List is "fin" node and cookies only contains final node
   op checkStatus : CookieList ActionList Graph -> Bool .
   eq checkStatus(nil, nil, G) = false .
-  eq checkStatus((a[i]), (CList ; (a[i])), G ;; (n[x]: type', func') -> (n[i]: type, func)) = 
-    if func == fin
+  eq checkStatus((a[i]), (CList ; (a[i])), ( G ;; (n[x]: type') -> (n[i]: type) ) ) = 
+    if i == (-7)
     then true
     else false
     fi .
 
   --- Check if node is type "sequential", "and", "or" or "xor"
   op checkType : Action Graph -> String .
-  eq checkType((a[i]), (n[x]: type', func') -> (n[i]: type, func) ;; G) =
+  eq checkType((a[i]), (n[x]: type') -> (n[i]: type) ;; G) =
     if type == nand
     then "and"
     else 
@@ -403,8 +402,8 @@ fmod GRAPH-EQ is
     fi .
     
   op isStartingNode : Action Graph -> Bool . 
-  eq isStartingNode( a[i] , G1 ;; (n[i]: type', func') -> (n[x]: type, func) ;; G2  ) = 
-  	if func' == start
+  eq isStartingNode( a[i] , G1 ;; (n[i]: type') -> (n[x]: type) ;; G2  ) = 
+  	if i == (-5)
     then true
     else false
     fi .
@@ -412,11 +411,11 @@ fmod GRAPH-EQ is
     
   --- get action function
   op checkFunc : Action Graph -> String .
-  eq checkFunc((a[i]), (n[x]: type', func') -> (n[i]: type, func) ;; G) =
-    if func == start
+  eq checkFunc((a[i]), (n[x]: type') -> (n[i]: type) ;; G) =
+    if i == (-5)
     then "start"
     else 
-      if func == fin
+      if i == (-7)
       then "fin"
       else "oth"
       fi
@@ -514,13 +513,13 @@ fmod GRAPH-EQ is
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph. -- returns parents
   op parents : Action Graph -> ActionList .
-  eq parents((a[i]), (n[x]: type1, func1) -> (n[i]: type, func) ;; G) =
+  eq parents((a[i]), (n[x]: type1) -> (n[i]: type) ;; G) =
     (a[x]) ; parents((a[i]), G) .
   eq parents((a[i]), G) = nil [owise] .
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Action Graph -> ActionList .
-  eq children((a[i]), (n[i]: type, func) -> (n[x]: type', func') ;; G) =
+  eq children((a[i]), (n[i]: type) -> (n[x]: type') ;; G) =
     (a[x]) ; children((a[i]), G) .
   eq children((a[i]), G) = nil [owise] .
   
@@ -625,13 +624,13 @@ fmod GRAPH-EQ is
   eq (c[i,j]) in Cookies1 = false [owise] .
 
   op isArc : Node Node Graph -> Bool .
-  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), nil) = false .
-  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), G1 ;; (n[x]: type1, func1) -> (n[y]: type2, func2) ;; G2) = true .
-  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), G) = false [owise] .
+  eq isArc((n[x]: type1), (n[y]: type2), nil) = false .
+  eq isArc((n[x]: type1), (n[y]: type2), G1 ;; (n[x]: type1) -> (n[y]: type2) ;; G2) = true .
+  eq isArc((n[x]: type1), (n[y]: type2), G) = false [owise] .
   
   op isArcAction : Action Action Graph -> Bool .
   eq isArcAction( a[x], a[y] , nil) = false .
-  eq isArcAction( a[x], a[y] , G1 ;; (n[x]: type1, func1) -> (n[y]: type2, func2) ;; G2) = true .
+  eq isArcAction( a[x], a[y] , G1 ;; (n[x]: type1) -> (n[y]: type) ;; G2) = true .
   eq isArcAction( a[x], a[y] , G) = false [owise] .
   
   --- subtract second list from first list
@@ -987,14 +986,14 @@ fmod GRAPH-EQ is
   
   op normalizeGraph : Graph -> Graph .
   eq normalizeGraph( G ) =
-  if arcLeftExists( (n[-5]: nseq, oth) , G ) then 
-  		if arcRightExists( (n[-7]: nseq, oth) , G ) then
+  if arcLeftExists( (n[-5]: nseq) , G ) then 
+  		if arcRightExists( (n[-7]: nseq) , G ) then
         		G
         else 
         		addFinalNode( G )
         fi 
   else 
-    	if arcRightExists( (n[-7]: nseq, oth) , G ) then
+    	if arcRightExists( (n[-7]: nseq) , G ) then
         		addStartingNode( G )
         else 
         		addStartingNode ( addFinalNode( G ) )
@@ -1014,22 +1013,22 @@ fmod GRAPH-EQ is
   
   op addFinalNode : Graph -> Graph .
   eq addFinalNode( G1 ) = if 
-  		arcRightExists( (n[-7]: nseq, fin) , addFinalNodeHelper(G1, nil) ) then addFinalNodeHelper(G1, nil)
+  		arcRightExists( (n[-7]: nseq) , addFinalNodeHelper(G1, nil) ) then addFinalNodeHelper(G1, nil)
         else 
         addFinalNodeToLastNode( G1 )
         fi .
         
   
   op addFinalNodeHelper : Graph Graph -> Graph .
-  eq addFinalNodeHelper( ( (n[i]: type', func') -> (n[x]: type, func) ;; G2 ) , G ) = 
-  if func == fin
-  		then addFinalNodeHelper( G2 , ( ( G ;; (n[i]: type', func') -> (n[x]: type, oth) ) ;; (n[x]: type, oth) -> (n[-7]: nseq, fin) )  )
-  else addFinalNodeHelper( G2, ( G ;; (n[i]: type', func') -> (n[x]: type, func) ) ) fi .
+  eq addFinalNodeHelper( ( (n[i]: type') -> (n[x]: type) ;; G2 ) , G ) = 
+  if x == (-7)
+  		then addFinalNodeHelper( G2 , ( ( G ;; (n[i]: type') -> (n[x]: type) ) ;; (n[x]: type) -> (n[-7]: nseq) )  )
+  else addFinalNodeHelper( G2, ( G ;; (n[i]: type') -> (n[x]: type) ) ) fi .
   eq addFinalNodeHelper( nil , G ) = G .
   
   op addFinalNodeToLastNode : Graph -> Graph .
-  eq addFinalNodeToLastNode( G ;; (n[i]: type', func') -> (n[x]: type, func) ) = 
-  ( ( G ;; (n[i]: type', func') -> (n[x]: type, func) ) ;; (n[x]: type, func) -> (n[-7]: nseq, fin) ) .
+  eq addFinalNodeToLastNode( G ;; (n[i]: type') -> (n[x]: type) ) = 
+  ( ( G ;; (n[i]: type') -> (n[x]: type) ) ;; (n[x]: type) -> (n[-7]: nseq) ) .
   eq addFinalNodeToLastNode( nil ) = nil .
   
   
@@ -1037,21 +1036,21 @@ fmod GRAPH-EQ is
   
   op addStartingNode : Graph -> Graph .
   eq addStartingNode( G1 ) = if 
-  		arcLeftExists( (n[-5]: nseq, start) , addStartingNodeHelper( G1, nil ) ) then addStartingNodeHelper( G1 , nil )
+  		arcLeftExists( (n[-5]: nseq) , addStartingNodeHelper( G1, nil ) ) then addStartingNodeHelper( G1 , nil )
         else 
         addStartingNodeToFirstNode( G1 )
         fi .
   
   op addStartingNodeHelper : Graph Graph -> Graph .
-  eq addStartingNodeHelper( ( (n[i]: type', func') -> (n[x]: type, func) ;; G2 ) , G ) = 
-  if func' == start
-  		then addStartingNodeHelper( G2 , (n[-5]: nseq, start) -> (n[i]: type', oth) ;; (n[i]: type', oth) -> (n[x]: type, oth) ;; G )
-  else addStartingNodeHelper( G2, ( (n[i]: type', func') -> (n[x]: type, func) ;; G ) ) fi .
+  eq addStartingNodeHelper( ( (n[i]: type') -> (n[x]: type) ;; G2 ) , G ) = 
+  if i == (-5)
+  		then addStartingNodeHelper( G2 , (n[-5]: nseq) -> (n[i]: type') ;; (n[i]: type') -> (n[x]: type) ;; G )
+  else addStartingNodeHelper( G2, ( (n[i]: type') -> (n[x]: type) ;; G ) ) fi .
   eq addStartingNodeHelper( nil, G ) = G .
   
   op addStartingNodeToFirstNode : Graph -> Graph .
-  eq addStartingNodeToFirstNode( (n[i]: type', func') -> (n[x]: type, func) ;; G ) = 
-  (n[-5]: nseq, start) -> (n[i]: type', func') ;; ( (n[i]: type', func') -> (n[x]: type, func) ;; G ) .
+  eq addStartingNodeToFirstNode( (n[i]: type') -> (n[x]: type) ;; G ) = 
+  (n[-5]: nseq) -> (n[i]: type') ;; ( (n[i]: type') -> (n[x]: type) ;; G ) .
   eq addStartingNodeToFirstNode( nil ) = nil . 
   
   op genCFG : ActionList Graph -> Config .
