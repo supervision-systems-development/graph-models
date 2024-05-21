@@ -57,7 +57,7 @@ fmod GRAPH is
   --- Definition of actions
   sort Action .
   subsort Action < ActionList . --- List of Nodes should be part of Graph
-  op (a[_]) : Int -> Action [ctor prec 30] . --- Definition of Action. Has Id
+  op (a(_)) : Int -> Action [ctor prec 30] . --- Definition of Action. Has Id
 
   --- Definition of a List of Actions
   sort ActionList .
@@ -94,10 +94,10 @@ fmod GRAPH is
   op _,_ : TupleList TupleList -> TupleList [assoc id: nil] .
   
   op firstAction : ActionList -> Action .  --- this one is being used 
-  eq firstAction( ( a[i] ; AList1 ) ) = a[i] .
+  eq firstAction( ( a(i) ; AList1 ) ) = a(i) .
   
   op firstActionInt : ActionList -> Int .  --- this one is being used too
-  eq firstActionInt( ( a[i] ; AList1 ) ) = i .
+  eq firstActionInt( ( a(i) ; AList1 ) ) = i .
   
 endfm
 
@@ -215,32 +215,32 @@ fmod SEQUENCES is
   *** Action sequences for testing ***
   
   op xorTestingSeq1 : -> ActionList .
-  eq xorTestingSeq1 =  (a[-5]) ;(a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[5]) ; (a[6]) ; (a[2]) ; (a[3]) ; (a[5]) ; (a[4]) ; (a[6]) ; (a[7]) .
+  eq xorTestingSeq1 =  (a(-5)) ;(a(1)) ; (a(2)) ; (a(3)) ; (a(4)) ; (a(5)) ; (a(6)) ; (a(2)) ; (a(3)) ; (a(5)) ; (a(4)) ; (a(6)) ; (a(7)) .
   
   op seq1 : -> ActionList .
-  eq seq1 = (a[0]) ; (a[1]) ; (a[2]) ; (a[11]) .
+  eq seq1 = (a(0)) ; (a(1)) ; (a(2)) ; (a(11)) .
 
   op seq2 : -> ActionList .
-  eq seq2 = (a[0]) ; (a[1]) ; (a[11]) .
+  eq seq2 = (a(0)) ; (a(1)) ; (a(11)) .
 
   op seq3 : -> ActionList .
-  eq seq3 = (a[0]) ; (a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[11]) .
+  eq seq3 = (a(0)) ; (a(1)) ; (a(2)) ; (a(3)) ; (a(4)) ; (a(11)) .
 
   op seq4 : -> ActionList .
-  eq seq4 = (a[0]) ; (a[1]) ; (a[2]) ; (a[4]) ; (a[11]) .
+  eq seq4 = (a(0)) ; (a(1)) ; (a(2)) ; (a(4)) ; (a(11)) .
   
   op seqSimpleLoop : -> ActionList . 
-  eq seqSimpleLoop = (a[-1] ; a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[1] ; a[2] ; a[5] ; a[6] ; a[4] ; a[5] ; a[2] ; a[3] ; a[1] ; a[3] ; a[4] ; a[5] ; a[6] ; a[11]) .
+  eq seqSimpleLoop = (a(-1) ; a(0) ; a(1) ; a(2) ; a(4) ; a(5) ; a(1) ; a(2) ; a(5) ; a(6) ; a(4) ; a(5) ; a(2) ; a(3) ; a(1) ; a(3) ; a(4) ; a(5) ; a(6) ; a(11)) .
 
   op smallLoopSeq : -> ActionList .
-  eq smallLoopSeq = ( a[-5] ; a[0] ; a[1] ; a[2] ; a[1] ; a[2] ; a[11]) .
+  eq smallLoopSeq = ( a(-5) ; a(0) ; a(1) ; a(2) ; a(1) ; a(2) ; a(11)) .
   
   op multiLoopSeq : -> ActionList .
-  eq multiLoopSeq = ( a[-5] ; a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[8] ; a[3] ; a[4] ; a[9] ; a[4] ; a[5] ; a[6] ; a[8] ; a[9] ; a[6] ; a[11] ) .
+  eq multiLoopSeq = ( a(-5) ; a(0) ; a(1) ; a(2) ; a(4) ; a(5) ; a(6) ; a(8) ; a(3) ; a(4) ; a(9) ; a(4) ; a(5) ; a(6) ; a(8) ; a(9) ; a(6) ; a(11) ) .
   
   
   op test64-seq : -> ActionList .
-  eq test64-seq = ( a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[4] ; a[5] ; a[6] ; a[11] ) .
+  eq test64-seq = ( a(0) ; a(1) ; a(2) ; a(4) ; a(5) ; a(6) ; a(4) ; a(5) ; a(6) ; a(11) ) .
   
   
 endfm
@@ -301,7 +301,7 @@ fmod CONFIG is
 
   op test-start : -> Config .
   eq test-start =
-  	(a[1]) ; (a[2])   |
+  	(a(1)) ; (a(2))   |
     nil | 
     nil |
     nil |
@@ -311,7 +311,7 @@ fmod CONFIG is
     
   op test-start-end : -> Config .
   eq test-start-end =
-  	(a[1]) ; (a[2]) |
+  	(a(1)) ; (a(2)) |
     nil | 
     nil |
     nil |
@@ -380,7 +380,7 @@ fmod GRAPH-EQ is
   --- Check if last node of Correct List is "fin" node and cookies only contains final node
   op checkStatus : CookieList ActionList Graph -> Bool .
   eq checkStatus(nil, nil, G) = false .
-  eq checkStatus((a[i]), (CList ; (a[i])), ( G ;; (n[x]: type') -> (n[i]: type) ) ) = 
+  eq checkStatus((a(i)), (CList ; (a(i))), ( G ;; (n[x]: type') -> (n[i]: type) ) ) = 
     if i == (-7)
     then true
     else false
@@ -388,7 +388,7 @@ fmod GRAPH-EQ is
 
   --- Check if node is type "sequential", "and", "or" or "xor"
   op checkType : Action Graph -> String .
-  eq checkType((a[i]), (n[x]: type') -> (n[i]: type) ;; G) =
+  eq checkType((a(i)), (n[x]: type') -> (n[i]: type) ;; G) =
     if type == nand
     then "and"
     else 
@@ -403,7 +403,7 @@ fmod GRAPH-EQ is
     fi .
     
   op isStartingNode : Action Graph -> Bool . 
-  eq isStartingNode( a[i] , G1 ;; (n[i]: type') -> (n[x]: type) ;; G2  ) = 
+  eq isStartingNode( a(i) , G1 ;; (n[i]: type') -> (n[x]: type) ;; G2  ) = 
   	if i == (-5)
     then true
     else false
@@ -412,7 +412,7 @@ fmod GRAPH-EQ is
     
   --- get action function
   op checkFunc : Action Graph -> String .
-  eq checkFunc((a[i]), (n[x]: type') -> (n[i]: type) ;; G) =
+  eq checkFunc((a(i)), (n[x]: type') -> (n[i]: type) ;; G) =
     if i == (-5)
     then "start"
     else 
@@ -426,32 +426,32 @@ fmod GRAPH-EQ is
 
   --- Check if requirements for "and" are met
   op isAnd : Action Graph -> Bool .
-  eq isAnd((a[i]), G) =
-    if checkType((a[i]), G) == "and" 
+  eq isAnd((a(i)), G) =
+    if checkType((a(i)), G) == "and" 
     then true
     else false
     fi .
 
   --- Check if requirements for "or" are met
   op isOr : Action Graph -> Bool .
-  eq isOr((a[i]), G) =
-    if checkType((a[i]), G) == "or"
+  eq isOr((a(i)), G) =
+    if checkType((a(i)), G) == "or"
     then true
     else false
     fi .
 
   --- Check if requirements for "xor" are met
   op isXor : Action Graph -> Bool .
-  eq isXor((a[i]), G) =
-    if checkType((a[i]), G) == "xor"
+  eq isXor((a(i)), G) =
+    if checkType((a(i)), G) == "xor"
     then true
     else false
     fi .
 
   --- Check if requirements for "seq" are met
   op isSeq : Action Graph -> Bool .
-  eq isSeq((a[i]), G) =
-    if checkType((a[i]), G) == "seq"
+  eq isSeq((a(i)), G) =
+    if checkType((a(i)), G) == "seq"
     then true
     else false
     fi .
@@ -470,23 +470,23 @@ fmod GRAPH-EQ is
   --- Add cookies to list
   op add : ActionList ActionList -> ActionList .
   eq add(AList, nil) = nil .
-  eq add(((a[x]) ; AList), Cookies) = 
-    if (a[x]) in Cookies
-    then (a[x]) ; consume(AList, Cookies)
+  eq add(((a(x)) ; AList), Cookies) = 
+    if (a(x)) in Cookies
+    then (a(x)) ; consume(AList, Cookies)
     else add(AList, Cookies)
     fi .
 
   --- Return how many parents are in list of correct actions
   op checkParentsInList : Action ActionList ActionList Graph -> String .
-  eq checkParentsInList((a[i]), Cookies, CList, G) =
-    if allActionsListInList(parents((a[i]), G), CList) == true and allActionsListInList(parents((a[i]), G), Cookies) == true
+  eq checkParentsInList((a(i)), Cookies, CList, G) =
+    if allActionsListInList(parents((a(i)), G), CList) == true and allActionsListInList(parents((a(i)), G), Cookies) == true
     then 
       "all"
     else 
-      if oneActionListInList(parents((a[i]), G), CList) == true and oneActionListInList(parents((a[i]), G), Cookies) == true
+      if oneActionListInList(parents((a(i)), G), CList) == true and oneActionListInList(parents((a(i)), G), Cookies) == true
       then "one"
       else 
-        if someActionsListInList(parents((a[i]), G), CList) == true and someActionsListInList(parents((a[i]), G), Cookies) == true
+        if someActionsListInList(parents((a(i)), G), CList) == true and someActionsListInList(parents((a(i)), G), Cookies) == true
         then "some"
         else "none"
         fi
@@ -496,41 +496,41 @@ fmod GRAPH-EQ is
   --- Check if all nodes are in the target list of nodes
   op allActionsListInList : ActionList ActionList -> Bool .
   eq allActionsListInList(nil, CList) = true .
-  eq allActionsListInList(((a[x]) ; AList), CList) =
-    ((a[x]) in CList) and allActionsListInList(AList, CList) .
+  eq allActionsListInList(((a(x)) ; AList), CList) =
+    ((a(x)) in CList) and allActionsListInList(AList, CList) .
   
   --- Check if at least one of the nodes is in the target list of nodes
   op someActionsListInList : ActionList ActionList -> Bool .
   eq someActionsListInList(nil, CList) = false .
-  eq someActionsListInList(((a[x]) ; AList), CList) =
-    ((a[x]) in CList) or someActionsListInList(AList, CList) .
+  eq someActionsListInList(((a(x)) ; AList), CList) =
+    ((a(x)) in CList) or someActionsListInList(AList, CList) .
 
   --- Check if only one one of the nodes is in the target list of nodes
   op oneActionListInList : ActionList ActionList -> Bool .
   eq oneActionListInList(nil, CList) = false .
-  eq oneActionListInList(((a[x]) ; AList), CList) =
-    ((a[x]) in CList) xor oneActionListInList(AList, CList) .
+  eq oneActionListInList(((a(x)) ; AList), CList) =
+    ((a(x)) in CList) xor oneActionListInList(AList, CList) .
 
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph. -- returns parents
   op parents : Action Graph -> ActionList .
-  eq parents((a[i]), (n[x]: type1) -> (n[i]: type) ;; G) =
-    (a[x]) ; parents((a[i]), G) .
-  eq parents((a[i]), G) = nil [owise] .
+  eq parents((a(i)), (n[x]: type1) -> (n[i]: type) ;; G) =
+    (a(x)) ; parents((a(i)), G) .
+  eq parents((a(i)), G) = nil [owise] .
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Action Graph -> ActionList .
-  eq children((a[i]), (n[i]: type) -> (n[x]: type') ;; G) =
-    (a[x]) ; children((a[i]), G) .
-  eq children((a[i]), G) = nil [owise] .
+  eq children((a(i)), (n[i]: type) -> (n[x]: type') ;; G) =
+    (a(x)) ; children((a(i)), G) .
+  eq children((a(i)), G) = nil [owise] .
   
   op listChildren : ActionList Graph -> ActionList . 
   eq listChildren( ( Action ; AList1 ) , G ) = ( ( children(Action, G) ) ; listChildren( AList1 , G ) ) .
   eq listChildren( nil, G ) = nil .
    
   op _in_ : Action ActionList -> Bool .
-  eq (a[i]) in (AList1 ; (a[i]) ; AList2) = true .
-  eq (a[i]) in AList1 = false [owise] .
+  eq (a(i)) in (AList1 ; (a(i)) ; AList2) = true .
+  eq (a(i)) in AList1 = false [owise] .
   
   op tupleInTupleList : Tuple TupleList -> Bool .
   eq tupleInTupleList( ( t( x , y ) ) , ( t( z , i) , TList1 ) ) = 
@@ -562,7 +562,7 @@ fmod GRAPH-EQ is
     fi .
    
   op blockActionCookie : Action TupleList -> TupleList .
-  eq blockActionCookie( a[i] , TList ) = 
+  eq blockActionCookie( a(i) , TList ) = 
   if tupleInTupleList( t( i , -1 ) , TList ) then 
     TList
     else ( ( TList , t( i , -1 ) ) )
@@ -608,14 +608,14 @@ fmod GRAPH-EQ is
   --- MAIN function to use with rules
   ---seems to work, deactivates ACTION LIST from COOKIE LIST and returns COOKIE LIST
   op deactivateActionCookies : ActionList TupleList -> TupleList .
-  eq deactivateActionCookies( ( a[x] ; AList1 ) , TList ) = deactivateActionCookies(AList1 , deactivateCookie(x, TList)) .
+  eq deactivateActionCookies( ( a(x) ; AList1 ) , TList ) = deactivateActionCookies(AList1 , deactivateCookie(x, TList)) .
   eq deactivateActionCookies( nil , TList ) = TList .
   
   
   --- MAIN function to use with rules
   ---seems to work, unblocks ACTION LIST from COOKIE LIST and returns COOKIE LIST
   op unblockActionCookies : ActionList TupleList -> TupleList .
-  eq unblockActionCookies( ( a[x] ; AList1 ) , TList ) = unblockActionCookies(AList1 , unblockCookie(x, TList)) .
+  eq unblockActionCookies( ( a(x) ; AList1 ) , TList ) = unblockActionCookies(AList1 , unblockCookie(x, TList)) .
   eq unblockActionCookies( nil , TList ) = TList .
 
 
@@ -630,16 +630,16 @@ fmod GRAPH-EQ is
   eq isArc((n[x]: type1), (n[y]: type2), G) = false [owise] .
   
   op isArcAction : Action Action Graph -> Bool .
-  eq isArcAction( a[x], a[y] , nil) = false .
-  eq isArcAction( a[x], a[y] , G1 ;; (n[x]: type1) -> (n[y]: type) ;; G2) = true .
-  eq isArcAction( a[x], a[y] , G) = false [owise] .
+  eq isArcAction( a(x), a(y) , nil) = false .
+  eq isArcAction( a(x), a(y) , G1 ;; (n[x]: type1) -> (n[y]: type) ;; G2) = true .
+  eq isArcAction( a(x), a(y) , G) = false [owise] .
   
   --- subtract second list from first list
   op actionListSubtraction : ActionList ActionList -> ActionList .
-  eq actionListSubtraction( ( a[x] ; AList1) , AList2 ) = 
-  if ( a[x] in AList2 ) then actionListSubtraction(AList1, AList2)
+  eq actionListSubtraction( ( a(x) ; AList1) , AList2 ) = 
+  if ( a(x) in AList2 ) then actionListSubtraction(AList1, AList2)
   else 
-    ( a[x] ; actionListSubtraction(AList1, AList2)  ) 
+    ( a(x) ; actionListSubtraction(AList1, AList2)  ) 
     fi .
   eq actionListSubtraction(nil, AList2) = nil .
 
@@ -674,12 +674,12 @@ fmod GRAPH-EQ is
   --- if the search from the initial NodeList (a[0]) reaches the next node (subsequent node) before the previous node (the first argument), then it is a loop.
   --- Previous Node, Subsequent Node, List of Current Nodes, List of Checked Nodes, Graph
   op BFSLoopDetect : Action Action ActionList ActionList Graph -> Bool .
-  eq BFSLoopDetect( a[x] , a[y] , AList1 , AList2 , G ) =
-  if ( a[x] in AList1 ) then false 
+  eq BFSLoopDetect( a(x) , a(y) , AList1 , AList2 , G ) =
+  if ( a(x) in AList1 ) then false 
   else 
-  	if ( a[y] in AList1 ) then true
+  	if ( a(y) in AList1 ) then true
     	else 
-           BFSLoopDetect( a[x] , a[y] , ( actionListSubtraction( ( listChildren( AList1 , G ) ) , AList2 ) ) , ( AList1 ; AList2 ) , G )
+           BFSLoopDetect( a(x) , a(y) , ( actionListSubtraction( ( listChildren( AList1 , G ) ) , AList2 ) ) , ( AList1 ; AList2 ) , G )
    fi  
    fi .
 
@@ -704,22 +704,22 @@ fmod GRAPH-EQ is
   
   --- current node, target node, graph, list of visited nodes
   op DFSSubgraphSearch : Action Action Graph ActionList -> ActionList .
-  eq DFSSubgraphSearch( a[x] , a[y] , G , AList1 ) =
-  checkIfCorrectNode( a[x] , a[y] , children(a[x],G) , G , ( a[x] ; AList1 ) ) .
+  eq DFSSubgraphSearch( a(x) , a(y) , G , AList1 ) =
+  checkIfCorrectNode( a(x) , a(y) , children(a(x),G) , G , ( a(x) ; AList1 ) ) .
   
  
   --- current node, target node, list of children (of the current node), Graph, visited nodes
   op checkIfCorrectNode : Action Action ActionList Graph ActionList -> ActionList .
-  eq checkIfCorrectNode( a[x] , a[y] , ( ( a[i] ) ; AList2 ) , G , AList1 ) = 
-  if ( ( a[i] ) in AList1 ) --- if current node is in the list of visited nodes
-  	then ( nil ; checkIfCorrectNode( a[x] , a[y] , AList2, G , AList1 ) )  --- then skip current node
+  eq checkIfCorrectNode( a(x) , a(y) , ( ( a(i) ) ; AList2 ) , G , AList1 ) = 
+  if ( ( a(i) ) in AList1 ) --- if current node is in the list of visited nodes
+  	then ( nil ; checkIfCorrectNode( a(x) , a(y) , AList2, G , AList1 ) )  --- then skip current node
   else 
   	if ( i == y ) --- if target node is our current node, then 
-    	then ( AList1 ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) ) 
-        	else( DFSSubgraphSearch( a[i] , a[y] , G , AList1 ) ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) )
+    	then ( AList1 ; checkIfCorrectNode( a(x) , a(y) , AList2 , G , AList1 ) ) 
+        	else( DFSSubgraphSearch( a(i) , a(y) , G , AList1 ) ; checkIfCorrectNode( a(x) , a(y) , AList2 , G , AList1 ) )
     fi 
   fi .
-  eq checkIfCorrectNode( a[x] , a[y] , nil , G , AList1 ) = nil .
+  eq checkIfCorrectNode( a(x) , a(y) , nil , G , AList1 ) = nil .
   
   
   
@@ -734,20 +734,20 @@ fmod GRAPH-EQ is
 
  --- current node ,  searching node , visited nodes - returns nodes
   op DFS2 : Action Action ActionList Graph -> ActionList .
-  eq DFS2( a[i] , a[i] , AList , G) = ( a[i] ; AList ) .
-  eq DFS2( a[i] , a[n] , AList , G) = 
-  if ( a[i] in AList ) then
+  eq DFS2( a(i) , a(i) , AList , G) = ( a(i) ; AList ) .
+  eq DFS2( a(i) , a(n) , AList , G) = 
+  if ( a(i) in AList ) then
   	nil
   else
-  	---for all children of a[i]:
-    	----append DFS2( a[child] , a[n] , ( a[i] ; ( a[x] ; AList ) ) , G)
-  	forAllChildren( children(a[i], G) , a[n] , ( a[i] ; AList ) , G )
+  	---for all children of a(i):
+    	----append DFS2( a[child] , a(n) , ( a(i) ; ( a(x) ; AList ) ) , G)
+  	forAllChildren( children(a(i), G) , a(n) , ( a(i) ; AList ) , G )
   fi .
         
   ---- children , target node , visited nodes , graph 
   op forAllChildren : ActionList Action ActionList Graph -> ActionList .
-  eq forAllChildren( ( a[x] ; AList ) , a[n] , AList1 , G) = ( ( DFS2( a[x] , a[n] , AList1 , G) ) ; ( forAllChildren( AList , a[n] , AList1 , G) ) ) .
-  eq forAllChildren( nil , a[n] , AList1 , G ) = nil .
+  eq forAllChildren( ( a(x) ; AList ) , a(n) , AList1 , G) = ( ( DFS2( a(x) , a(n) , AList1 , G) ) ; ( forAllChildren( AList , a(n) , AList1 , G) ) ) .
+  eq forAllChildren( nil , a(n) , AList1 , G ) = nil .
   
 
 
@@ -757,24 +757,24 @@ fmod GRAPH-EQ is
  --- current node ,  searching node  - returns nodes
  --- return 
   op DFS3 : Action Action ActionList Graph TupleList -> ActionList .
-  eq DFS3( a[i] , a[i] , AList , G , TList1 ) = ( a[i] ; AList ) .
-  eq DFS3( a[i] , a[n] , AList , G , TList1 ) = 
-  if ( a[i] in AList ) then
+  eq DFS3( a(i) , a(i) , AList , G , TList1 ) = ( a(i) ; AList ) .
+  eq DFS3( a(i) , a(n) , AList , G , TList1 ) = 
+  if ( a(i) in AList ) then
   	nil
   else
-  	if ( isCookieBlocked( i , TList1 ) and isAtLeastOneParentBlocked( a[i] , TList1 , G ) ) then
+  	if ( isCookieBlocked( i , TList1 ) and isAtLeastOneParentBlocked( a(i) , TList1 , G ) ) then
     	nil
     else
-  	---for all children of a[i]:
-    	----append DFS2( a[child] , a[n] , ( a[i] ; ( a[x] ; AList ) ) , G)
-  		forAllChildren3( children(a[i], G) , a[n] , ( a[i] ; AList ) , G , TList1 )
+  	---for all children of a(i):
+    	----append DFS2( a[child] , a(n) , ( a(i) ; ( a(x) ; AList ) ) , G)
+  		forAllChildren3( children(a(i), G) , a(n) , ( a(i) ; AList ) , G , TList1 )
     fi
   fi .
         
   ---- children , target node , visited nodes , graph 
   op forAllChildren3 : ActionList Action ActionList Graph TupleList -> ActionList .
-  eq forAllChildren3( ( a[x] ; AList ) , a[n] , AList1 , G , TList1 ) = ( ( DFS3( a[x] , a[n] , AList1 , G , TList1 ) ) ; ( forAllChildren3( AList , a[n] , AList1 , G , TList1 ) ) ) .
-  eq forAllChildren3( nil , a[n] , AList1 , G , TList1 ) = nil .
+  eq forAllChildren3( ( a(x) ; AList ) , a(n) , AList1 , G , TList1 ) = ( ( DFS3( a(x) , a(n) , AList1 , G , TList1 ) ) ; ( forAllChildren3( AList , a(n) , AList1 , G , TList1 ) ) ) .
+  eq forAllChildren3( nil , a(n) , AList1 , G , TList1 ) = nil .
     
   
   ------
@@ -796,10 +796,10 @@ fmod GRAPH-EQ is
   ---- get all actions for deactivating a loop in the current rule (arguments already switched) 
   --- if the edge exists
   op getActionsForLoopDeactivation : Action Action Graph TupleList -> ActionList .
-  eq getActionsForLoopDeactivation( a[x] , a[y] , G , TList1 ) =
-  if isArcAction( a[x] , a[y] , G ) 
+  eq getActionsForLoopDeactivation( a(x) , a(y) , G , TList1 ) =
+  if isArcAction( a(x) , a(y) , G ) 
   	then
-  		(  removeDuplicates( DFS3( a[y] , a[x] , nil , G , TList1 ) )  ) 
+  		(  removeDuplicates( DFS3( a(y) , a(x) , nil , G , TList1 ) )  ) 
   else nil 
   fi . 
   eq getActionsForLoopDeactivation( Action1 , Action1 , G , TList1 ) = nil [owise] .
@@ -815,16 +815,16 @@ fmod GRAPH-EQ is
 
   --- gets all paths between first and second argument in graph, including first argument but excluding last argument
   op getAllPathsBetween : Action Action Graph -> ActionList .
-  eq getAllPathsBetween(a[x] , a[y] , G) = removeDuplicates(DFSSubgraphSearch( a[x] , a[y] ,  nil , G )) .
+  eq getAllPathsBetween(a(x) , a(y) , G) = removeDuplicates(DFSSubgraphSearch( a(x) , a(y) ,  nil , G )) .
   
   
   ---- OLD IMPLEMENTATION ---MAIN function for use in RULES 
   op getAllPathsForLoopDeactivation : Action Action Graph -> ActionList .
-  ----eq getAllPathsForLoopDeactivation(a[x] , a[y] , G) = ( removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil ))  ; a[y] ) .
-  eq getAllPathsForLoopDeactivation( a[x] , a[y] , G) = removeDuplicates(  DFS2( a[y] , a[x] , nil, G )  ) .
+  ----eq getAllPathsForLoopDeactivation(a(x) , a(y) , G) = ( removeDuplicates(DFSSubgraphSearch( a(x) , a(y) , G , nil ))  ; a(y) ) .
+  eq getAllPathsForLoopDeactivation( a(x) , a(y) , G) = removeDuplicates(  DFS2( a(y) , a(x) , nil, G )  ) .
   
   op allPaths : Action Action Graph -> ActionList .
-  eq allPaths( a[x] , a[y] , G ) = DFS2( a[x] , a[y] , nil , G ) .
+  eq allPaths( a(x) , a(y) , G ) = DFS2( a(x) , a(y) , nil , G ) .
   
   
   --- check if it is a loop while transitioning from first argument to second
@@ -838,7 +838,7 @@ fmod GRAPH-EQ is
   --- MAIN function to use in RULES
   ---detects loop given the first node is 0
   op detectLoop : Action Action Graph -> Bool .
-  eq detectLoop( Action1 , Action2 , G ) = BFSLoopDetect( Action1 , Action2 , (a[-5]) , nil , G ) .
+  eq detectLoop( Action1 , Action2 , G ) = BFSLoopDetect( Action1 , Action2 , (a(-5)) , nil , G ) .
   eq detectLoop( nil , Action2 , G) = false .
   eq detectLoop( Action1 , nil , G) = true .
   
@@ -859,32 +859,32 @@ fmod GRAPH-EQ is
   fi .
  
   op allParentCookiesActiveHelper : ActionList TupleList Graph -> Bool .
-  eq allParentCookiesActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) and allParentCookiesActiveHelper( AList1 , TList1, G ) .
+  eq allParentCookiesActiveHelper( ( a(i) ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) and allParentCookiesActiveHelper( AList1 , TList1, G ) .
   eq allParentCookiesActiveHelper( nil, TList1, G ) = true .
   
   --- action , cookies, graph
   op allParentCookiesActive : Action TupleList Graph -> Bool .
-  eq allParentCookiesActive( a[i] , TList1 , G ) = allParentCookiesActiveHelper( parents(a[i] , G ) , TList1 , G ) .
+  eq allParentCookiesActive( a(i) , TList1 , G ) = allParentCookiesActiveHelper( parents(a(i) , G ) , TList1 , G ) .
   eq allParentCookiesActive( Action1 , nil , G ) = false .
   
   
   op atLeastOneParentCookieActiveHelper : ActionList TupleList Graph -> Bool .
-  eq atLeastOneParentCookieActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or atLeastOneParentCookieActiveHelper( AList1 , TList1, G ) .
+  eq atLeastOneParentCookieActiveHelper( ( a(i) ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or atLeastOneParentCookieActiveHelper( AList1 , TList1, G ) .
   eq atLeastOneParentCookieActiveHelper( nil, TList1, G ) = false .
   
   op atLeastOneParentCookieActive : Action TupleList Graph -> Bool .
-  eq atLeastOneParentCookieActive( a[i] , TList1 , G ) = atLeastOneParentCookieActiveHelper( parents( a[i] , G ) , TList1 , G ) .
+  eq atLeastOneParentCookieActive( a(i) , TList1 , G ) = atLeastOneParentCookieActiveHelper( parents( a(i) , G ) , TList1 , G ) .
   eq atLeastOneParentCookieActive( Action1 , nil , G ) = false .
   
   
 
 
   op atLeastOneChildCookieActiveHelper : ActionList TupleList Graph -> Bool .
-  eq atLeastOneChildCookieActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or atLeastOneChildCookieActiveHelper( AList1 , TList1, G ) .
+  eq atLeastOneChildCookieActiveHelper( ( a(i) ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or atLeastOneChildCookieActiveHelper( AList1 , TList1, G ) .
   eq atLeastOneChildCookieActiveHelper( nil, TList1, G ) = false .
   
   op atLeastOneChildCookieActive : Action TupleList Graph -> Bool .
-  eq atLeastOneChildCookieActive( a[i] , TList1 , G ) = atLeastOneChildCookieActiveHelper( children( a[i] , G ) , TList1 , G ) .
+  eq atLeastOneChildCookieActive( a(i) , TList1 , G ) = atLeastOneChildCookieActiveHelper( children( a(i) , G ) , TList1 , G ) .
   eq atLeastOneChildCookieActive( Action1 , nil , G ) = false .
   
   
@@ -892,52 +892,52 @@ fmod GRAPH-EQ is
 
   
   op xorParentCookieActiveHelper : ActionList Bool TupleList Graph -> Bool .
-  eq xorParentCookieActiveHelper( ( a[i] ; AList1 ) , Bool1 , TList1 , G ) = isCookieActive( i , TList1 ) xor allParentCookiesActiveHelper( AList1 , TList1, G ) .
+  eq xorParentCookieActiveHelper( ( a(i) ; AList1 ) , Bool1 , TList1 , G ) = isCookieActive( i , TList1 ) xor allParentCookiesActiveHelper( AList1 , TList1, G ) .
   eq xorParentCookieActiveHelper( nil, Bool1 , TList1, G ) = Bool1 .
 
   op xorParentCookieActive : Action TupleList Graph -> Bool .
-  eq xorParentCookieActive( a[i] , TList1 , G ) = xorParentCookieActiveHelper( parents( a[i] , G ) , isCookieActive( firstActionInt( ( parents( a[i] , G ) ) ) , TList1 ) , TList1 , G ) .
+  eq xorParentCookieActive( a(i) , TList1 , G ) = xorParentCookieActiveHelper( parents( a(i) , G ) , isCookieActive( firstActionInt( ( parents( a(i) , G ) ) ) , TList1 ) , TList1 , G ) .
   eq xorParentCookieActive( Action1 , nil , G ) = false .
   
   op isAtLeastOneXorParentChildActiveHelper : ActionList TupleList Graph -> Bool .
   eq isAtLeastOneXorParentChildActiveHelper( nil , TList1 , G ) = false .
-  eq isAtLeastOneXorParentChildActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = 
-  if isXor(a[i] , G) then atLeastOneChildCookieActive( a[i] , TList1 , G ) or isAtLeastOneXorParentChildActiveHelper( AList1 , TList1 , G )
+  eq isAtLeastOneXorParentChildActiveHelper( ( a(i) ; AList1 ) , TList1 , G ) = 
+  if isXor(a(i) , G) then atLeastOneChildCookieActive( a(i) , TList1 , G ) or isAtLeastOneXorParentChildActiveHelper( AList1 , TList1 , G )
   else isAtLeastOneXorParentChildActiveHelper( AList1 , TList1 , G )
   fi .
   
   op isAtLeastOneXorParentChildActive : Action TupleList Graph -> Bool .
-  eq isAtLeastOneXorParentChildActive( a[i] , TList1 , G ) = isAtLeastOneXorParentChildActiveHelper( parents( a[i], G ) , TList1 , G ) .
+  eq isAtLeastOneXorParentChildActive( a(i) , TList1 , G ) = isAtLeastOneXorParentChildActiveHelper( parents( a(i), G ) , TList1 , G ) .
   
   op isAtLeastOneParentBlocked : Action TupleList Graph -> Bool .
-  eq isAtLeastOneParentBlocked( a[i] , ( ( t( x , y) ) , TList1 ) , G ) =
-  if ( y == -1 ) and ( ( a[x] ) in parents( a[i] , G ) ) then true 
-  else isAtLeastOneParentBlocked( a[i] , TList1 , G ) 
+  eq isAtLeastOneParentBlocked( a(i) , ( ( t( x , y) ) , TList1 ) , G ) =
+  if ( y == -1 ) and ( ( a(x) ) in parents( a(i) , G ) ) then true 
+  else isAtLeastOneParentBlocked( a(i) , TList1 , G ) 
   fi .
-  eq isAtLeastOneParentBlocked( a[i] , nil , G ) = false .
+  eq isAtLeastOneParentBlocked( a(i) , nil , G ) = false .
 
   
   op isXorInList : ActionList Graph -> Bool .
-  eq isXorInList( ( a[i] ; AList1 ) , G ) = isXor( a[i] , G ) or isXorInList(  AList1  , G ) .
+  eq isXorInList( ( a(i) ; AList1 ) , G ) = isXor( a(i) , G ) or isXorInList(  AList1  , G ) .
   eq isXorInList( nil , G ) = false .
   
   op getXorListInActionList : ActionList Graph -> ActionList .
-  eq getXorListInActionList( ( a[i] ; AList1 ) , G ) = 
-  if isXor( a[i] , G ) then ( a[i] ; getXorListInActionList( AList1 , G ) ) else getXorListInActionList( AList1 , G ) fi .
+  eq getXorListInActionList( ( a(i) ; AList1 ) , G ) = 
+  if isXor( a(i) , G ) then ( a(i) ; getXorListInActionList( AList1 , G ) ) else getXorListInActionList( AList1 , G ) fi .
   eq getXorListInActionList( nil , G ) = nil .
   
   op blockActionListCookies : ActionList TupleList -> TupleList .
-  eq blockActionListCookies( ( a[i] ; AList1 ) , TList ) = blockActionListCookies( AList1 , blockCookie( i , TList) ) .
+  eq blockActionListCookies( ( a(i) ; AList1 ) , TList ) = blockActionListCookies( AList1 , blockCookie( i , TList) ) .
   eq blockActionListCookies( nil , TList ) = TList . 
   
   op removeAction : Action ActionList -> ActionList .
-  eq removeAction( a[i] , ( a[n] ; AList1 ) ) = if (i == n) then removeAction(a[i] , AList1) else a[n] ; removeAction(a[i] , AList1) fi .
-  eq removeAction( a[i] , nil ) = nil .
+  eq removeAction( a(i) , ( a(n) ; AList1 ) ) = if (i == n) then removeAction(a(i) , AList1) else a(n) ; removeAction(a(i) , AList1) fi .
+  eq removeAction( a(i) , nil ) = nil .
   
 
   op blockParentAndSiblingCookiesIfParentIsXor : Action Graph TupleList -> TupleList . 
-  eq blockParentAndSiblingCookiesIfParentIsXor( ( a[i] ) , G , TList ) = 
-  if isXorInList( parents( a[i] , G ) , G ) then blockActionListCookies( removeAction( a[i] , listChildren(getXorListInActionList( parents( a[i] , G ) , G ), G ) )  , blockActionListCookies( getXorListInActionList( parents( a[i] , G ) , G ) , TList ) )
+  eq blockParentAndSiblingCookiesIfParentIsXor( ( a(i) ) , G , TList ) = 
+  if isXorInList( parents( a(i) , G ) , G ) then blockActionListCookies( removeAction( a(i) , listChildren(getXorListInActionList( parents( a(i) , G ) , G ), G ) )  , blockActionListCookies( getXorListInActionList( parents( a(i) , G ) , G ) , TList ) )
   else TList fi .
 
 
@@ -952,16 +952,16 @@ fmod GRAPH-EQ is
   --- if it doesn't have an ending node, we add it after the node with the ending node
   op normalizeSequence : ActionList -> ActionList .
   eq normalizeSequence( AList1 ) = 
-  if ( firstAction( AList1 ) == ( a[-5] ) )
+  if ( firstAction( AList1 ) == ( a(-5) ) )
   	then --- if -5 is present in AList1
-  		if ( lastAction( AList1 ) == ( a[-7] ) )  
+  		if ( lastAction( AList1 ) == ( a(-7) ) )  
         	then --- if both -5 and -7 are present in AList1
             	AList1
             else --- if -5 is present in AList1 but -7 is not present in AList1
                 addFinalAction( AList1 )
         fi
     else --- if -5 is NOT present in AList1
-  		if ( lastAction( AList1 ) == ( a[-7] ) ) 
+  		if ( lastAction( AList1 ) == ( a(-7) ) ) 
         	then --- if -5 is NOT present and -7 is present in AList1
             	addStartingAction( AList1 )
             else --- if -5 is NOT present in AList1 and -7 is NOT present in AList1
@@ -970,18 +970,18 @@ fmod GRAPH-EQ is
   fi .
   
   op lastAction : ActionList -> Action .
-  eq lastAction( AList1 ; ( a[x] ) ) = a[x] .
+  eq lastAction( AList1 ; ( a(x) ) ) = a(x) .
   eq lastAction( nil ) = nil .
   
   op firstAction : ActionList -> Action .
-  eq firstAction( ( a[x] ) ; AList1 ) = a[x] .
+  eq firstAction( ( a(x) ) ; AList1 ) = a(x) .
   eq firstAction( nil ) = nil .
   
   op addFinalAction : ActionList -> ActionList .
-  eq addFinalAction( AList1 ) = ( AList1 ; a[-7] ) .
+  eq addFinalAction( AList1 ) = ( AList1 ; a(-7) ) .
   
   op addStartingAction : ActionList -> ActionList .
-  eq addStartingAction( AList1 ) = ( a[-5] ; AList1 ) .
+  eq addStartingAction( AList1 ) = ( a(-5) ; AList1 ) .
   
   
   
@@ -1058,8 +1058,8 @@ fmod GRAPH-EQ is
   eq genCFG( AList , G ) = ( normalizeSequence( AList ) | nil | nil | nil | normalizeGraph( G ) | starting ) .
 
   op isNotAnd : Action Graph -> Bool .
-  eq isNotAnd( a[i] , G ) =
-  	if not ( checkType( a[i], G ) == "and" ) then true
+  eq isNotAnd( a(i) , G ) =
+  	if not ( checkType( a(i), G ) == "and" ) then true
     else false
     fi .
 
@@ -1094,11 +1094,11 @@ mod GRAPH-RL is
   --- works correctly
   --- the starting node DOES NOT CHECK node function
   rl [start]: 
-    a[i] ; AList | TupleCookies | CList | EList | G | starting  
-    => if isStartingNode( a[i] , G ) then
-    AList | activateCookie( i , TupleCookies) | ( CList ; (a[i]) ) | EList | G | executing
+    a(i) ; AList | TupleCookies | CList | EList | G | starting  
+    => if isStartingNode( a(i) , G ) then
+    AList | activateCookie( i , TupleCookies) | ( CList ; (a(i)) ) | EList | G | executing
 	else 
-    AList | TupleCookies | CList | ( EList ; (a[i]) ) | G | starting 
+    AList | TupleCookies | CList | ( EList ; (a(i)) ) | G | starting 
     fi .
   --- works correctly
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
@@ -1114,32 +1114,32 @@ mod GRAPH-RL is
     fi .
     
   rl [step] :
-    (a[i]) ; AList | TupleCookies | CList | EList | G | executing
+    (a(i)) ; AList | TupleCookies | CList | EList | G | executing
     => 
-   if not ( ( isAtLeastOneParentBlocked( a[i] , TupleCookies, G ) ) and ( isCookieBlocked( i , TupleCookies ) ) ) then
+   if not ( ( isAtLeastOneParentBlocked( a(i) , TupleCookies, G ) ) and ( isCookieBlocked( i , TupleCookies ) ) ) then
      if isCookieActive(i, TupleCookies) then
-       if detectNotBlockedLoop( lastAction(CList) , a[i] , G , TupleCookies ) and isCookieNotActive(i, deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a[i] , G , TupleCookies ) , TupleCookies ) ) then
-     		if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a[i] , G , TupleCookies ) , TupleCookies ) ) )   | (CList ; (a[i])) | EList | G | executing 
+       if detectNotBlockedLoop( lastAction(CList) , a(i) , G , TupleCookies ) and isCookieNotActive(i, deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) then
+     		if isAnd((a(i)), G) and allParentCookiesActive( a(i) , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )   | (CList ; (a(i))) | EList | G | executing 
       		else
-      			if ( isNotAnd( a[i] , G ) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a[i] , G , TupleCookies ) , TupleCookies ) ) )  | (CList ; (a[i])) | EList | G | executing 
+      			if ( isNotAnd( a(i) , G ) and atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , deactivateActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )  | (CList ; (a(i))) | EList | G | executing 
         		else
-            		AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
+            		AList | TupleCookies | CList | (EList ; (a(i))) | G | executing 
         		fi
       		fi
        else 
-       	 AList | TupleCookies | CList | (EList ; (a[i])) | G | executing
+       	 AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
        fi
     else
      if isCookieNotActive(i, TupleCookies) then
-      if isAnd((a[i]), G) and allParentCookiesActive( a[i] , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) )  | (CList ; (a[i])) | EList | G | executing 
+      if isAnd((a(i)), G) and allParentCookiesActive( a(i) , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing 
       else
-      if ( isNotAnd( a[i] , G ) and atLeastOneParentCookieActive( a[i] , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a[i] , G , activateCookie( i , TupleCookies ) )  | (CList ; (a[i])) | EList | G | executing 
+      if ( isNotAnd( a(i) , G ) and atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing 
         else
-        	AList | TupleCookies | CList | (EList ; (a[i])) | G | executing 
+        	AList | TupleCookies | CList | (EList ; (a(i))) | G | executing 
         fi
       fi
-      else AList | TupleCookies | CList | (EList ; (a[i])) | G | executing fi
+      else AList | TupleCookies | CList | (EList ; (a(i))) | G | executing fi
     fi
-   else AList | TupleCookies | CList | (EList ; (a[i])) | G | executing
+   else AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
    fi .
 endm
