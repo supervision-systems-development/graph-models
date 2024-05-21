@@ -559,15 +559,15 @@ fmod GRAPH-EQ is
   eq blockCookie( x , TList ) = 
   if tupleInTupleList( t( x , -1 ) , TList ) then 
     TList
-    else ( ( TList , t( x , -1 ) ) )
-    fi .
+    else 
+	 if tupleInTupleList( t( x , 1 ) , TList) then blockCookie( x , removeTupleFromTupleList( t( x , 1 ) , TList ) ) 
+	 else 
+	  ( TList , t( x , -1 ) ) 	
+	 fi
+  fi .
    
   op blockActionCookie : Action TupleList -> TupleList .
-  eq blockActionCookie( a(i) , TList ) = 
-  if tupleInTupleList( t( i , -1 ) , TList ) then 
-    TList
-    else ( ( TList , t( i , -1 ) ) )
-    fi .
+  eq blockActionCookie( a(i) , TList ) = blockCookie( i , TList ) .
     
   op isCookieActive : Int TupleList -> Bool .
   eq isCookieActive( x , TList ) =
@@ -1140,5 +1140,4 @@ mod GRAPH-RL is
    else AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
    fi .
 endm
-
-search simpleLoopTest =>* InputActionList | CookieT | CorrectActionList | IncorrectActionList | G | Status .                             
+                         
