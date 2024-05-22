@@ -565,7 +565,7 @@ fmod GRAPH-EQ is
     TList
   else 
     if tupleInTupleList( t( x , 1 ) , TList) then 
-      blockCookie( x , removeTupleFromTupleList( t( x , 1 ) , TList ) ) 
+      ( removeTupleFromTupleList( t( x , 1 ) , TList ) , t( x , -1 ) ) 
     else 
       ( TList , t( x , -1 ) ) 	
     fi
