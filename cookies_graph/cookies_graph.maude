@@ -563,11 +563,12 @@ fmod GRAPH-EQ is
   eq blockCookie( x , TList ) = 
   if tupleInTupleList( t( x , -1 ) , TList ) then 
     TList
+  else 
+    if tupleInTupleList( t( x , 1 ) , TList) then 
+      blockCookie( x , removeTupleFromTupleList( t( x , 1 ) , TList ) ) 
     else 
-	 if tupleInTupleList( t( x , 1 ) , TList) then blockCookie( x , removeTupleFromTupleList( t( x , 1 ) , TList ) ) 
-	 else 
-	  ( TList , t( x , -1 ) ) 	
-	 fi
+      ( TList , t( x , -1 ) ) 	
+    fi
   fi .
    
   op blockActionCookie : Action TupleList -> TupleList .
