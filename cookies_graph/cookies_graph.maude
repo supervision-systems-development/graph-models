@@ -1118,7 +1118,7 @@ mod GRAPH-RL is
     (a(i)) ; AList | TupleCookies | CList | EList | G | executing
     => 
    if not ( ( isAtLeastOneParentBlocked( a(i) , TupleCookies, G ) ) and ( isCookieBlocked( i , TupleCookies ) ) ) then
-     if isCookieActive(i, TupleCookies) then
+     if ( isCookieActive(i, TupleCookies) or isCookieBlocked(i, TupleCookies) ) then
        if enteringLoop( lastAction(CList) , a(i) , G , TupleCookies ) and isCookieNotActive(i, resetActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) then
      		if isAnd((a(i)), G) and allParentCookiesActive( a(i) , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , resetActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )   | (CList ; (a(i))) | EList | G | executing 
       		else
@@ -1131,7 +1131,7 @@ mod GRAPH-RL is
        	 AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
        fi
     else
-     if isCookieNotActive(i, TupleCookies) then
+     if ( isCookieNotActive(i, TupleCookies) and isCookieNotBlocked(i , TupleCookies) ) then
       if isAnd((a(i)), G) and allParentCookiesActive( a(i) , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing 
       else
       if ( isNotAnd( a(i) , G ) and atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing 
