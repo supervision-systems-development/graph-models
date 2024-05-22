@@ -184,6 +184,16 @@ fmod SEQUENCES is
     (n[3]: nseq) -> (n[4]: nand) ;;
     (n[4]: nand) -> (n[-7]: nseq) .
 
+  ---
+  op xorGraph : -> Graph .
+  eq xorGraph =
+    (n[-5]: nseq) -> (n[1]: nxor) ;;
+    (n[1]: nxor) -> (n[2]: nseq) ;;
+    (n[1]: nxor) -> (n[3]: nseq) ;;
+    (n[2]: nseq) -> (n[4]: nseq) ;;
+    (n[3]: nseq) -> (n[4]: nseq) ;;
+    (n[4]: nseq) -> (n[-7]: nseq) .
+
   *** Action sequences for testing ***
   op seq1 : -> ActionList .
   eq seq1 = (a[-5]) ; (a[1]) ; (a[2]) ; (a[-7]) .
@@ -275,6 +285,12 @@ fmod GRAPH-EQ is
       fi
     fi .
 
+  ---
+  op blockIndicators : Action IndicatorList Graph -> IndicatorList .
+  eq blockIndicators((a[x]), nil, G) = nil .
+  eq blockIndicators((a[x]), nil, G) = 
+    blockList(getXORParents((a[x]), G)) and blockList(getSiblings((a[x]), G)) and (IList ; getIndicator((a[x]))) .
+
   --- Check if the node is starting (-5) or fin (-7). If neither, is considered "other"
   op checkFunction : Action Graph -> String . 
   eq checkFunction((a[x]), G1 ;; (n[x]: type) -> (n[y]: type') ;; G2) = 
@@ -316,21 +332,54 @@ fmod GRAPH-EQ is
   op isParentBlocked : Action IndicatorList Graph -> Bool .
   eq isParentBlocked((a[x]), nil, G) = false .
   eq isParentBlocked((a[x]), (i[m]: n) ; IList, G) = 
-  if (n == -1) and (a[m]) in parents((a[x]), G)
-  then true
-  else isParentBlocked((a[x]), IList, G)
-  fi .
+    if (n == -1) and (a[m]) in parents((a[x]), G)
+    then true
+    else isParentBlocked((a[x]), IList, G)
+    fi .
 
   ---
-  op isParentXOR : 
-  eq isParentXOR()
-
-  ---
-  ---op lastAction : ActionList -> Action .
-  ---eq lastAction((AList ; (a[x]))) = (a[x]) .
-  ---eq lastAction(nil) = nil .
+  op isParentXOR : Action Graph -> Bool .
+  eq isParentXOR((a[x]), G) =
+    if isXorInList(parents((a[x]), G), G)
+    then true
+    else false
+    fi .
 
   *** Auxiliary Equations ***
+   --- Check if all actions are in the target list of active actions
+  op allIndicatorsActive : ActionList IndicatorList -> Bool .
+  eq allIndicatorsActive(nil, IList) = true .
+  eq allIndicatorsActive(((a[x]) ; AList), IList) =
+    (not getIndicator((a[x]), IList) == (i[x]: 0)) and (getIndicator((a[x]), IList) in IList) and allIndicatorsActive(AList, IList) .
+  
+  ---
+  op blockIndicator : Indicator -> Indicator .
+  eq blockIndicator((i[x]: y)) = (i[x]: -1) .
+
+   ---
+  op blockList : ActionList IndicatorList -> IndicatorList .
+  eq blockList((a[x]) ; AList, IList) =
+    blockIndicator(getIndicator((a[x]), IList)) ; blockList(AList, IList) .
+
+  --- To obtain the list of direct children of a node in a graph.
+  op children : Action Graph -> ActionList .
+  eq children((a[x]), (n[x]: type) -> (n[y]: type') ;; G) =
+    (a[y]) ; children((a[x]), G) .
+  eq children((a[x]), G) = nil [owise] .
+
+  ---
+  op getIndicator : Action IndicatorList -> Indicator .
+  eq getIndicator((a[x]), IList ; (i[x]: y) ; IList') = (i[x]: y) .
+  eq getIndicator((a[x]), IList) = (i[x]: 0) [owise] .
+
+  op getXORParents : Action Graph -> ActionList .
+  eq getXORParents((a[x]), (n[y]: nxor) -> (n[x]: type) ;; G) =
+    (a[y]) ; getXORParents((a[x]), G) .
+
+  op getSiblings : Action Graph -> ActionList .
+  eq getSiblings((a[x]), (n[y]: nxor) -> (n[x]: type) ;; G) =
+    children((a[y]), G) ; getSiblings((a[x]), G) .
+
   --- Action in List of Actions 
   op _in_ : Action ActionList -> Bool .
   eq (a[x]) in (AList ; (a[x]) ; AList') = true .
@@ -340,30 +389,6 @@ fmod GRAPH-EQ is
   op _in_ : Indicator IndicatorList -> Bool .
   eq (i[x]: y) in (IList ; (i[x]: y) ; IList') = true .
   eq (i[x]: y) in IList = false [owise] .
-
-  --- To obtain the list of direct parents of a node in a graph. -- returns parents
-  op parents : Action Graph -> ActionList .
-  eq parents((a[x]), (n[y]: type') -> (n[x]: type) ;; G) =
-    (a[y]) ; parents((a[x]), G) .
-  eq parents((a[x]), G) = nil [owise] .
-
-  --- Check if all actions are in the target list of active actions
-  op allIndicatorsActive : ActionList IndicatorList -> Bool .
-  eq allIndicatorsActive(nil, IList) = true .
-  eq allIndicatorsActive(((a[x]) ; AList), IList) =
-    (not getIndicator((a[x]), IList) == (i[x]: 0)) and (getIndicator((a[x]), IList) in IList) and allIndicatorsActive(AList, IList) .
-  
-  --- To obtain the list of direct children of a node in a graph.
-  op children : Action Graph -> ActionList .
-  eq children((a[x]), (n[x]: type) -> (n[x]: type') ;; G) =
-    (a[x]) ; children((a[x]), G) .
-  eq children((a[x]), G) = nil [owise] .
-
-  ---
-  op getIndicator : Action IndicatorList -> Indicator .
-  eq getIndicator((a[x]), IList ; (i[x]: y) ; IList') = (i[x]: y) .
-  eq getIndicator((a[x]), IList) = (i[x]: 0) [owise] .
-
   ---
   op isActive : Indicator -> Bool .
   eq isActive((i[x]: y)) =
@@ -371,6 +396,17 @@ fmod GRAPH-EQ is
     then true
     else false
     fi .
+
+  op isXorInList : ActionList Graph -> Bool .
+  eq isXorInList(nil , G) = false .
+  eq isXorInList((a[x]) ; AList, G ) = 
+    checkType(a[x], G) == "xor" or isXorInList(AList, G) .
+  
+  --- To obtain the list of direct parents of a node in a graph. -- returns parents
+  op parents : Action Graph -> ActionList .
+  eq parents((a[x]), (n[y]: type') -> (n[x]: type) ;; G) =
+    (a[y]) ; parents((a[x]), G) .
+  eq parents((a[x]), G) = nil [owise] .
 
   --- Remove inactive indicator to substitute for active indicator
   op removeInactive : Int IndicatorList -> IndicatorList .
@@ -398,10 +434,6 @@ mod GRAPH-RL is
   var x y z : Int . --- Node ids
 
   *** Rules ***
-  --- Preliminary setup rule: Insert start and fin nodes into the graph (optional rule) 
-  --- Requires consultation
-  --- TO DO
-
   --- Start the execution: Transition status from "starting" to "executing" and consume starting action
   --- Actions start and fin are artificially inserted to control the sequences
   rl [start]: 
@@ -428,27 +460,43 @@ mod GRAPH-RL is
   
   ---
   rl [step] :
-    (a[x]) ; AList | IList | CList | EList | G | executing
-    => 
-    if not (isParentBlocked((a[x]), IList, G) and isBlocked((a[x]), IList)) 
+  (a[x]) ; AList | IList | CList | EList | G | executing
+  => 
+  if not (isParentBlocked((a[x]), IList, G)) and not (isBlocked((a[x]), IList)) and not (activeParents((a[x]), IList, G) == "none")
+  then
+    if not (isParentXOR((a[x]), G))
     then
-      ---if not (isParentXOR)
-      then
+      ---if not (parentIndicatorActive()) then *** Detect loop or repeated action
         if checkType((a[x]), G) == "and" and activeParents((a[x]), IList, G) == "all"
         then 
-          AList | IList | (CList ; (a[x])) | EList | G | executing 
+          AList | IList ; (i[x]: 1) | (CList ; (a[x])) | EList | G | executing 
         else
           if not (checkType((a[x]), G) == "and") and activeParents((a[x]), IList, G) == "some"
           then 
-            AList | IList | (CList ; (a[x])) | EList | G | executing 
+            AList | IList ; (i[x]: 1) | (CList ; (a[x])) | EList | G | executing 
           else
             AList | IList | CList | (EList ; (a[x])) | G | executing 
           fi
         fi 
       ---fi
-    else
-      AList | IList | CList | (EList ; (a[x])) | G | executing 
-    fi .
+    else *** If parent is XOR, block parent and sibling indicators
+       ---if not (parentIndicatorActive()) then *** Detect loop or repeated action
+        if checkType((a[x]), G) == "and" and activeParents((a[x]), IList, G) == "all"
+        then 
+          AList | blockIndicators() | (CList ; (a[x])) | EList | G | executing 
+        else
+          if not (checkType((a[x]), G) == "and") and activeParents((a[x]), IList, G) == "some"
+          then 
+            AList | blockIndicators() | (CList ; (a[x])) | EList | G | executing 
+          else
+            AList | IList | CList | (EList ; (a[x])) | G | executing 
+          fi
+        fi 
+      ---fi
+    fi
+  else
+    AList | IList | CList | (EList ; (a[x])) | G | executing 
+  fi .
 endm
 
 --- Things I have to check:
@@ -471,3 +519,8 @@ endm
 ---red allIndicatorsActive((a[3]), someInd) .
 ---red activeParents((a[4]), someInd, andGraph) .
 ---red isParentBlocked((a[2]), (i[-5]: 1) ; (i[1]: -1), andGraph) .
+---red isXorInList((a[1]) ; (a[2]), xorGraph) .
+---red isParentXOR((a[3]), xorGraph) .
+*** PENDING: get the siblings
+*** PENDING: test blockIndicators and related functions
+*** PENDING: loop detection
