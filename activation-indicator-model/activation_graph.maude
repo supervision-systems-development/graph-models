@@ -247,6 +247,34 @@ fmod GRAPH-EQ is
   var x y z n m : Int . --- Node ids
 
   *** Equations ***
+  --- Activates indicator if not already active
+  op activateIndicator : Int IndicatorList -> IndicatorList .
+  eq activateIndicator(x, IList) = 
+    if (i[x]: 1) in IList
+    then 
+      IList
+    else 
+      if (i[x]: -1) in IList --- If blocked, keep blocked
+      then
+        IList
+      else 
+        (i[x]: 1) ; IList
+      fi
+    fi .
+
+  --- Return how many parents are in list of correct actions
+  op activeParents : Action IndicatorList Graph -> String .
+  eq activeParents((a[x]), IList, G) =
+    if allIndicatorsActive(parents((a[x]), G), IList) == true
+    then 
+      "all"
+    else 
+      if someIndicatorsActive(parents((a[x]), G), IList) == true
+      then "some"
+      else "none"
+      fi
+    fi .
+
   --- Check if the node is starting (-5) or fin (-7). If neither, is considered "other"
   op checkFunction : Action Graph -> String . 
   eq checkFunction((a[x]), G1 ;; (n[x]: type) -> (n[y]: type') ;; G2) = 
@@ -276,37 +304,31 @@ fmod GRAPH-EQ is
     fi .
 
   ---
+  op isBlocked : Action IndicatorList -> Bool .
+  eq isBlocked((a[x]), nil) = false .
+  eq isBlocked((a[x]), IList) = 
+    if (i[x]: -1) in IList
+    then true
+    else false
+    fi .
+
+  ---
+  op isParentBlocked : Action IndicatorList Graph -> Bool .
+  eq isParentBlocked((a[x]), nil, G) = false .
+  eq isParentBlocked((a[x]), (i[m]: n) ; IList, G) = 
+  if (n == -1) and (a[m]) in parents((a[x]), G)
+  then true
+  else isParentBlocked((a[x]), IList, G)
+  fi .
+
+  ---
+  op isParentXOR : 
+  eq isParentXOR()
+
+  ---
   ---op lastAction : ActionList -> Action .
   ---eq lastAction((AList ; (a[x]))) = (a[x]) .
   ---eq lastAction(nil) = nil .
-
-  --- Activates indicator if not already active
-  op activateIndicator : Int IndicatorList -> IndicatorList .
-  eq activateIndicator(x, IList) = 
-  if (i[x]: 1) in IList
-  then 
-    IList
-  else 
-    if (i[x]: -1) in IList --- If blocked, keep blocked
-    then
-      IList
-    else 
-      (i[x]: 1) ; IList
-    fi
-  fi .
-
-  --- Return how many parents are in list of correct actions
-  op activeParents : Action IndicatorList Graph -> String .
-  eq activeParents((a[x]), IList, G) =
-    if allIndicatorsActive(parents((a[x]), G), IList) == true
-    then 
-      "all"
-    else 
-      if someIndicatorsActive(parents((a[x]), G), IList) == true
-      then "some"
-      else "none"
-      fi
-    fi .
 
   *** Auxiliary Equations ***
   --- Action in List of Actions 
@@ -331,21 +353,11 @@ fmod GRAPH-EQ is
   eq allIndicatorsActive(((a[x]) ; AList), IList) =
     (not getIndicator((a[x]), IList) == (i[x]: 0)) and (getIndicator((a[x]), IList) in IList) and allIndicatorsActive(AList, IList) .
   
-  --- Check if at least one of the actions is in the target list of active actions
-  op someIndicatorsActive : ActionList IndicatorList -> Bool .
-  eq someIndicatorsActive(nil, IList) = false .
-  eq someIndicatorsActive(((a[x]) ; AList), IList) =
-    (not getIndicator((a[x]), IList) == (i[x]: 0)) and (getIndicator((a[x]), IList) in IList) or someIndicatorsActive(AList, IList) .
-
   --- To obtain the list of direct children of a node in a graph.
   op children : Action Graph -> ActionList .
   eq children((a[x]), (n[x]: type) -> (n[x]: type') ;; G) =
     (a[x]) ; children((a[x]), G) .
   eq children((a[x]), G) = nil [owise] .
-
-  --- Remove inactive indicator to substitute for active indicator
-  op removeInactive : Int IndicatorList -> IndicatorList .
-  eq removeInactive(x, IList ; (i[x]: 0) ; IList') = (IList ; IList') .
 
   ---
   op getIndicator : Action IndicatorList -> Indicator .
@@ -359,6 +371,16 @@ fmod GRAPH-EQ is
     then true
     else false
     fi .
+
+  --- Remove inactive indicator to substitute for active indicator
+  op removeInactive : Int IndicatorList -> IndicatorList .
+  eq removeInactive(x, IList ; (i[x]: 0) ; IList') = (IList ; IList') .
+
+  --- Check if at least one of the actions is in the target list of active actions
+  op someIndicatorsActive : ActionList IndicatorList -> Bool .
+  eq someIndicatorsActive(nil, IList) = false .
+  eq someIndicatorsActive(((a[x]) ; AList), IList) =
+    (not getIndicator((a[x]), IList) == (i[x]: 0)) and (getIndicator((a[x]), IList) in IList) or someIndicatorsActive(AList, IList) .
 
 endfm
 
@@ -383,13 +405,13 @@ mod GRAPH-RL is
   --- Start the execution: Transition status from "starting" to "executing" and consume starting action
   --- Actions start and fin are artificially inserted to control the sequences
   rl [start]: 
-    (a[x]) ; AList | IList | CList | EList | G | starting  
+    (a[x]) ; AList | nil | nil | nil | G | starting  
     => 
     if checkFunction((a[x]), G) == "start"
     then
-      AList | activateIndicator(x, IList) | (CList ; (a[x])) | EList | G | executing
+      AList | activateIndicator(x, nil) | (nil ; (a[x])) | nil | G | executing
 	  else 
-      AList | IList | CList | (EList ; (a[x])) | G | starting 
+      AList | nil | nil | (nil ; (a[x])) | G | starting 
     fi .
 
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
@@ -408,19 +430,36 @@ mod GRAPH-RL is
   rl [step] :
     (a[x]) ; AList | IList | CList | EList | G | executing
     => 
-    if checkType((a[x]), G) == "and" and activeParents((a[x]), IList, G) == "all"
-    then 
-      AList | IList | (CList ; (a[x])) | EList | G | executing 
+    if not (isParentBlocked((a[x]), IList, G) and isBlocked((a[x]), IList)) 
+    then
+      ---if not (isParentXOR)
+      then
+        if checkType((a[x]), G) == "and" and activeParents((a[x]), IList, G) == "all"
+        then 
+          AList | IList | (CList ; (a[x])) | EList | G | executing 
+        else
+          if not (checkType((a[x]), G) == "and") and activeParents((a[x]), IList, G) == "some"
+          then 
+            AList | IList | (CList ; (a[x])) | EList | G | executing 
+          else
+            AList | IList | CList | (EList ; (a[x])) | G | executing 
+          fi
+        fi 
+      ---fi
     else
-      if not (checkType((a[x]), G) == "and") and activeParents((a[x]), IList, G) == "some"
-      then 
-        AList | IList | (CList ; (a[x])) | EList | G | executing 
-      else
-        AList | IList | CList | (EList ; (a[x])) | G | executing 
-      fi
+      AList | IList | CList | (EList ; (a[x])) | G | executing 
     fi .
-  
 endm
+
+--- Things I have to check:
+--- If parent is XOR
+--- Have I already been executed: If I am starting a loop or I am incorrectly executed
+
+--- Assume simplest path as default:
+--- parent is SEQ and not blocked
+--- I am not blocked
+--- Not been executed before (no loop and not incorrectly performed)
+--- Check if I am AND, OR or XOR
 
 *** Testing functions ***
 ---red checkType((a[4]), andGraph) .
@@ -431,3 +470,4 @@ endm
 ---red parents((a[4]), andGraph) .
 ---red allIndicatorsActive((a[3]), someInd) .
 ---red activeParents((a[4]), someInd, andGraph) .
+---red isParentBlocked((a[2]), (i[-5]: 1) ; (i[1]: -1), andGraph) .

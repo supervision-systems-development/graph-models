@@ -8,7 +8,6 @@ endfm
 
 *** Definition of Node function ***
 fmod NFUNC is
-
   sort NFunc .
   ops start fin oth : -> NFunc [ctor] .
 
@@ -33,13 +32,20 @@ fmod GRAPH is
 
   --- Definition of a Graph
   sort Graph .
-  op nil : -> Graph [ctor] .
+  op nil : -> Graph [ctor] . --- There was no [ctor]
   op _;;_ : Graph Graph -> Graph [assoc comm id: nil prec 50 ] .
+
+  *** A Graph is conformed by Arcs and Nodes ***
+  --- Definition of a List of Nodes
+  ---sort NodeList .
+  ---subsort NodeList < Graph . --- List of Nodes should be part of Graph
+  ---op nil : -> NodeList [ctor] . --- Definition of List of Nodes. There was no [ctor]
+  ---op _;_ : NodeList NodeList -> NodeList [assoc id: nil] .
 
   --- Definition of Nodes
   sort Node .
   ---subsort Node < Graph .
-  op (n[_]:_,_) : Int NType NFunc -> Node [ctor prec 30] . --- Definition of Node. Has Id, Type and Function
+  op (n[_]:_) : Int NType -> Node [ctor prec 30] . --- Definition of Node. Has Id and Type
 
   --- Definition of Arcs
   sort Arc .
@@ -47,27 +53,32 @@ fmod GRAPH is
  --- op arcnil : -> Arc .
   op _->_ : Node Node -> Arc [ctor prec 30] . --- Definition of Arc. Unites two nodes.
 
+
   --- Definition of actions
   sort Action .
-  subsort Action < ActionList .
-  op (a[_]) : Int -> Action [ctor prec 30] . --- Definition of Action. Has Id
+  subsort Action < ActionList . --- List of Nodes should be part of Graph
+  op (a(_)) : Int -> Action [ctor prec 30] . --- Definition of Action. Has Id
 
   --- Definition of a List of Actions
   sort ActionList .
-  subsort ActionList < Graph . --- Definition of ActionList. List of Actions should be part of Graph
-  op nil : -> ActionList [ctor] . 
-  op _;_ : ActionList ActionList -> ActionList [assoc id: nil] . --- Definition of List of Actions.
+  subsort ActionList < Graph . --- List of Nodes should be part of Graph
+  op nil : -> ActionList [ctor] . --- Definition of List of Nodes. There was no [ctor] --- it was returning an error
+  op _;_ : ActionList ActionList -> ActionList [assoc id: nil] .
+
 
   --- 
-  sort Indicator .
-  subsort Indicator < IndicatorList .
-  op (c[_,_]) : Int Int -> Indicator [ctor prec 30] .
+  sort Cookie .
+  subsort Cookie < CookieList .
+  op (c[_,_]) : Int Int -> Cookie [ctor prec 30] .
 
   ---
-  sort IndicatorList .
-  subsort IndicatorList < Graph .
-  op nil : -> IndicatorList [ctor] .
-  op _;_ : IndicatorList IndicatorList -> IndicatorList [assoc id: nil] .
+  sort CookieList .
+  subsort CookieList < Graph .
+  op clnil : -> CookieList [ctor] .
+  op _;_ : CookieList CookieList -> CookieList [assoc id: nil] .
+  
+  ----sort ActiveCookieList .
+  
   
   var i j x y z : Int .
   var tuple1 tuple2 tuple3 : Tuple .
@@ -76,11 +87,17 @@ fmod GRAPH is
   
   sort Tuple .
   subsort Tuple < TupleList .
-  op t(_&_) : Int Int -> Tuple [ctor] .
+  op t(_,_) : Int Int -> Tuple [ctor] .
 
   sort TupleList .
   op nil : -> TupleList [ctor] .
-  op _&_ : TupleList TupleList -> TupleList [assoc id: nil] .
+  op _,_ : TupleList TupleList -> TupleList [assoc id: nil] .
+  
+  op firstAction : ActionList -> Action .  --- this one is being used 
+  eq firstAction( ( a(i) ; AList1 ) ) = a(i) .
+  
+  op firstActionInt : ActionList -> Int .  --- this one is being used too
+  eq firstActionInt( ( a(i) ; AList1 ) ) = i .
   
 endfm
 
@@ -92,137 +109,139 @@ fmod SEQUENCES is
   --- Sequential graph
   op graph1 : -> Graph .
   eq graph1 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[2]: nseq)->(n[11]: nseq) .
 
   --- Sequential graph
   op graph2 : -> Graph .
   eq graph2 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[11]: nseq) .
     
       --- Sequential graph
   op graphLoop : -> Graph .
   eq graphLoop = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[5]: nseq, oth);;
-    (n[5]: nseq, oth)->(n[6]: nseq, oth);;
-    (n[6]: nseq, oth)->(n[11]: nseq, fin);;
-    (n[5]: nseq, oth)->(n[1]: nseq, oth) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[5]: nseq);;
+    (n[5]: nseq)->(n[6]: nseq);;
+    (n[6]: nseq)->(n[11]: nseq);;
+    (n[5]: nseq)->(n[1]: nseq) .
   
   
   --- And graph
   op graph3 : -> Graph .
   eq graph3 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nand, oth);;
-    (n[3]: nseq, oth)->(n[4]: nand, oth);;
-    (n[4]: nand, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nand);;
+    (n[3]: nseq)->(n[4]: nand);;
+    (n[4]: nand)->(n[11]: nseq) .
 
   --- Or graph
   op graph4 : -> Graph .
   eq graph4 = 
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nor, oth);;
-    (n[3]: nseq, oth)->(n[4]: nor, oth);;
-    (n[4]: nor, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nor);;
+    (n[3]: nseq)->(n[4]: nor);;
+    (n[4]: nor)->(n[11]: nseq) .
 
   --- Xor graph
   op graph5 : -> Graph .
   eq graph5 = 
-  	(n[0]: nseq, oth)->(n[1]: nxor, oth);;
-    (n[1]: nxor, oth)->(n[2]: nseq, oth);;
-    (n[1]: nxor, oth)->(n[3]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[11]: nseq, fin) .
+  	(n[0]: nseq)->(n[1]: nxor);;
+    (n[1]: nxor)->(n[2]: nseq);;
+    (n[1]: nxor)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[11]: nseq) .
     
   op graph51 : -> Graph .
   eq graph51 = 
-  	(n[0]: nseq, oth)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nxor, oth);;
-    (n[1]: nseq, oth)->(n[3]: nseq, oth);;
-    (n[2]: nxor, oth)->(n[4]: nseq, oth);;
-    (n[3]: nseq, oth)->(n[2]: nxor, oth);;
-    (n[3]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[11]: nseq, oth) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nxor);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nxor)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[2]: nxor);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[11]: nseq) .
     
   op smallLoopGraph : -> Graph .
   eq smallLoopGraph = 
-    (n[0]: nseq, start)->(n[1]: nor, oth);;
-    (n[1]: nor, oth)->(n[2]: nseq, oth);;
-    (n[2]: nseq, oth)->(n[1]: nor, oth);;
-    (n[2]: nseq, oth)->(n[11]: nseq, fin) .
+    (n[-5]: nseq) -> (n[0]: nxor);;
+	(n[0]: nxor) -> (n[11]: nseq);;
+    (n[0]: nxor)->(n[1]: nor);;
+    (n[1]: nor)->(n[2]: nseq);;
+    (n[2]: nseq)->(n[0]: nxor);;
+    (n[2]: nseq)->(n[11]: nseq) .
     
   op multiLoopGraph : -> Graph .
   eq multiLoopGraph =
-  	(n[0]: nseq, start)->(n[1]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[2]: nseq, oth);;
-    (n[1]: nseq, oth)->(n[3]: nor, oth);;
-    (n[2]: nseq, oth)->(n[4]: nseq, oth);;
-    (n[3]: nor, oth)->(n[4]: nseq, oth);;
-    (n[4]: nseq, oth)->(n[5]: nseq, oth);;
-    (n[5]: nseq, oth)->(n[6]: nor, oth);;
-    (n[6]: nor, oth)->(n[11]: nseq, fin);;
-    (n[5]: nseq, oth)->(n[1]: nseq, oth);;
-    (n[6]: nor, oth)->(n[8]: nseq, oth);;
-    (n[8]: nseq, oth)->(n[9]: nseq, oth);;
-    (n[9]: nseq, oth)->(n[6]: nor, oth);;
-    (n[8]: nseq, oth)->(n[3]: nor, oth) .
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nor);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nor)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[5]: nseq);;
+    (n[5]: nseq)->(n[6]: nor);;
+    (n[6]: nor)->(n[11]: nseq);;
+    (n[5]: nseq)->(n[1]: nseq);;
+    (n[6]: nor)->(n[8]: nseq);;
+    (n[8]: nseq)->(n[9]: nseq);;
+    (n[9]: nseq)->(n[6]: nor);;
+    (n[8]: nseq)->(n[3]: nor) .
     
   op xorTestingGraph : -> Graph .
-  eq xorTestingGraph = (n[1]: nseq, start) -> (n[2]: nseq, oth);;
-    (n[2]: nseq, oth) -> (n[3]: nxor, oth);;
-    (n[3]: nxor, oth) -> (n[4]: nseq, oth);;
-    (n[3]: nxor, oth) -> (n[5]: nseq, oth);;
-    (n[5]: nseq, oth) -> (n[6]: nor, oth);;
-    (n[4]: nseq, oth) -> (n[6]: nor, oth);;
-    (n[6]: nor, oth) -> (n[7]: nseq, fin);;
-    (n[6]: nor, oth) -> (n[2]: nseq, oth) .
+  eq xorTestingGraph = (n[1]: nseq) -> (n[2]: nseq);;
+    (n[2]: nseq) -> (n[3]: nxor);;
+    (n[3]: nxor) -> (n[4]: nseq);;
+    (n[3]: nxor) -> (n[5]: nseq);;
+    (n[5]: nseq) -> (n[6]: nor);;
+    (n[4]: nseq) -> (n[6]: nor);;
+    (n[6]: nor) -> (n[7]: nseq);;
+    (n[6]: nor) -> (n[2]: nseq) .
     
   
   *** Action sequences for testing ***
   
   op xorTestingSeq1 : -> ActionList .
-  eq xorTestingSeq1 = (a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[5]) ; (a[6]) ; (a[2]) ; (a[3]) ; (a[5]) ; (a[4]) ; (a[6]) ; (a[7]) .
+  eq xorTestingSeq1 =  (a(-5)) ;(a(1)) ; (a(2)) ; (a(3)) ; (a(4)) ; (a(5)) ; (a(6)) ; (a(2)) ; (a(3)) ; (a(5)) ; (a(4)) ; (a(6)) ; (a(7)) .
   
   op seq1 : -> ActionList .
-  eq seq1 = (a[0]) ; (a[1]) ; (a[2]) ; (a[11]) .
+  eq seq1 = (a(0)) ; (a(1)) ; (a(2)) ; (a(11)) .
 
   op seq2 : -> ActionList .
-  eq seq2 = (a[0]) ; (a[1]) ; (a[11]) .
+  eq seq2 = (a(0)) ; (a(1)) ; (a(11)) .
 
   op seq3 : -> ActionList .
-  eq seq3 = (a[0]) ; (a[1]) ; (a[2]) ; (a[3]) ; (a[4]) ; (a[11]) .
+  eq seq3 = (a(0)) ; (a(1)) ; (a(2)) ; (a(3)) ; (a(4)) ; (a(11)) .
 
   op seq4 : -> ActionList .
-  eq seq4 = (a[0]) ; (a[1]) ; (a[2]) ; (a[4]) ; (a[11]) .
+  eq seq4 = (a(0)) ; (a(1)) ; (a(2)) ; (a(4)) ; (a(11)) .
   
   op seqSimpleLoop : -> ActionList . 
-  eq seqSimpleLoop = (a[-1] ; a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[1] ; a[2] ; a[5] ; a[6] ; a[4] ; a[5] ; a[2] ; a[3] ; a[1] ; a[3] ; a[4] ; a[5] ; a[6] ; a[11]) .
+  eq seqSimpleLoop = (a(-1) ; a(0) ; a(1) ; a(2) ; a(4) ; a(5) ; a(1) ; a(2) ; a(5) ; a(6) ; a(4) ; a(5) ; a(2) ; a(3) ; a(1) ; a(3) ; a(4) ; a(5) ; a(6) ; a(11)) .
 
   op smallLoopSeq : -> ActionList .
-  eq smallLoopSeq = (a[0] ; a[1] ; a[2] ; a[1] ; a[2] ; a[11]) .
+  eq smallLoopSeq = ( a(-5) ; a(0) ; a(1) ; a(2) ; a(0) ; a(1) ; a(2) ; a(11)) .
   
   op multiLoopSeq : -> ActionList .
-  eq multiLoopSeq = ( a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[8] ; a[3] ; a[4] ; a[9] ; a[4] ; a[5] ; a[6] ; a[8] ; a[9] ; a[6] ; a[11] ) .
+  eq multiLoopSeq = ( a(-5) ; a(0) ; a(1) ; a(2) ; a(4) ; a(5) ; a(6) ; a(8) ; a(3) ; a(4) ; a(9) ; a(4) ; a(5) ; a(6) ; a(8) ; a(9) ; a(6) ; a(11) ) .
   
   
   op test64-seq : -> ActionList .
-  eq test64-seq = ( a[0] ; a[1] ; a[2] ; a[4] ; a[5] ; a[6] ; a[4] ; a[5] ; a[6] ; a[11] ) .
+  eq test64-seq = ( a(0) ; a(1) ; a(2) ; a(4) ; a(5) ; a(6) ; a(4) ; a(5) ; a(6) ; a(11) ) .
   
   
 endfm
@@ -232,12 +251,12 @@ fmod CONFIG is
   pr SEQUENCES .
 
   sort Config .
-  op _|_|_|_|_|_ : ActionList TupleList ActionList ActionList Graph Status -> Config [ctor] . --- input actionlist, Indicatorlist, correct actionlist, incorrect actiounlist, graph, status
+  op _|_|_|_|_|_ : ActionList TupleList ActionList ActionList Graph Status -> Config [ctor] . --- input actionlist, cookielist, correct actionlist, incorrect actiounlist, graph, status
   
   *** Variables ***
   var AList CList EList InputActionList : ActionList .
-  var Indicators : IndicatorList .
-  var TupleIndicators TList1 : TupleList .
+  var Cookies : CookieList .
+  var TupleCookies TList1 : TupleList .
   var G : Graph .
   var type : NType .
   var func : NFunc .
@@ -283,21 +302,21 @@ fmod CONFIG is
 
   op test-start : -> Config .
   eq test-start =
-  	(a[1]) ; (a[2])   |
+  	(a(1)) ; (a(2))   |
     nil | 
     nil |
     nil |
-    ( (n[4]: nseq, oth) -> (n[6]: nseq, oth) ;; (n[1]: nseq, start) -> (n[2]: nseq, oth) ;; (n[2]: nseq, oth) -> (n[3]: nseq, oth) ) |
+    ( (n[4]: nseq) -> (n[6]: nseq) ;; (n[1]: nseq) -> (n[2]: nseq) ;; (n[2]: nseq) -> (n[3]: nseq) ) |
 	starting .
     
     
   op test-start-end : -> Config .
   eq test-start-end =
-  	(a[1]) ; (a[2]) |
+  	(a(1)) ; (a(2)) |
     nil | 
     nil |
     nil |
-    ( (n[1]: nseq, start) -> (n[2]: nseq, fin) ) |
+    ( (n[1]: nseq) -> (n[2]: nseq) ) |
 	starting .
 
 
@@ -332,7 +351,7 @@ fmod CONFIG is
     
 
   op test-tuple-list : -> TupleList .
-  eq test-tuple-list = ( t( 2 & 1 ) & t( 4 & 1 ) & t( 3 & 1 ) & t( 1 & 1 ) & t( 5 & 1 ) & t( 6 & 1 ) & t( 7 & 1 ) & t( 8 & 1 ) & t( 9 & 1 ) ) .
+  eq test-tuple-list = ( t( 2 , 1 ) , t( 4 , 1 ) , t( 3 , 1 ) , t( 1 , 1 ) , t( 5 , 1 ) , t( 6 , 1 ) , t( 7 , 1 ) , t( 8 , 1 ) , t( 9 , 1 ) ) .
 
 
 endfm
@@ -343,8 +362,8 @@ fmod GRAPH-EQ is
 
   *** Variables ***
   var AList AList' AList1 AList2 InputActionList : ActionList . --- Lists of user actions
-  var Indicators Indicators' Indicators1 Indicators2 : IndicatorList . --- Lists of Indicators
-  var TupleIndicators TupleIndicators' TupleIndicators1 TupleIndicators2 : TupleList . --- Lists of Tuple
+  var Cookies Cookies' Cookies1 Cookies2 : CookieList . --- Lists of cookies
+  var TupleCookies TupleCookies' TupleCookies1 TupleCookies2 : TupleList . --- Lists of Tuple
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
   var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
   var G G' G1 G2 : Graph . --- Graphs
@@ -359,18 +378,18 @@ fmod GRAPH-EQ is
   var Node1 Node2 Node3 : Node .
 
   *** Equations ***
-  --- Check if last node of Correct List is "fin" node and Indicators only contains final node
-  op checkStatus : IndicatorList ActionList Graph -> Bool .
+  --- Check if last node of Correct List is "fin" node and cookies only contains final node
+  op checkStatus : CookieList ActionList Graph -> Bool .
   eq checkStatus(nil, nil, G) = false .
-  eq checkStatus((a[i]), (CList ; (a[i])), G ;; (n[x]: type', func') -> (n[i]: type, func)) = 
-    if func == fin
+  eq checkStatus((a(i)), (CList ; (a(i))), ( G ;; (n[x]: type') -> (n[i]: type) ) ) = 
+    if i == (-7)
     then true
     else false
     fi .
 
   --- Check if node is type "sequential", "and", "or" or "xor"
   op checkType : Action Graph -> String .
-  eq checkType((a[i]), (n[x]: type', func') -> (n[i]: type, func) ;; G) =
+  eq checkType((a(i)), (n[x]: type') -> (n[i]: type) ;; G) =
     if type == nand
     then "and"
     else 
@@ -384,21 +403,21 @@ fmod GRAPH-EQ is
       fi
     fi .
     
-  op isStartingNode : Action Graph -> Bool . 
-  eq isStartingNode( a[i] , G1 ;; (n[i]: type', func') -> (n[x]: type, func) ;; G2  ) = 
-  	if func' == start
+  op isStartingNode : Action -> Bool . 
+  eq isStartingNode( a(i) ) = 
+  	if i == (-5)
     then true
     else false
     fi .
-  eq isStartingNode( Action1, G) = false [owise] .
+  eq isStartingNode( Action1 ) = false [owise] .
     
   --- get action function
-  op checkFunc : Action Graph -> String .
-  eq checkFunc((a[i]), (n[x]: type', func') -> (n[i]: type, func) ;; G) =
-    if func == start
+  op checkFunc : Action -> String .
+  eq checkFunc((a(i))) =
+    if i == (-5)
     then "start"
     else 
-      if func == fin
+      if i == (-7)
       then "fin"
       else "oth"
       fi
@@ -408,65 +427,67 @@ fmod GRAPH-EQ is
 
   --- Check if requirements for "and" are met
   op isAnd : Action Graph -> Bool .
-  eq isAnd((a[i]), G) =
-    if checkType((a[i]), G) == "and" 
+  eq isAnd((a(i)), G) =
+    if checkType((a(i)), G) == "and" 
     then true
     else false
     fi .
 
   --- Check if requirements for "or" are met
   op isOr : Action Graph -> Bool .
-  eq isOr((a[i]), G) =
-    if checkType((a[i]), G) == "or"
+  eq isOr((a(i)), G) =
+    if checkType((a(i)), G) == "or"
     then true
     else false
     fi .
 
   --- Check if requirements for "xor" are met
   op isXor : Action Graph -> Bool .
-  eq isXor((a[i]), G) =
-    if checkType((a[i]), G) == "xor"
+  eq isXor((a(i)), G) =
+    if checkType((a(i)), G) == "xor"
     then true
     else false
     fi .
 
   --- Check if requirements for "seq" are met
   op isSeq : Action Graph -> Bool .
-  eq isSeq((a[i]), G) =
-    if checkType((a[i]), G) == "seq"
+  eq isSeq((a(i)), G) =
+    if checkType((a(i)), G) == "seq"
     then true
     else false
     fi .
     
-  --- Consume Indicators from list
-  op consume : IndicatorList IndicatorList -> IndicatorList .
-  eq consume(Indicators1, nil) = nil .
-  eq consume(((c[x,y]) ; AList), Indicators) = 
-    if (c[x,y]) in Indicators
-    then (c[x,y]) ; consume(AList, Indicators)
-    else consume(AList, Indicators)
+
+
+  --- Consume cookies from list
+  op consume : CookieList CookieList -> CookieList .
+  eq consume(Cookies1, nil) = nil .
+  eq consume(((c[x,y]) ; AList), Cookies) = 
+    if (c[x,y]) in Cookies
+    then (c[x,y]) ; consume(AList, Cookies)
+    else consume(AList, Cookies)
     fi .
 
-  --- Add Indicators to list
+  --- Add cookies to list
   op add : ActionList ActionList -> ActionList .
   eq add(AList, nil) = nil .
-  eq add(((a[x]) ; AList), Indicators) = 
-    if (a[x]) in Indicators
-    then (a[x]) ; consume(AList, Indicators)
-    else add(AList, Indicators)
+  eq add(((a(x)) ; AList), Cookies) = 
+    if (a(x)) in Cookies
+    then (a(x)) ; consume(AList, Cookies)
+    else add(AList, Cookies)
     fi .
 
   --- Return how many parents are in list of correct actions
   op checkParentsInList : Action ActionList ActionList Graph -> String .
-  eq checkParentsInList((a[i]), Indicators, CList, G) =
-    if allActionsListInList(parents((a[i]), G), CList) == true and allActionsListInList(parents((a[i]), G), Indicators) == true
+  eq checkParentsInList((a(i)), Cookies, CList, G) =
+    if allActionsListInList(parents((a(i)), G), CList) == true and allActionsListInList(parents((a(i)), G), Cookies) == true
     then 
       "all"
     else 
-      if oneActionListInList(parents((a[i]), G), CList) == true and oneActionListInList(parents((a[i]), G), Indicators) == true
+      if oneActionListInList(parents((a(i)), G), CList) == true and oneActionListInList(parents((a(i)), G), Cookies) == true
       then "one"
       else 
-        if someActionsListInList(parents((a[i]), G), CList) == true and someActionsListInList(parents((a[i]), G), Indicators) == true
+        if someActionsListInList(parents((a(i)), G), CList) == true and someActionsListInList(parents((a(i)), G), Cookies) == true
         then "some"
         else "none"
         fi
@@ -476,182 +497,205 @@ fmod GRAPH-EQ is
   --- Check if all nodes are in the target list of nodes
   op allActionsListInList : ActionList ActionList -> Bool .
   eq allActionsListInList(nil, CList) = true .
-  eq allActionsListInList(((a[x]) ; AList), CList) =
-    ((a[x]) in CList) and allActionsListInList(AList, CList) .
+  eq allActionsListInList(((a(x)) ; AList), CList) =
+    ((a(x)) in CList) and allActionsListInList(AList, CList) .
   
   --- Check if at least one of the nodes is in the target list of nodes
   op someActionsListInList : ActionList ActionList -> Bool .
   eq someActionsListInList(nil, CList) = false .
-  eq someActionsListInList(((a[x]) ; AList), CList) =
-    ((a[x]) in CList) or someActionsListInList(AList, CList) .
+  eq someActionsListInList(((a(x)) ; AList), CList) =
+    ((a(x)) in CList) or someActionsListInList(AList, CList) .
 
   --- Check if only one one of the nodes is in the target list of nodes
   op oneActionListInList : ActionList ActionList -> Bool .
   eq oneActionListInList(nil, CList) = false .
-  eq oneActionListInList(((a[x]) ; AList), CList) =
-    ((a[x]) in CList) xor oneActionListInList(AList, CList) .
+  eq oneActionListInList(((a(x)) ; AList), CList) =
+    ((a(x)) in CList) xor oneActionListInList(AList, CList) .
 
   *** Auxiliary equations ***
   --- To obtain the list of direct parents of a node in a graph. -- returns parents
   op parents : Action Graph -> ActionList .
-  eq parents((a[i]), (n[x]: type1, func1) -> (n[i]: type, func) ;; G) =
-    (a[x]) ; parents((a[i]), G) .
-  eq parents((a[i]), G) = nil [owise] .
+  eq parents((a(i)), (n[x]: type1) -> (n[i]: type) ;; G) =
+    (a(x)) ; parents((a(i)), G) .
+  eq parents((a(i)), G) = nil [owise] .
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Action Graph -> ActionList .
-  eq children((a[i]), (n[i]: type, func) -> (n[x]: type', func') ;; G) =
-    (a[x]) ; children((a[i]), G) .
-  eq children((a[i]), G) = nil [owise] .
+  eq children((a(i)), (n[i]: type) -> (n[x]: type') ;; G) =
+    (a(x)) ; children((a(i)), G) .
+  eq children((a(i)), G) = nil [owise] .
   
   op listChildren : ActionList Graph -> ActionList . 
   eq listChildren( ( Action ; AList1 ) , G ) = ( ( children(Action, G) ) ; listChildren( AList1 , G ) ) .
   eq listChildren( nil, G ) = nil .
    
   op _in_ : Action ActionList -> Bool .
-  eq (a[i]) in (AList1 ; (a[i]) ; AList2) = true .
-  eq (a[i]) in AList1 = false [owise] .
+  eq (a(i)) in (AList1 ; (a(i)) ; AList2) = true .
+  eq (a(i)) in AList1 = false [owise] .
   
   op tupleInTupleList : Tuple TupleList -> Bool .
-  eq tupleInTupleList( ( t( x & y ) ) , ( t( z & i) & TList1 ) ) = 
+  eq tupleInTupleList( ( t( x , y ) ) , ( t( z , i) , TList1 ) ) = 
   if ( x == z ) and ( y == i ) then true
-  else tupleInTupleList( ( t( x & y ) ) , TList1)
+  else tupleInTupleList( ( t( x , y ) ) , TList1)
   fi .
   eq tupleInTupleList(tuple2, TList2) = false [owise] .
 
+
   op removeTupleFromTupleList : Tuple TupleList -> TupleList .
-  eq removeTupleFromTupleList( tuple1 , ( TList1 & tuple1 & TList2 ) ) = ( TList1 & TList2 ) .
+  eq removeTupleFromTupleList( tuple1 , ( TList1 , tuple1 , TList2 ) ) = ( TList1 , TList2 ) .
   
-  --- activates Indicator if not already active
-  op activateIndicator : Int TupleList -> TupleList .
-  eq activateIndicator( x , TList ) = 
-  if tupleInTupleList( t( x & 1 ) , TList ) then 
+  ---op activateCookie : Int TupleList -> TupleList .
+  ---eq activateCookie( x , TList ) = activateCookieTuple
+  
+  --- activates cookie if not already active
+  op activateCookie : Int TupleList -> TupleList .
+  eq activateCookie( x , TList ) = 
+  if tupleInTupleList( t( x , 1 ) , TList ) then 
     TList
-    else ( ( TList & t( x & 1 ) ) )
-    fi .
+    else 
+      if tupleInTupleList( t( x , (-1) ) , TList ) then 
+      TList
+        else ( TList , t( x , 1 ) )
+      fi
+  fi .
     
-  op blockIndicator : Int TupleList -> TupleList .
-  eq blockIndicator( x , TList ) = 
-  if tupleInTupleList( t( x & -1 ) , TList ) then 
+  op blockCookie : Int TupleList -> TupleList .
+  eq blockCookie( x , TList ) = 
+  if tupleInTupleList( t( x , -1 ) , TList ) then 
     TList
-    else ( ( TList & t( x & -1 ) ) )
-    fi .
+    else 
+	 if tupleInTupleList( t( x , 1 ) , TList) then blockCookie( x , removeTupleFromTupleList( t( x , 1 ) , TList ) ) 
+	 else 
+	  ( TList , t( x , -1 ) ) 	
+	 fi
+  fi .
    
-  op blockActionIndicator : Action TupleList -> TupleList .
-  eq blockActionIndicator( a[i] , TList ) = 
-  if tupleInTupleList( t( i & -1 ) , TList ) then 
-    TList
-    else ( ( TList & t( i & -1 ) ) )
-    fi .
+  op blockActionCookie : Action TupleList -> TupleList .
+  eq blockActionCookie( a(i) , TList ) = blockCookie( i , TList ) .
     
-  op isIndicatorActive : Int TupleList -> Bool .
-  eq isIndicatorActive( x , TList ) =
-  if tupleInTupleList ( t( x & 1 ) , TList ) then true
+  op isCookieActive : Int TupleList -> Bool .
+  eq isCookieActive( x , TList ) =
+  if tupleInTupleList ( t( x , 1 ) , TList ) then true
   else false
   fi .
   
-  op isIndicatorBlocked : Int TupleList -> Bool .
-  eq isIndicatorBlocked( x , TList ) =
-  if tupleInTupleList ( t( x & -1 ) , TList ) then true
+  op isCookieBlocked : Int TupleList -> Bool .
+  eq isCookieBlocked( x , TList ) =
+  if tupleInTupleList ( t( x , -1 ) , TList ) then true
   else false
   fi .
-
-  op deactivateIndicator : Int TupleList -> TupleList .
-  eq deactivateIndicator( x , TList ) = 
-  if tupleInTupleList( ( t( x & 1 ) ) , TList ) then removeTupleFromTupleList( t( x & 1 )  , TList )
+  
+  
+  
+  op resetCookie : Int TupleList -> TupleList .
+  eq resetCookie( x , TList ) = 
+  if tupleInTupleList( ( t( x , 1 ) ) , TList ) then 
+  	if  tupleInTupleList( ( t( x , -1 ) ) , TList ) then removeTupleFromTupleList( t( x , 1 )  , removeTupleFromTupleList( t( x , -1 )  , TList ) )
+  		else 
+        	removeTupleFromTupleList( t( x , 1 )  , TList)
+    fi
+  else
+  	if  tupleInTupleList( ( t( x , -1 ) ) , TList ) then removeTupleFromTupleList( t( x , -1 )  , TList )
+  		else 
+        	TList
+    fi
+  fi .
+  
+  
+  op unblockCookie : Int TupleList -> TupleList .
+  eq unblockCookie( x , TList ) = 
+  if tupleInTupleList( ( t( x , -1 ) ) , TList ) then removeTupleFromTupleList( t( x , -1 )  , TList )
   else TList 
   fi .
-
-  op unblockIndicator : Int TupleList -> TupleList .
-  eq unblockIndicator( x , TList ) = 
-  if tupleInTupleList( ( t( x & -1 ) ) , TList ) then removeTupleFromTupleList( t( x & -1 )  , TList )
-  else TList 
-  fi .
-
-  --- deactivate Indicators in the first list in the scond list
-  op deactivateIndicatorList : TupleList TupleList -> TupleList .
-  eq deactivateIndicatorList( ( ( t( x & 1) & ( TList1 ) ) ) , ( TList ) ) = deactivateIndicatorList( TList1 , deactivateIndicator( x , TList ) ) . 
-  eq deactivateIndicatorList( nil , TList ) = TList .
   
-  op unblockIndicatorList : TupleList TupleList -> TupleList .
-  eq unblockIndicatorList( ( ( t( x & -1) & ( TList1 ) ) ) , ( TList ) ) = deactivateIndicatorList( TList1 , deactivateIndicator( x , TList ) ) . 
-  eq unblockIndicatorList( nil , TList ) = TList .
+  
+  --- deactivate cookies in the first list in the scond list
+  op resetCookieList : TupleList TupleList -> TupleList .
+  eq resetCookieList( ( ( t( x , 1) , ( TList1 ) ) ) , ( TList ) ) = resetCookieList( TList1 , resetCookie( x , TList ) ) . 
+  eq resetCookieList( ( ( t( x , -1) , ( TList1 ) ) ) , ( TList ) ) = resetCookieList( TList1 , unblockCookie( x , TList ) ) . 
+  eq resetCookieList( nil , TList ) = TList .
+  
+  op unblockCookieList : TupleList TupleList -> TupleList .
+  eq unblockCookieList( ( ( t( x , -1) , ( TList1 ) ) ) , ( TList ) ) = resetCookieList( TList1 , resetCookie( x , TList ) ) . 
+  eq unblockCookieList( nil , TList ) = TList .
   
   --- MAIN function to use with rules
-  ---seems to work, deactivates ACTION LIST from Indicator LIST and returns Indicator LIST
-  op deactivateActionIndicators : ActionList TupleList -> TupleList .
-  eq deactivateActionIndicators( ( a[x] ; AList1 ) , TList ) = deactivateActionIndicators(AList1 , deactivateIndicator(x, TList)) .
-  eq deactivateActionIndicators( nil , TList ) = TList .
-
+  ---seems to work, deactivates ACTION LIST from COOKIE LIST and returns COOKIE LIST
+  op resetActionCookies : ActionList TupleList -> TupleList .
+  eq resetActionCookies( ( a(x) ; AList1 ) , TList ) = resetActionCookies(AList1 , resetCookie(x, TList)) .
+  eq resetActionCookies( nil , TList ) = TList .
+  
+  
   --- MAIN function to use with rules
-  ---seems to work, unblocks ACTION LIST from Indicator LIST and returns Indicator LIST
-  op unblockActionIndicators : ActionList TupleList -> TupleList .
-  eq unblockActionIndicators( ( a[x] ; AList1 ) , TList ) = unblockActionIndicators(AList1 , unblockIndicator(x, TList)) .
-  eq unblockActionIndicators( nil , TList ) = TList .
+  ---seems to work, unblocks ACTION LIST from COOKIE LIST and returns COOKIE LIST
+  op unblockActionCookies : ActionList TupleList -> TupleList .
+  eq unblockActionCookies( ( a(x) ; AList1 ) , TList ) = unblockActionCookies(AList1 , unblockCookie(x, TList)) .
+  eq unblockActionCookies( nil , TList ) = TList .
 
-  op _in_ : Indicator IndicatorList -> Bool .
-  eq (c[i,j]) in (Indicators1 ; (c[i,j]) ; Indicators2) = true .
-  eq (c[i,j]) in Indicators1 = false [owise] .
+
+
+  op _in_ : Cookie CookieList -> Bool .
+  eq (c[i,j]) in (Cookies1 ; (c[i,j]) ; Cookies2) = true .
+  eq (c[i,j]) in Cookies1 = false [owise] .
 
   op isArc : Node Node Graph -> Bool .
-  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), nil) = false .
-  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), G1 ;; (n[x]: type1, func1) -> (n[y]: type2, func2) ;; G2) = true .
-  eq isArc((n[x]: type1, func1), (n[y]: type2, func2), G) = false [owise] .
+  eq isArc((n[x]: type1), (n[y]: type2), nil) = false .
+  eq isArc((n[x]: type1), (n[y]: type2), G1 ;; (n[x]: type1) -> (n[y]: type2) ;; G2) = true .
+  eq isArc((n[x]: type1), (n[y]: type2), G) = false [owise] .
+  
+  op isArcAction : Action Action Graph -> Bool .
+  eq isArcAction( a(x), a(y) , nil) = false .
+  eq isArcAction( a(x), a(y) , G1 ;; (n[x]: type1) -> (n[y]: type) ;; G2) = true .
+  eq isArcAction( a(x), a(y) , G) = false [owise] .
   
   --- subtract second list from first list
   op actionListSubtraction : ActionList ActionList -> ActionList .
-  eq actionListSubtraction( ( a[x] ; AList1) , AList2 ) = 
-  if ( a[x] in AList2 ) then actionListSubtraction(AList1, AList2)
+  eq actionListSubtraction( ( a(x) ; AList1) , AList2 ) = 
+  if ( a(x) in AList2 ) then actionListSubtraction(AList1, AList2)
   else 
-    ( a[x] ; actionListSubtraction(AList1, AList2)  ) 
+    ( a(x) ; actionListSubtraction(AList1, AList2)  ) 
     fi .
   eq actionListSubtraction(nil, AList2) = nil .
 
   --- intersection of two tuple lists 
-  --- tupleListIntersection(( t( 2 & 2 ) & t( 3 & 4 ) ), ( t( 1 & 2 ) & t( 3 & 4 ) ))
+  --- tupleListIntersection(( t( 2 , 2 ) , t( 3 , 4 ) ), ( t( 1 , 2 ) , t( 3 , 4 ) ))
   op tupleListIntersection : TupleList TupleList -> TupleList .
-  eq tupleListIntersection( ( tuple1 & TList1 ) , TList2 ) = 
+  eq tupleListIntersection( ( tuple1 , TList1 ) , TList2 ) = 
   if ( tupleInTupleList( tuple1 , TList2 ) )
-  then ( tuple1 & tupleListIntersection( TList1 , TList2 ) )
+  then ( tuple1 , tupleListIntersection( TList1 , TList2 ) )
   else tupleListIntersection( TList1 , TList2 )
   fi .
   eq tupleListIntersection(nil, TList2) = nil .
   
   ---subract all elements of second list from first list
-
+  
+  
   --- Tuple 1 - Tuple 2 - subtract second tuple from first tuple
-  --- tupleSubtraction(( t( 1 & 2 ) & t( 3 & 4 ) ), ( t( 1 & 2 ) & t( 3 & 4 ) ))
-  --- tupleSubtraction(( t( 1 & 2 ) & t( 3 & 4 ) ), ( t( 3 & 4 ) ))
+  --- tupleSubtraction(( t( 1 , 2 ) , t( 3 , 4 ) ), ( t( 1 , 2 ) , t( 3 , 4 ) ))
+  --- tupleSubtraction(( t( 1 , 2 ) , t( 3 , 4 ) ), ( t( 3 , 4 ) ))
   op tupleSubtraction : TupleList TupleList -> TupleList .
-  eq tupleSubtraction( ( tuple1 & TList1 ) , TList3 ) =
+  eq tupleSubtraction( ( tuple1 , TList1 ) , TList3 ) =
   if 
   ( tupleInTupleList( tuple1, TList3 ) )
   then
   ( tupleSubtraction( TList1 , TList3 ) )
   else
-  ( tuple1 & tupleSubtraction( TList1 , TList3 ) )
+  ( tuple1 , tupleSubtraction( TList1 , TList3 ) )
   fi . 
   eq tupleSubtraction( nil , TList3 ) = nil .
+  
 
   --- if the search from the initial NodeList (a[0]) reaches the next node (subsequent node) before the previous node (the first argument), then it is a loop.
   --- Previous Node, Subsequent Node, List of Current Nodes, List of Checked Nodes, Graph
-  --- TO DO HERE
   op BFSLoopDetect : Action Action ActionList ActionList Graph -> Bool .
-  eq BFSLoopDetect( a[x] , a[y] , AList1 , AList2 , G ) =
-  if ( a[x] in AList1 ) then false 
+  eq BFSLoopDetect( a(x) , a(y) , AList1 , AList2 , G ) =
+  if ( a(x) in AList1 ) then false 
   else 
-  	if ( a[y] in AList1 ) then true
+  	if ( a(y) in AList1 ) then true
     	else 
-           BFSLoopDetect( a[x] , a[y] , ( actionListSubtraction( ( listChildren( AList1 , G ) ) , AList2 ) ) , ( AList1 ; AList2 ) , G )
+           BFSLoopDetect( a(x) , a(y) , ( actionListSubtraction( ( listChildren( AList1 , G ) ) , AList2 ) ) , ( AList1 ; AList2 ) , G )
    fi  
    fi .
-
-     
-  op firstAction : ActionList -> Action .  --- this one is being used 
-  eq firstAction( ( a[i] ; AList1 ) ) = a[i] .
-  
-  op firstActionInt : ActionList -> Int .  --- this one is being used too
-  eq firstActionInt( ( a[i] ; AList1 ) ) = i .
 
 
   --- if the search for a loop detects a loop
@@ -674,22 +718,22 @@ fmod GRAPH-EQ is
   
   --- current node, target node, graph, list of visited nodes
   op DFSSubgraphSearch : Action Action Graph ActionList -> ActionList .
-  eq DFSSubgraphSearch( a[x] , a[y] , G , AList1 ) =
-  checkIfCorrectNode( a[x] , a[y] , children(a[x],G) , G , ( a[x] ; AList1 ) ) .
+  eq DFSSubgraphSearch( a(x) , a(y) , G , AList1 ) =
+  checkIfCorrectNode( a(x) , a(y) , children(a(x),G) , G , ( a(x) ; AList1 ) ) .
   
  
   --- current node, target node, list of children (of the current node), Graph, visited nodes
   op checkIfCorrectNode : Action Action ActionList Graph ActionList -> ActionList .
-  eq checkIfCorrectNode( a[x] , a[y] , ( ( a[i] ) ; AList2 ) , G , AList1 ) = 
-  if ( ( a[i] ) in AList1 ) --- if current node is in the list of visited nodes
-  	then ( nil ; checkIfCorrectNode( a[x] , a[y] , AList2, G , AList1 ) )  --- then skip current node
+  eq checkIfCorrectNode( a(x) , a(y) , ( ( a(i) ) ; AList2 ) , G , AList1 ) = 
+  if ( ( a(i) ) in AList1 ) --- if current node is in the list of visited nodes
+  	then ( nil ; checkIfCorrectNode( a(x) , a(y) , AList2, G , AList1 ) )  --- then skip current node
   else 
   	if ( i == y ) --- if target node is our current node, then 
-    	then ( AList1 ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) ) 
-        	else( DFSSubgraphSearch( a[i] , a[y] , G , AList1 ) ; checkIfCorrectNode( a[x] , a[y] , AList2 , G , AList1 ) )
+    	then ( AList1 ; checkIfCorrectNode( a(x) , a(y) , AList2 , G , AList1 ) ) 
+        	else( DFSSubgraphSearch( a(i) , a(y) , G , AList1 ) ; checkIfCorrectNode( a(x) , a(y) , AList2 , G , AList1 ) )
     fi 
   fi .
-  eq checkIfCorrectNode( a[x] , a[y] , nil , G , AList1 ) = nil .
+  eq checkIfCorrectNode( a(x) , a(y) , nil , G , AList1 ) = nil .
   
   
   
@@ -704,21 +748,76 @@ fmod GRAPH-EQ is
 
  --- current node ,  searching node , visited nodes - returns nodes
   op DFS2 : Action Action ActionList Graph -> ActionList .
-  eq DFS2( a[i] , a[i] , AList , G) = ( a[i] ; AList ) .
-  eq DFS2( a[i] , a[n] , AList , G) = 
-  if ( a[i] in AList ) then
+  eq DFS2( a(i) , a(i) , AList , G) = ( a(i) ; AList ) .
+  eq DFS2( a(i) , a(n) , AList , G) = 
+  if ( a(i) in AList ) then
   	nil
   else
-  	---for all children of a[i]:
-    	----append DFS2( a[child] , a[n] , ( a[i] ; ( a[x] ; AList ) ) , G)
-  	forAllChildren( children(a[i], G) , a[n] , ( a[i] ; AList ) , G )
+  	---for all children of a(i):
+    	----append DFS2( a[child] , a(n) , ( a(i) ; ( a(x) ; AList ) ) , G)
+  	forAllChildren( children(a(i), G) , a(n) , ( a(i) ; AList ) , G )
   fi .
         
   ---- children , target node , visited nodes , graph 
   op forAllChildren : ActionList Action ActionList Graph -> ActionList .
-  eq forAllChildren( ( a[x] ; AList ) , a[n] , AList1 , G) = ( ( DFS2( a[x] , a[n] , AList1 , G) ) ; ( forAllChildren( AList , a[n] , AList1 , G) ) ) .
-  eq forAllChildren( nil , a[n] , AList1 , G ) = nil .
+  eq forAllChildren( ( a(x) ; AList ) , a(n) , AList1 , G) = ( ( DFS2( a(x) , a(n) , AList1 , G) ) ; ( forAllChildren( AList , a(n) , AList1 , G) ) ) .
+  eq forAllChildren( nil , a(n) , AList1 , G ) = nil .
   
+
+
+
+----
+ --- returns all nodes from all not blocked subgraphs from Arg1 to Arg2
+ --- current node ,  searching node  - returns nodes
+ --- return 
+  op DFS3 : Action Action ActionList Graph TupleList -> ActionList .
+  eq DFS3( a(i) , a(i) , AList , G , TList1 ) = ( a(i) ; AList ) .
+  eq DFS3( a(i) , a(n) , AList , G , TList1 ) = 
+  if ( a(i) in AList ) then
+  	nil
+  else
+ --- 	if ( isCookieBlocked( i , TList1 ) and isAtLeastOneParentBlocked( a(i) , TList1 , G ) ) then
+ ---   	nil
+ ---   else
+  	---for all children of a(i):
+    	----append DFS2( a[child] , a(n) , ( a(i) ; ( a(x) ; AList ) ) , G)
+  		forAllChildren3( children(a(i), G) , a(n) , ( a(i) ; AList ) , G , TList1 )
+ ---   fi
+  fi .
+        
+  ---- children , target node , visited nodes , graph 
+  op forAllChildren3 : ActionList Action ActionList Graph TupleList -> ActionList .
+  eq forAllChildren3( ( a(x) ; AList ) , a(n) , AList1 , G , TList1 ) = ( ( DFS3( a(x) , a(n) , AList1 , G , TList1 ) ) ; ( forAllChildren3( AList , a(n) , AList1 , G , TList1 ) ) ) .
+  eq forAllChildren3( nil , a(n) , AList1 , G , TList1 ) = nil .
+    
+  
+  ------
+  --- MAIN function to use in rule - detects a subgraph from Argument 1 to Arugument 2 that is not blocked, if it exists - TRUE, it it does not exist - FALSE
+  --- is there a not blocked subgraph from Argument 1 to Argument 2 in Argumnent 3 with TupleList4
+  op enteringLoop : Action Action Graph TupleList -> Bool .
+  eq enteringLoop( Action1 , Action2 , G , TList1 ) =
+  if ( DFS3( Action1 , Action2 , nil , G , TList1 ) == nil )
+  	then false
+  else 
+  	if ( isArcAction( Action1 , Action2 , G ) )
+    	then true
+    else false
+    fi
+  fi .
+  eq enteringLoop( nil , Action2 , G , TList1 ) = false .
+  eq enteringLoop( Action1 , nil , G , TList2 ) = true .
+  
+  ---- get all actions for deactivating a loop in the current rule (arguments already switched) 
+  --- if the edge exists
+  op getActionsForLoopDeactivation : Action Action Graph TupleList -> ActionList .
+  eq getActionsForLoopDeactivation( a(x) , a(y) , G , TList1 ) =
+  if isArcAction( a(x) , a(y) , G ) 
+  	then
+  		(  removeDuplicates( DFS3( a(y) , a(x) , nil , G , TList1 ) )  ) 
+  else nil 
+  fi . 
+  eq getActionsForLoopDeactivation( Action1 , Action1 , G , TList1 ) = nil [owise] .
+
 
   op removeDuplicatesHelper : ActionList ActionList -> ActionList .
   eq removeDuplicatesHelper((Action1 ; AList1) , AList2) = 
@@ -730,129 +829,116 @@ fmod GRAPH-EQ is
 
   --- gets all paths between first and second argument in graph, including first argument but excluding last argument
   op getAllPathsBetween : Action Action Graph -> ActionList .
-  eq getAllPathsBetween(a[x] , a[y] , G) = removeDuplicates(DFSSubgraphSearch( a[x] , a[y] ,  nil , G )) .
+  eq getAllPathsBetween(a(x) , a(y) , G) = removeDuplicates(DFSSubgraphSearch( a(x) , a(y) ,  nil , G )) .
   
   
   ---- OLD IMPLEMENTATION ---MAIN function for use in RULES 
   op getAllPathsForLoopDeactivation : Action Action Graph -> ActionList .
-  ----eq getAllPathsForLoopDeactivation(a[x] , a[y] , G) = ( removeDuplicates(DFSSubgraphSearch( a[x] , a[y] , G , nil ))  ; a[y] ) .
-  eq getAllPathsForLoopDeactivation( a[x] , a[y] , G) = removeDuplicates(  DFS2( a[y] , a[x] , nil, G )  ) .
+  ----eq getAllPathsForLoopDeactivation(a(x) , a(y) , G) = ( removeDuplicates(DFSSubgraphSearch( a(x) , a(y) , G , nil ))  ; a(y) ) .
+  eq getAllPathsForLoopDeactivation( a(x) , a(y) , G) = removeDuplicates(  DFS2( a(y) , a(x) , nil, G )  ) .
   
   op allPaths : Action Action Graph -> ActionList .
-  eq allPaths( a[x] , a[y] , G ) = DFS2( a[x] , a[y] , nil , G ) .
+  eq allPaths( a(x) , a(y) , G ) = DFS2( a(x) , a(y) , nil , G ) .
   
   
-  --- check if it is a loop while transitioning from first argument to second
-  op loopFilter : Action Action Graph TupleList -> TupleList .
-  eq loopFilter(Action1 , Action2 , G , TList1) =
-  if detectLoop(Action1, Action2, G) then 
-  deactivateActionIndicators( getAllPathsForLoopDeactivation( Action2 , Action1 , G) , TList1 ) 
-  else TList1
-  fi .
 
-  --- MAIN function to use in RULES
-  ---detects loop given the first node is 0
-  op detectLoop : Action Action Graph -> Bool .
-  eq detectLoop( Action1 , Action2 , G ) = BFSLoopDetect( Action1 , Action2 , (a[-5]) , nil , G ) .
-  eq detectLoop( nil , Action2 , G) = false .
-  eq detectLoop( Action1 , nil , G) = true .
   
   op lastAction : ActionList -> Action .
   eq lastAction( ( AList1 ; Action1 ) ) = Action1 .
   eq lastAction(nil) = nil .
   
-  op isIndicatorNotActive : Int TupleList -> Bool .
-  eq isIndicatorNotActive( x , TList ) =
-  if tupleInTupleList ( t( x & 1 ) , TList ) then false
+  op isCookieNotActive : Int TupleList -> Bool .
+  eq isCookieNotActive( x , TList ) =
+  if tupleInTupleList ( t( x , 1 ) , TList ) then false
   else true
   fi .
   
-  op isIndicatorNotBlocked : Int TupleList -> Bool .
-  eq isIndicatorNotBlocked( x , TList ) =
-  if tupleInTupleList ( t( x & -1 ) , TList ) then false
+  op isCookieNotBlocked : Int TupleList -> Bool .
+  eq isCookieNotBlocked( x , TList ) =
+  if tupleInTupleList ( t( x , -1 ) , TList ) then false
   else true
   fi .
  
-  op allParentIndicatorsActiveHelper : ActionList TupleList Graph -> Bool .
-  eq allParentIndicatorsActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isIndicatorActive( i , TList1 ) and allParentIndicatorsActiveHelper( AList1 , TList1, G ) .
-  eq allParentIndicatorsActiveHelper( nil, TList1, G ) = true .
+  op allParentCookiesActiveHelper : ActionList TupleList Graph -> Bool .
+  eq allParentCookiesActiveHelper( ( a(i) ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) and allParentCookiesActiveHelper( AList1 , TList1, G ) .
+  eq allParentCookiesActiveHelper( nil, TList1, G ) = true .
   
-  --- action , Indicators, graph
-  op allParentIndicatorsActive : Action TupleList Graph -> Bool .
-  eq allParentIndicatorsActive( a[i] , TList1 , G ) = allParentIndicatorsActiveHelper( parents(a[i] , G ) , TList1 , G ) .
-  eq allParentIndicatorsActive( Action1 , nil , G ) = false .
-  
-  
-  op atLeastOneParentIndicatorActiveHelper : ActionList TupleList Graph -> Bool .
-  eq atLeastOneParentIndicatorActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isIndicatorActive( i , TList1 ) or atLeastOneParentIndicatorActiveHelper( AList1 , TList1, G ) .
-  eq atLeastOneParentIndicatorActiveHelper( nil, TList1, G ) = false .
-  
-  op atLeastOneParentIndicatorActive : Action TupleList Graph -> Bool .
-  eq atLeastOneParentIndicatorActive( a[i] , TList1 , G ) = atLeastOneParentIndicatorActiveHelper( parents( a[i] , G ) , TList1 , G ) .
-  eq atLeastOneParentIndicatorActive( Action1 , nil , G ) = false .
+  --- action , cookies, graph
+  op allParentCookiesActive : Action TupleList Graph -> Bool .
+  eq allParentCookiesActive( a(i) , TList1 , G ) = allParentCookiesActiveHelper( parents(a(i) , G ) , TList1 , G ) .
+  eq allParentCookiesActive( Action1 , nil , G ) = false .
   
   
-
-
-  op atLeastOneChildIndicatorActiveHelper : ActionList TupleList Graph -> Bool .
-  eq atLeastOneChildIndicatorActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = isIndicatorActive( i , TList1 ) or atLeastOneChildIndicatorActiveHelper( AList1 , TList1, G ) .
-  eq atLeastOneChildIndicatorActiveHelper( nil, TList1, G ) = false .
+  op atLeastOneParentCookieActiveHelper : ActionList TupleList Graph -> Bool .
+  eq atLeastOneParentCookieActiveHelper( ( a(i) ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or atLeastOneParentCookieActiveHelper( AList1 , TList1, G ) .
+  eq atLeastOneParentCookieActiveHelper( nil, TList1, G ) = false .
   
-  op atLeastOneChildIndicatorActive : Action TupleList Graph -> Bool .
-  eq atLeastOneChildIndicatorActive( a[i] , TList1 , G ) = atLeastOneChildIndicatorActiveHelper( children( a[i] , G ) , TList1 , G ) .
-  eq atLeastOneChildIndicatorActive( Action1 , nil , G ) = false .
+  op atLeastOneParentCookieActive : Action TupleList Graph -> Bool .
+  eq atLeastOneParentCookieActive( a(i) , TList1 , G ) = atLeastOneParentCookieActiveHelper( parents( a(i) , G ) , TList1 , G ) .
+  eq atLeastOneParentCookieActive( Action1 , nil , G ) = false .
   
   
 
 
+  op atLeastOneChildCookieActiveHelper : ActionList TupleList Graph -> Bool .
+  eq atLeastOneChildCookieActiveHelper( ( a(i) ; AList1 ) , TList1 , G ) = isCookieActive( i , TList1 ) or atLeastOneChildCookieActiveHelper( AList1 , TList1, G ) .
+  eq atLeastOneChildCookieActiveHelper( nil, TList1, G ) = false .
   
-  op xorParentIndicatorActiveHelper : ActionList Bool TupleList Graph -> Bool .
-  eq xorParentIndicatorActiveHelper( ( a[i] ; AList1 ) , Bool1 , TList1 , G ) = isIndicatorActive( i , TList1 ) xor allParentIndicatorsActiveHelper( AList1 , TList1, G ) .
-  eq xorParentIndicatorActiveHelper( nil, Bool1 , TList1, G ) = Bool1 .
+  op atLeastOneChildCookieActive : Action TupleList Graph -> Bool .
+  eq atLeastOneChildCookieActive( a(i) , TList1 , G ) = atLeastOneChildCookieActiveHelper( children( a(i) , G ) , TList1 , G ) .
+  eq atLeastOneChildCookieActive( Action1 , nil , G ) = false .
+  
+  
 
-  op xorParentIndicatorActive : Action TupleList Graph -> Bool .
-  eq xorParentIndicatorActive( a[i] , TList1 , G ) = xorParentIndicatorActiveHelper( parents( a[i] , G ) , isIndicatorActive( firstActionInt( ( parents( a[i] , G ) ) ) , TList1 ) , TList1 , G ) .
-  eq xorParentIndicatorActive( Action1 , nil , G ) = false .
+
+  
+  op xorParentCookieActiveHelper : ActionList Bool TupleList Graph -> Bool .
+  eq xorParentCookieActiveHelper( ( a(i) ; AList1 ) , Bool1 , TList1 , G ) = isCookieActive( i , TList1 ) xor allParentCookiesActiveHelper( AList1 , TList1, G ) .
+  eq xorParentCookieActiveHelper( nil, Bool1 , TList1, G ) = Bool1 .
+
+  op xorParentCookieActive : Action TupleList Graph -> Bool .
+  eq xorParentCookieActive( a(i) , TList1 , G ) = xorParentCookieActiveHelper( parents( a(i) , G ) , isCookieActive( firstActionInt( ( parents( a(i) , G ) ) ) , TList1 ) , TList1 , G ) .
+  eq xorParentCookieActive( Action1 , nil , G ) = false .
   
   op isAtLeastOneXorParentChildActiveHelper : ActionList TupleList Graph -> Bool .
   eq isAtLeastOneXorParentChildActiveHelper( nil , TList1 , G ) = false .
-  eq isAtLeastOneXorParentChildActiveHelper( ( a[i] ; AList1 ) , TList1 , G ) = 
-  if isXor(a[i] , G) then atLeastOneChildIndicatorActive( a[i] , TList1 , G ) or isAtLeastOneXorParentChildActiveHelper( AList1 , TList1 , G )
+  eq isAtLeastOneXorParentChildActiveHelper( ( a(i) ; AList1 ) , TList1 , G ) = 
+  if isXor(a(i) , G) then atLeastOneChildCookieActive( a(i) , TList1 , G ) or isAtLeastOneXorParentChildActiveHelper( AList1 , TList1 , G )
   else isAtLeastOneXorParentChildActiveHelper( AList1 , TList1 , G )
   fi .
   
   op isAtLeastOneXorParentChildActive : Action TupleList Graph -> Bool .
-  eq isAtLeastOneXorParentChildActive( a[i] , TList1 , G ) = isAtLeastOneXorParentChildActiveHelper( parents( a[i], G ) , TList1 , G ) .
+  eq isAtLeastOneXorParentChildActive( a(i) , TList1 , G ) = isAtLeastOneXorParentChildActiveHelper( parents( a(i), G ) , TList1 , G ) .
   
   op isAtLeastOneParentBlocked : Action TupleList Graph -> Bool .
-  eq isAtLeastOneParentBlocked( a[i] , ( ( t( x & y) ) & TList1 ) , G ) =
-  if ( y == -1 ) and ( ( a[x] ) in parents( a[i] , G ) ) then true 
-  else isAtLeastOneParentBlocked( a[i] , TList1 , G ) 
+  eq isAtLeastOneParentBlocked( a(i) , ( ( t( x , y) ) , TList1 ) , G ) =
+  if ( y == -1 ) and ( ( a(x) ) in parents( a(i) , G ) ) then true 
+  else isAtLeastOneParentBlocked( a(i) , TList1 , G ) 
   fi .
-  eq isAtLeastOneParentBlocked( a[i] , nil , G ) = false .
+  eq isAtLeastOneParentBlocked( a(i) , nil , G ) = false .
 
   
   op isXorInList : ActionList Graph -> Bool .
-  eq isXorInList( ( a[i] ; AList1 ) , G ) = isXor( a[i] , G ) or isXorInList(  AList1  , G ) .
+  eq isXorInList( ( a(i) ; AList1 ) , G ) = isXor( a(i) , G ) or isXorInList(  AList1  , G ) .
   eq isXorInList( nil , G ) = false .
   
   op getXorListInActionList : ActionList Graph -> ActionList .
-  eq getXorListInActionList( ( a[i] ; AList1 ) , G ) = 
-  if isXor( a[i] , G ) then ( a[i] ; getXorListInActionList( AList1 , G ) ) else getXorListInActionList( AList1 , G ) fi .
+  eq getXorListInActionList( ( a(i) ; AList1 ) , G ) = 
+  if isXor( a(i) , G ) then ( a(i) ; getXorListInActionList( AList1 , G ) ) else getXorListInActionList( AList1 , G ) fi .
   eq getXorListInActionList( nil , G ) = nil .
   
-  op blockActionListIndicators : ActionList TupleList -> TupleList .
-  eq blockActionListIndicators( ( a[i] ; AList1 ) , TList ) = blockActionListIndicators( AList1 , blockIndicator( i , TList) ) .
-  eq blockActionListIndicators( nil , TList ) = TList . 
+  op blockActionListCookies : ActionList TupleList -> TupleList .
+  eq blockActionListCookies( ( a(i) ; AList1 ) , TList ) = blockActionListCookies( AList1 , blockCookie( i , TList) ) .
+  eq blockActionListCookies( nil , TList ) = TList . 
   
   op removeAction : Action ActionList -> ActionList .
-  eq removeAction( a[i] , ( a[n] ; AList1 ) ) = if (i == n) then removeAction(a[i] , AList1) else a[n] ; removeAction(a[i] , AList1) fi .
-  eq removeAction( a[i] , nil ) = nil .
+  eq removeAction( a(i) , ( a(n) ; AList1 ) ) = if (i == n) then removeAction(a(i) , AList1) else a(n) ; removeAction(a(i) , AList1) fi .
+  eq removeAction( a(i) , nil ) = nil .
   
 
-  op blockParentAndSiblingIndicatorsIfParentIsXor : Action Graph TupleList -> TupleList . 
-  eq blockParentAndSiblingIndicatorsIfParentIsXor( ( a[i] ) , G , TList ) = 
-  if isXorInList( parents( a[i] , G ) , G ) then blockActionListIndicators( removeAction( a[i] , listChildren(getXorListInActionList( parents( a[i] , G ) , G ), G ) )  , blockActionListIndicators( getXorListInActionList( parents( a[i] , G ) , G ) , TList ) )
+  op blockParentAndSiblingCookiesIfParentIsXor : Action Graph TupleList -> TupleList . 
+  eq blockParentAndSiblingCookiesIfParentIsXor( ( a(i) ) , G , TList ) = 
+  if isXorInList( parents( a(i) , G ) , G ) then blockActionListCookies( removeAction( a(i) , listChildren(getXorListInActionList( parents( a(i) , G ) , G ), G ) )  , blockActionListCookies( getXorListInActionList( parents( a(i) , G ) , G ) , TList ) )
   else TList fi .
 
 
@@ -867,16 +953,16 @@ fmod GRAPH-EQ is
   --- if it doesn't have an ending node, we add it after the node with the ending node
   op normalizeSequence : ActionList -> ActionList .
   eq normalizeSequence( AList1 ) = 
-  if ( firstAction( AList1 ) == ( a[-5] ) )
+  if ( firstAction( AList1 ) == ( a(-5) ) )
   	then --- if -5 is present in AList1
-  		if ( lastAction( AList1 ) == ( a[-7] ) )  
+  		if ( lastAction( AList1 ) == ( a(-7) ) )  
         	then --- if both -5 and -7 are present in AList1
             	AList1
             else --- if -5 is present in AList1 but -7 is not present in AList1
                 addFinalAction( AList1 )
         fi
     else --- if -5 is NOT present in AList1
-  		if ( lastAction( AList1 ) == ( a[-7] ) ) 
+  		if ( lastAction( AList1 ) == ( a(-7) ) ) 
         	then --- if -5 is NOT present and -7 is present in AList1
             	addStartingAction( AList1 )
             else --- if -5 is NOT present in AList1 and -7 is NOT present in AList1
@@ -885,31 +971,31 @@ fmod GRAPH-EQ is
   fi .
   
   op lastAction : ActionList -> Action .
-  eq lastAction( AList1 ; ( a[x] ) ) = a[x] .
+  eq lastAction( AList1 ; ( a(x) ) ) = a(x) .
   eq lastAction( nil ) = nil .
   
   op firstAction : ActionList -> Action .
-  eq firstAction( ( a[x] ) ; AList1 ) = a[x] .
+  eq firstAction( ( a(x) ) ; AList1 ) = a(x) .
   eq firstAction( nil ) = nil .
   
   op addFinalAction : ActionList -> ActionList .
-  eq addFinalAction( AList1 ) = ( AList1 ; a[-7] ) .
+  eq addFinalAction( AList1 ) = ( AList1 ; a(-7) ) .
   
   op addStartingAction : ActionList -> ActionList .
-  eq addStartingAction( AList1 ) = ( a[-5] ; AList1 ) .
+  eq addStartingAction( AList1 ) = ( a(-5) ; AList1 ) .
   
   
   
   op normalizeGraph : Graph -> Graph .
   eq normalizeGraph( G ) =
-  if arcLeftExists( (n[-5]: nseq, oth) , G ) then 
-  		if arcRightExists( (n[-7]: nseq, oth) , G ) then
+  if arcLeftExists( (n[-5]: nseq) , G ) then 
+  		if arcRightExists( (n[-7]: nseq) , G ) then
         		G
         else 
         		addFinalNode( G )
         fi 
   else 
-    	if arcRightExists( (n[-7]: nseq, oth) , G ) then
+    	if arcRightExists( (n[-7]: nseq) , G ) then
         		addStartingNode( G )
         else 
         		addStartingNode ( addFinalNode( G ) )
@@ -929,22 +1015,22 @@ fmod GRAPH-EQ is
   
   op addFinalNode : Graph -> Graph .
   eq addFinalNode( G1 ) = if 
-  		arcRightExists( (n[-7]: nseq, fin) , addFinalNodeHelper(G1, nil) ) then addFinalNodeHelper(G1, nil)
+  		arcRightExists( (n[-7]: nseq) , addFinalNodeHelper(G1, nil) ) then addFinalNodeHelper(G1, nil)
         else 
         addFinalNodeToLastNode( G1 )
         fi .
         
   
   op addFinalNodeHelper : Graph Graph -> Graph .
-  eq addFinalNodeHelper( ( (n[i]: type', func') -> (n[x]: type, func) ;; G2 ) , G ) = 
-  if func == fin
-  		then addFinalNodeHelper( G2 , ( ( G ;; (n[i]: type', func') -> (n[x]: type, oth) ) ;; (n[x]: type, oth) -> (n[-7]: nseq, fin) )  )
-  else addFinalNodeHelper( G2, ( G ;; (n[i]: type', func') -> (n[x]: type, func) ) ) fi .
+  eq addFinalNodeHelper( ( (n[i]: type') -> (n[x]: type) ;; G2 ) , G ) = 
+  if x == (-7)
+  		then addFinalNodeHelper( G2 , ( ( G ;; (n[i]: type') -> (n[x]: type) ) ;; (n[x]: type) -> (n[-7]: nseq) )  )
+  else addFinalNodeHelper( G2, ( G ;; (n[i]: type') -> (n[x]: type) ) ) fi .
   eq addFinalNodeHelper( nil , G ) = G .
   
   op addFinalNodeToLastNode : Graph -> Graph .
-  eq addFinalNodeToLastNode( G ;; (n[i]: type', func') -> (n[x]: type, func) ) = 
-  ( ( G ;; (n[i]: type', func') -> (n[x]: type, func) ) ;; (n[x]: type, func) -> (n[-7]: nseq, fin) ) .
+  eq addFinalNodeToLastNode( G ;; (n[i]: type') -> (n[x]: type) ) = 
+  ( ( G ;; (n[i]: type') -> (n[x]: type) ) ;; (n[x]: type) -> (n[-7]: nseq) ) .
   eq addFinalNodeToLastNode( nil ) = nil .
   
   
@@ -952,26 +1038,31 @@ fmod GRAPH-EQ is
   
   op addStartingNode : Graph -> Graph .
   eq addStartingNode( G1 ) = if 
-  		arcLeftExists( (n[-5]: nseq, start) , addStartingNodeHelper( G1, nil ) ) then addStartingNodeHelper( G1 , nil )
+  		arcLeftExists( (n[-5]: nseq) , addStartingNodeHelper( G1, nil ) ) then addStartingNodeHelper( G1 , nil )
         else 
         addStartingNodeToFirstNode( G1 )
         fi .
   
   op addStartingNodeHelper : Graph Graph -> Graph .
-  eq addStartingNodeHelper( ( (n[i]: type', func') -> (n[x]: type, func) ;; G2 ) , G ) = 
-  if func' == start
-  		then addStartingNodeHelper( G2 , (n[-5]: nseq, start) -> (n[i]: type', oth) ;; (n[i]: type', oth) -> (n[x]: type, oth) ;; G )
-  else addStartingNodeHelper( G2, ( (n[i]: type', func') -> (n[x]: type, func) ;; G ) ) fi .
+  eq addStartingNodeHelper( ( (n[i]: type') -> (n[x]: type) ;; G2 ) , G ) = 
+  if i == (-5)
+  		then addStartingNodeHelper( G2 , (n[-5]: nseq) -> (n[i]: type') ;; (n[i]: type') -> (n[x]: type) ;; G )
+  else addStartingNodeHelper( G2, ( (n[i]: type') -> (n[x]: type) ;; G ) ) fi .
   eq addStartingNodeHelper( nil, G ) = G .
   
   op addStartingNodeToFirstNode : Graph -> Graph .
-  eq addStartingNodeToFirstNode( (n[i]: type', func') -> (n[x]: type, func) ;; G ) = 
-  (n[-5]: nseq, start) -> (n[i]: type', func') ;; ( (n[i]: type', func') -> (n[x]: type, func) ;; G ) .
+  eq addStartingNodeToFirstNode( (n[i]: type') -> (n[x]: type) ;; G ) = 
+  (n[-5]: nseq) -> (n[i]: type') ;; ( (n[i]: type') -> (n[x]: type) ;; G ) .
   eq addStartingNodeToFirstNode( nil ) = nil . 
   
   op genCFG : ActionList Graph -> Config .
   eq genCFG( AList , G ) = ( normalizeSequence( AList ) | nil | nil | nil | normalizeGraph( G ) | starting ) .
 
+  op isNotAnd : Action Graph -> Bool .
+  eq isNotAnd( a(i) , G ) =
+  	if not ( checkType( a(i), G ) == "and" ) then true
+    else false
+    fi .
 
 endfm
 
@@ -981,10 +1072,10 @@ mod GRAPH-RL is
 
   *** Variables ***
   var AList AList' AList1 AList2 CorrectActionList IncorrectActionList InputActionList : ActionList . --- Lists of user actions
-  var Indicators Indicators' Indicators1 Indicators2 BIndicators BIndicators2 BIndicators1 BIndicators3 : IndicatorList . --- Lists of Indicators
+  var Cookies Cookies' Cookies1 Cookies2 BCookies BCookies2 BCookies1 BCookies3 : CookieList . --- Lists of cookies
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
-  var TupleIndicators TupleIndicators' TupleIndicators1 TupleIndicators2 TupleBIndicators TupleBIndicators2 TupleBIndicators1 TupleBIndicators3 IndicatorT : TupleList . --- Lists of Indicators
-  var TuplePossibleIndicators TupleRealIndicators TupleBlockedIndicators : TupleList . 
+  var TupleCookies TupleCookies' TupleCookies1 TupleCookies2 TupleBCookies TupleBCookies2 TupleBCookies1 TupleBCookies3 CookieT : TupleList . --- Lists of cookies
+  var TuplePossibleCookies TupleRealCookies TupleBlockedCookies : TupleList . 
   var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
   var G G' G1 G2 : Graph . --- Graphs
   var Node1 Node2 Node3 : Node .
@@ -996,7 +1087,7 @@ mod GRAPH-RL is
   *** Rules ***
   --- Preliminary setup rule: Insert start and fin nodes into the graph (optional rule)
   --- Requires consultation
-  --- TO DO
+  --- TODO
 
   --- Start the execution: Transition status from "starting" to "executing" and consume starting action
   --- Actions start and fin are artificially inserted to control the sequences
@@ -1004,48 +1095,52 @@ mod GRAPH-RL is
   --- works correctly
   --- the starting node DOES NOT CHECK node function
   rl [start]: 
-    a[i] ; AList | TupleIndicators | CList | EList | G | starting  
-    => if isStartingNode( a[i] , G ) then
-    AList | activateIndicator( i , TupleIndicators) | ( CList ; (a[i]) ) | EList | G | executing
+    a(i) ; AList | TupleCookies | CList | EList | G | starting  
+    => if isStartingNode( a(i) ) then
+    AList | activateCookie( i , TupleCookies) | ( CList ; (a(i)) ) | EList | G | executing
 	else 
-    AList | TupleIndicators | CList | ( EList ; (a[i]) ) | G | starting 
+    AList | TupleCookies | CList | ( EList ; (a(i)) ) | G | starting 
     fi .
   --- works correctly
   --- End the execution: Transition status from "executing" to "correct" or "incorrect"
   --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
   rl [end]:  
-    nil | TupleIndicators | CList | EList | G | executing
+    nil | TupleCookies | CList | EList | G | executing
     =>
-    if checkFunc(lastAction(CList), G) == "fin"
+    if checkFunc(lastAction(CList)) == "fin"
     then
-      nil | TupleIndicators | CList | EList | G | correct 
+      nil | TupleCookies | CList | EList | G | correct 
     else 
-      nil | TupleIndicators | CList | EList | G | incorrect
+      nil | TupleCookies | CList | EList | G | incorrect
     fi .
     
   rl [step] :
-    (a[i]) ; AList | TupleIndicators | CList | EList | G | executing
+    (a(i)) ; AList | TupleCookies | CList | EList | G | executing
     => 
-   if not ( ( isAtLeastOneParentBlocked( a[i] , TupleIndicators, G ) ) and ( isIndicatorBlocked( i , TupleIndicators ) ) ) then
-    if detectLoop( lastAction(CList) , a[i] , G ) and isIndicatorNotActive(i, deactivateActionIndicators( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleIndicators ) ) then
-     if isAnd((a[i]), G) and allParentIndicatorsActive( a[i] , TupleIndicators , G ) then AList | blockParentAndSiblingIndicatorsIfParentIsXor( a[i] , G , activateIndicator( i , deactivateActionIndicators( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleIndicators ) ) )   | (CList ; (a[i])) | EList | G | executing 
-      else
-      if atLeastOneParentIndicatorActive( a[i] , TupleIndicators , G ) then AList | blockParentAndSiblingIndicatorsIfParentIsXor( a[i] , G , activateIndicator( i , deactivateActionIndicators( getAllPathsForLoopDeactivation( lastAction(CList) , a[i] , G ) , TupleIndicators ) ) )  | (CList ; (a[i])) | EList | G | executing 
-        else
-                  AList | TupleIndicators | CList | (EList ; (a[i])) | G | executing 
-        fi
-      fi 
+   if not ( ( isAtLeastOneParentBlocked( a(i) , TupleCookies, G ) ) and ( isCookieBlocked( i , TupleCookies ) ) ) then
+     if isCookieActive(i, TupleCookies) then
+       if enteringLoop( lastAction(CList) , a(i) , G , TupleCookies ) and isCookieNotActive(i, resetActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) then
+     		if isAnd((a(i)), G) and allParentCookiesActive( a(i) , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , resetActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )   | (CList ; (a(i))) | EList | G | executing 
+      		else
+      			if ( isNotAnd( a(i) , G ) and atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , resetActionCookies( getActionsForLoopDeactivation( lastAction(CList) , a(i) , G , TupleCookies ) , TupleCookies ) ) )  | (CList ; (a(i))) | EList | G | executing 
+        		else
+            		AList | TupleCookies | CList | (EList ; (a(i))) | G | executing 
+        		fi
+      		fi
+       else 
+       	 AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
+       fi
     else
-     if isIndicatorNotActive(i, TupleIndicators) then
-      if isAnd((a[i]), G) and allParentIndicatorsActive( a[i] , TupleIndicators , G ) then AList | blockParentAndSiblingIndicatorsIfParentIsXor( a[i] , G , activateIndicator( i , TupleIndicators ) )  | (CList ; (a[i])) | EList | G | executing 
+     if isCookieNotActive(i, TupleCookies) then
+      if isAnd((a(i)), G) and allParentCookiesActive( a(i) , TupleCookies , G ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing 
       else
-      if atLeastOneParentIndicatorActive( a[i] , TupleIndicators , G ) then AList | blockParentAndSiblingIndicatorsIfParentIsXor( a[i] , G , activateIndicator( i , TupleIndicators ) )  | (CList ; (a[i])) | EList | G | executing 
+      if ( isNotAnd( a(i) , G ) and atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) then AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing 
         else
-        	AList | TupleIndicators | CList | (EList ; (a[i])) | G | executing 
+        	AList | TupleCookies | CList | (EList ; (a(i))) | G | executing 
         fi
       fi
-      else AList | TupleIndicators | CList | (EList ; (a[i])) | G | executing fi
+      else AList | TupleCookies | CList | (EList ; (a(i))) | G | executing fi
     fi
-   else AList | TupleIndicators | CList | (EList ; (a[i])) | G | executing
+   else AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
    fi .
 endm
