@@ -194,6 +194,30 @@ fmod SEQUENCES is
     (n[3]: nseq) -> (n[4]: nseq) ;;
     (n[4]: nseq) -> (n[-7]: nseq) .
 
+  op grapTest0 : -> Graph .
+  eq grapTest =
+    (n[-5]: nseq) -> (n[1]: nseq) ;;
+    (n[1]: nseq) -> (n[5]: nseq) ;;
+    (n[5]: nseq) -> (n[8]: nseq) ;;
+    (n[8]: nseq) -> (n[2]: nor) ;;
+    (n[2]: nor) -> (n[3]: nseq) ;;
+    (n[3]: nseq) -> (n[6]: nseq) ;;
+    (n[6]: nseq) -> (n[11]: nseq) ;;
+    (n[11]: nseq) -> (n[-7]: nseq) .
+  
+  op grapTest1 : -> Graph .
+  eq grapTest1 =
+    (n[-5]: nseq) -> (n[1]: nseq) ;;
+    (n[1]: nseq) -> (n[5]: nseq) ;;
+    (n[5]: nseq) -> (n[8]: nseq) ;;
+    (n[8]: nseq) -> (n[2]: nor) ;;
+    (n[2]: nor) -> (n[3]: nseq) ;;
+    (n[3]: nseq) -> (n[6]: nseq) ;;
+    (n[6]: nseq) -> (n[4]: nseq) ;;
+    (n[4]: nseq) -> (n[2]: nor) ;;
+    (n[6]: nseq) -> (n[11]: nseq) ;;
+    (n[11]: nseq) -> (n[-7]: nseq) .
+
   *** Action sequences for testing ***
   op seq1 : -> ActionList .
   eq seq1 = (a[-5]) ; (a[1]) ; (a[2]) ; (a[-7]) .
@@ -206,6 +230,9 @@ fmod SEQUENCES is
 
   op seq4 : -> ActionList .
   eq seq4 = (a[-5]) ; (a[1]) ; (a[2]) ; (a[4]) ; (a[-7]) .
+
+  op seqTest : -> ActionList .
+  eq seqTest = (a[-5]) ; (a[1]) ; (a[5]) ; (a[8]) ; (a[2]) ; (a[3]) ; (a[6]) ; (a[9]) ; (a[4]) ; (a[2]) ; (a[3]) ; (a[6]) ; (a[9]) ;  (a[4]) ;  (a[2]) ;   (a[3]) ; (a[6]) ; (a[9]) ; (a[4]) ; (a[2]) ;    (a[3]) ; (a[6]) ; (a[9]) ; (a[11]) ; (a[-7]) .
 
   ***
   op allInd : -> IndicatorList .
@@ -285,11 +312,18 @@ fmod GRAPH-EQ is
       fi
     fi .
 
-  ---
-  op blockIndicators : Action IndicatorList Graph -> IndicatorList .
-  eq blockIndicators((a[x]), nil, G) = nil .
-  eq blockIndicators((a[x]), nil, G) = 
-    blockList(getXORParents((a[x]), G)) and blockList(getSiblings((a[x]), G)) and (IList ; getIndicator((a[x]))) .
+  --- If parent is XOR, block parent and sibling indicators in Indicator List
+  op blockIndicatorList : Action IndicatorList Graph -> IndicatorList .
+  eq blockIndicatorList((a[x]), nil, G) = nil .
+  eq blockIndicatorList((a[x]), (i[n]: y) ; IList, G) = 
+    if x == n
+    then 
+      blockList(getXORParents((a[x]), parents((a[x]), G), G), (i[n]: y) ; IList) ;
+      blockList(getAllSiblings((a[x]), parents((a[x]), G), G), (i[n]: y) ; IList) ;
+      IList ; getIndicator((a[x]), (i[n]: y) ; IList)
+    else 
+      blockIndicatorList((a[x]), IList, G)
+    fi .
 
   --- Check if the node is starting (-5) or fin (-7). If neither, is considered "other"
   op checkFunction : Action Graph -> String . 
@@ -331,8 +365,8 @@ fmod GRAPH-EQ is
   ---
   op isParentBlocked : Action IndicatorList Graph -> Bool .
   eq isParentBlocked((a[x]), nil, G) = false .
-  eq isParentBlocked((a[x]), (i[m]: n) ; IList, G) = 
-    if (n == -1) and (a[m]) in parents((a[x]), G)
+  eq isParentBlocked((a[x]), (i[n]: y) ; IList, G) = 
+    if (n == -1) and (a[n]) in parents((a[x]), G)
     then true
     else isParentBlocked((a[x]), IList, G)
     fi .
@@ -358,27 +392,26 @@ fmod GRAPH-EQ is
 
    ---
   op blockList : ActionList IndicatorList -> IndicatorList .
-  eq blockList((a[x]) ; AList, IList) =
-    blockIndicator(getIndicator((a[x]), IList)) ; blockList(AList, IList) .
+  eq blockList(nil, IList) = nil .
+  eq blockList((a[x]) ; AList, (i[n]: y) ; IList) =
+   if x == n
+   then blockIndicator(getIndicator((a[x]), (i[n]: y) ; IList)) ; blockList(AList, IList) 
+   else blockList(AList, (i[n]: y) ; IList) 
+   fi .
+
+  op test : ActionList IndicatorList -> Bool .
+  eq test ((a[x]) ; AList, (i[n]: y) ; IList) =
+    if x == n
+    then true
+    else false
+    fi .
+
 
   --- To obtain the list of direct children of a node in a graph.
   op children : Action Graph -> ActionList .
   eq children((a[x]), (n[x]: type) -> (n[y]: type') ;; G) =
     (a[y]) ; children((a[x]), G) .
   eq children((a[x]), G) = nil [owise] .
-
-  ---
-  op getIndicator : Action IndicatorList -> Indicator .
-  eq getIndicator((a[x]), IList ; (i[x]: y) ; IList') = (i[x]: y) .
-  eq getIndicator((a[x]), IList) = (i[x]: 0) [owise] .
-
-  op getXORParents : Action Graph -> ActionList .
-  eq getXORParents((a[x]), (n[y]: nxor) -> (n[x]: type) ;; G) =
-    (a[y]) ; getXORParents((a[x]), G) .
-
-  op getSiblings : Action Graph -> ActionList .
-  eq getSiblings((a[x]), (n[y]: nxor) -> (n[x]: type) ;; G) =
-    children((a[y]), G) ; getSiblings((a[x]), G) .
 
   --- Action in List of Actions 
   op _in_ : Action ActionList -> Bool .
@@ -389,7 +422,8 @@ fmod GRAPH-EQ is
   op _in_ : Indicator IndicatorList -> Bool .
   eq (i[x]: y) in (IList ; (i[x]: y) ; IList') = true .
   eq (i[x]: y) in IList = false [owise] .
-  ---
+
+  --- Check if the indicator is set to 1
   op isActive : Indicator -> Bool .
   eq isActive((i[x]: y)) =
     if y == 1
@@ -397,6 +431,27 @@ fmod GRAPH-EQ is
     else false
     fi .
 
+  --- For each parent of the selected action, get the list of children and remove the selected action from the list to obtain its siblings
+  op getAllSiblings : Action ActionList Graph -> ActionList .
+  eq getAllSiblings((a[x]), nil, G) = nil .
+  eq getAllSiblings((a[x]), (a[n]) ; AList, G) =
+    removeAction((a[x]), children((a[n]), G)) ; getAllSiblings((a[x]), AList, G) .
+
+  --- Get the corresponding indicator to an action. If not in list, return indicator as inactive (0)
+  op getIndicator : Action IndicatorList -> Indicator .
+  eq getIndicator((a[x]), IList ; (i[x]: y) ; IList') = (i[x]: y) .
+  eq getIndicator((a[x]), IList) = (i[x]: 0) [owise] .
+
+  ---
+  op getXORParents : Action ActionList Graph -> ActionList .
+  eq getXORParents((a[x]), nil, G) = nil .
+  eq getXORParents((a[x]), (a[n]) ; AList, G) =
+    if checkType((a[n]), G) == "xor"
+    then (a[n]) ; getXORParents((a[x]), AList, G)
+    else getXORParents((a[x]), AList, G)
+    fi .
+
+  --- Check if there is an XOR node in the graph that is performed as an action
   op isXorInList : ActionList Graph -> Bool .
   eq isXorInList(nil , G) = false .
   eq isXorInList((a[x]) ; AList, G ) = 
@@ -410,7 +465,20 @@ fmod GRAPH-EQ is
 
   --- Remove inactive indicator to substitute for active indicator
   op removeInactive : Int IndicatorList -> IndicatorList .
-  eq removeInactive(x, IList ; (i[x]: 0) ; IList') = (IList ; IList') .
+  eq removeInactive(x, (i[x]: y) ; IList) = 
+    if y == 0
+    then IList
+    else (i[x]: y) ; IList
+    fi .
+
+  --- Remove action from list of actions
+  op removeAction : Action ActionList -> ActionList .
+  eq removeAction((a[x]), nil) = nil .
+  eq removeAction((a[x]), (a[n]) ; AList) =
+    if (a[x]) == (a[n]) 
+    then AList
+    else (a[n]) ; removeAction((a[x]), AList)
+    fi .
 
   --- Check if at least one of the actions is in the target list of active actions
   op someIndicatorsActive : ActionList IndicatorList -> Bool .
@@ -483,11 +551,11 @@ mod GRAPH-RL is
        ---if not (parentIndicatorActive()) then *** Detect loop or repeated action
         if checkType((a[x]), G) == "and" and activeParents((a[x]), IList, G) == "all"
         then 
-          AList | blockIndicators() | (CList ; (a[x])) | EList | G | executing 
+          AList | IList | (CList ; (a[x])) | EList | G | executing 
         else
           if not (checkType((a[x]), G) == "and") and activeParents((a[x]), IList, G) == "some"
           then 
-            AList | blockIndicators() | (CList ; (a[x])) | EList | G | executing 
+            AList | IList | (CList ; (a[x])) | EList | G | executing 
           else
             AList | IList | CList | (EList ; (a[x])) | G | executing 
           fi
@@ -513,14 +581,55 @@ endm
 ---red checkType((a[4]), andGraph) .
 ---red checkType((a[4]), andGraph) == "and" .
 ---red not (checkType((a[3]), andGraph) == "and") .
----red getIndicator((a[2]) ; (a[3]), allInd) .
 ---red not (getIndicator((a[3]), someInd) == (i[3]: 0)) .
 ---red parents((a[4]), andGraph) .
 ---red allIndicatorsActive((a[3]), someInd) .
+---red someIndicatorsActive((a[3]), someInd) .
 ---red activeParents((a[4]), someInd, andGraph) .
+---red isBlocked((a[1]), allInd) .
 ---red isParentBlocked((a[2]), (i[-5]: 1) ; (i[1]: -1), andGraph) .
 ---red isXorInList((a[1]) ; (a[2]), xorGraph) .
 ---red isParentXOR((a[3]), xorGraph) .
+---red removeAction((a[1]), (a[0]) ; (a[1]) ; (a[2]) ; (a[3])) .
+---red children((a[1]), andGraph) .
+---red parents((a[4]), andGraph) .
+---red (a[1]) in ((a[0]) ; (a[1]) ; (a[2])) .
+---red (i[1]: 1) in allInd .
+---red isActive((i[1]: 1)) .
+---red removeInactive(1, someInd) .
+---red getIndicator((a[1]), allInd) .
+---red blockIndicator((i[1]: 1)) .
+---red blockList((a[1]) ; (a[2]), allInd) .
+---red parents((a[3]), xorGraph) .
+---red children((a[1]), xorGraph) .
+---red getXORParents((a[3]), parents((a[3]), xorGraph), xorGraph) .
+---red getAllSiblings((a[3]), parents((a[3]), xorGraph), xorGraph) .
+---red blockList(getXORParents((a[3]), parents((a[3]), xorGraph), xorGraph), allInd) .
+
+---red getIndicator((a[2]), allInd) .
+---red blockIndicator((i[2]: 1)) .
+
+----red blockList(getAllSiblings((a[3]), parents((a[3]), xorGraph), xorGraph), allInd) .
+---red blockList((a[2]), allInd) .
+---red blockIndicatorList((a[3]), allInd, xorGraph) .
+---red test((a[2]), (i[2]: 1)) .
+
+
+
 *** PENDING: get the siblings
 *** PENDING: test blockIndicators and related functions
 *** PENDING: loop detection
+
+--- CORRECT
+---i am active and parent is active
+---exists path from child to parent
+---all nodes in path are active
+---but no consecutive blocked nodes
+--- -> empty IList(path) and add myself to list
+
+
+--- INCORRECT
+--- ! exists path from child to parent
+--- !all nodes in path are active
+--- consecutive blocked nodes
+--- DISCARD
