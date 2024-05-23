@@ -944,7 +944,9 @@ fmod GRAPH-EQ is
     blockActionListCookies( 
       removeAction( a(i) , listChildren(getXorListInActionList( parents( a(i) , G ) , G ), G ) )  , 
       blockActionListCookies( getXorListInActionList( parents( a(i) , G ) , G ) , TList ) )
-  else TList fi .
+  else 
+    TList 
+  fi .
 
 
   --- in order to add starting and ending nodes to graphs and sequences, they will be added artificially 
