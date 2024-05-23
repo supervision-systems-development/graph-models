@@ -939,7 +939,11 @@ fmod GRAPH-EQ is
 
   op blockParentAndSiblingCookiesIfParentIsXor : Action Graph TupleList -> TupleList . 
   eq blockParentAndSiblingCookiesIfParentIsXor( ( a(i) ) , G , TList ) = 
-  if isXorInList( parents( a(i) , G ) , G ) then blockActionListCookies( removeAction( a(i) , listChildren(getXorListInActionList( parents( a(i) , G ) , G ), G ) )  , blockActionListCookies( getXorListInActionList( parents( a(i) , G ) , G ) , TList ) )
+  if isXorInList( parents( a(i) , G ) , G ) 
+    then 
+    blockActionListCookies( 
+      removeAction( a(i) , listChildren(getXorListInActionList( parents( a(i) , G ) , G ), G ) )  , 
+      blockActionListCookies( getXorListInActionList( parents( a(i) , G ) , G ) , TList ) )
   else TList fi .
 
 
