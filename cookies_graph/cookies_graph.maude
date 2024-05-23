@@ -913,8 +913,11 @@ fmod GRAPH-EQ is
   
   op isAtLeastOneParentBlocked : Action TupleList Graph -> Bool .
   eq isAtLeastOneParentBlocked( a(i) , ( ( t( x , y) ) , TList1 ) , G ) =
-  if ( y == -1 ) and ( ( a(x) ) in parents( a(i) , G ) ) then true 
-  else isAtLeastOneParentBlocked( a(i) , TList1 , G ) 
+  if ( y == -1 ) and ( ( a(x) ) in parents( a(i) , G ) ) 
+    then 
+      true 
+  else 
+    isAtLeastOneParentBlocked( a(i) , TList1 , G ) 
   fi .
   eq isAtLeastOneParentBlocked( a(i) , nil , G ) = false .
 
