@@ -565,9 +565,7 @@ fmod GRAPH-EQ is
   if tupleInTupleList( t( x , -1 ) , TList ) then 
     TList
     else 
-	 if tupleInTupleList( t( x , 1 ) , TList) then 
-		removeTupleFromTupleList( t( x , 1 ) , 
-			TList ) ) 
+	 if tupleInTupleList( t( x , 1 ) , TList) then blockCookie( x , removeTupleFromTupleList( t( x , 1 ) , TList ) ) 
 	 else 
 	  ( TList , t( x , -1 ) ) 	
 	 fi
@@ -1074,8 +1072,8 @@ mod GRAPH-RL is
   inc CONFIG .
 
   *** Variables ***
-  var AList AList' AList1 AList2 CorrectActionList IncorrectActionList InputActionList : ActionList . --- Lists of user actions
-  var Cookies Cookies' Cookies1 Cookies2 BCookies BCookies2 BCookies1 BCookies3 : CookieList . --- Lists of cookies
+  var AList AList' AList1 AList2 CorrectActionList IncorrectActionList InputActionList LR LW : ActionList . --- Lists of user actions
+  var Cookies Cookies' Cookies1 Cookies2 BCookies BCookies2 BCookies1 BCookies3 LS : CookieList . --- Lists of cookies
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
   var TupleCookies TupleCookies' TupleCookies1 TupleCookies2 TupleBCookies TupleBCookies2 TupleBCookies1 TupleBCookies3 CookieT : TupleList . --- Lists of cookies
   var TuplePossibleCookies TupleRealCookies TupleBlockedCookies : TupleList . 
@@ -1085,7 +1083,7 @@ mod GRAPH-RL is
   var type type' type1 type2 type3 : NType . --- Node types
   var func func' func1 func2 func3 : NFunc . --- Node functions
   var i j x y z : Int . --- Node ids
-  var status status' Status : Status . --- Status of the execution
+  var status status' Status final_st : Status . --- Status of the execution
 
   *** Rules ***
   --- Preliminary setup rule: Insert start and fin nodes into the graph (optional rule)
@@ -1147,3 +1145,5 @@ mod GRAPH-RL is
    else AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
    fi .
 endm
+
+rew ((a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting) .
