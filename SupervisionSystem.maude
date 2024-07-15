@@ -591,13 +591,13 @@ mod GRAPH-RL is
   inc CONFIG .
 
   *** Variables ***
-  var AList AList' AList1 AList2 CorrectActionList IncorrectActionList InputActionList LR LW : ActionList . --- Lists of user actions
+  var AList AList' AList1 AList2 CorrectActionList IncorrectActionList InputActionList LR LW List_Of_Input_Actions List_Of_Correct_Actions List_Of_Incorrect_Actions : ActionList . --- Lists of user actions
   var Cookies Cookies' Cookies1 Cookies2 BCookies BCookies2 BCookies1 BCookies3 LS : CookieList . --- Lists of cookies
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
-  var TupleCookies TupleCookies' TupleCookies1 TupleCookies2 TupleBCookies TupleBCookies2 TupleBCookies1 TupleBCookies3 CookieT : TupleList . --- Lists of cookies
+  var TupleCookies TupleCookies' TupleCookies1 TupleCookies2 TupleBCookies TupleBCookies2 TupleBCookies1 TupleBCookies3 CookieT List_Of_Indicators  : TupleList . --- Lists of cookies
   var TuplePossibleCookies TupleRealCookies TupleBlockedCookies : TupleList . 
   var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
-  var G G' G1 G2 : Graph . --- Graphs
+  var G G' G1 G2 Pattern : Graph . --- Graphs
   var Node1 Node2 Node3 : Node .
   var type type' type1 type2 type3 : NType . --- Node types
   var func func' func1 func2 func3 : NFunc . --- Node functions
@@ -659,5 +659,1782 @@ mod GRAPH-RL is
    fi .
 endm
 
+
+
+--- Examples of the execution.
+--- S is represented as -5 and F is represented as -7 due to integers being used as labels for convenience.
+
+--- First example is the sequence shown in Section 6.1 showing maude functionality with Toy Examples. 
+
 rew ((a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting) .
-rew ((a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting) .
+
+--- The application of "Search" command to the same example shows every state. 
+
+search ((a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting) =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | Status .
+
+
+--- Second example involves conformance checking of all JIGSAWS sequences using each of the graphs (a), (b) and (c).
+--- Search only for correct completions of the complex task, only correct final states are shown.
+--- If the task is not completed correctly, no final correct state can be found.
+--- The "Search" command is used instead of the "Rewrite" command because the in conformance checking, only the final state with a "correct" status is of interest
+--- The same procedure can be performed with "Rewrite", but it will show any final state, regardless of the correctness of execution. 
+
+
+
+--- Conformance Checking for All JIGSAWS sequences with the graph (a) from Section 6.2
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  1
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(8); a(2); a(3); a(2); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  2
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  3
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  4
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(6); a(4); a(2); a(3); a(6); a(4); a(8); a(2); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  5
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  6
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  7
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  8
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  9
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  10
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  11
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  12
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  13
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(2); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  14
+
+    search ( a(-5); a(1); a(4); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(6); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  15
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  16
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  17
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  18
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  19
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(9); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  20
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  21
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  22
+
+    search ( a(-5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  23
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  24
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  25
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  26
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(5); a(6); a(2); a(3); a(8); a(2); a(3); a(8); a(3); a(8); a(2); a(3); a(8); a(3); a(6); a(4); a(9); a(2); a(3); a(8); a(3); a(6); a(4); a(2); a(3); a(6); a(8); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  27
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  28
+
+    search ( a(-5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(2); a(3); a(6); a(4); a(10); a(2); a(8); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  29
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  30
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  31
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(10); a(6); a(10); a(6); a(4); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  32
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  33
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  34
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  35
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(10); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  36
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  37
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  38
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (a) and JIGSAWS sequence number  39
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[4]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for All JIGSAWS sequences with the graph (b) from Section 6.2
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  1
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(8); a(2); a(3); a(2); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  2
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  3
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  4
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(6); a(4); a(2); a(3); a(6); a(4); a(8); a(2); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  5
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  6
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  7
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  8
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  9
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  10
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  11
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  12
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  13
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(2); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  14
+
+    search ( a(-5); a(1); a(4); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(6); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  15
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  16
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  17
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  18
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  19
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(9); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  20
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  21
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  22
+
+    search ( a(-5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  23
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  24
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  25
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  26
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(5); a(6); a(2); a(3); a(8); a(2); a(3); a(8); a(3); a(8); a(2); a(3); a(8); a(3); a(6); a(4); a(9); a(2); a(3); a(8); a(3); a(6); a(4); a(2); a(3); a(6); a(8); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  27
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  28
+
+    search ( a(-5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(2); a(3); a(6); a(4); a(10); a(2); a(8); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  29
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  30
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  31
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(10); a(6); a(10); a(6); a(4); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  32
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  33
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  34
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  35
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(10); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  36
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  37
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  38
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (b) and JIGSAWS sequence number  39
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+        (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[4]: nor);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nor)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nor);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for All JIGSAWS sequences with the graph (c) from Section 6.2
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  1
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(8); a(2); a(3); a(2); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  2
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  3
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  4
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(6); a(4); a(2); a(3); a(6); a(4); a(8); a(2); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  5
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  6
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  7
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  8
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  9
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  10
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  11
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  12
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  13
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(2); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  14
+
+    search ( a(-5); a(1); a(4); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(6); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  15
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(9); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  16
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  17
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  18
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  19
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(9); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  20
+
+    search ( a(-5); a(1); a(5); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  21
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  22
+
+    search ( a(-5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  23
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  24
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  25
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  26
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(5); a(6); a(2); a(3); a(8); a(2); a(3); a(8); a(3); a(8); a(2); a(3); a(8); a(3); a(6); a(4); a(9); a(2); a(3); a(8); a(3); a(6); a(4); a(2); a(3); a(6); a(8); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  27
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  28
+
+    search ( a(-5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(8); a(2); a(3); a(6); a(4); a(10); a(2); a(8); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  29
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  30
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  31
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(10); a(6); a(10); a(6); a(4); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  32
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  33
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(9); a(4); a(2); a(3); a(6); a(9); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  34
+
+    search ( a(-5); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  35
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(10); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  36
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  37
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  38
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
+
+--- Conformance Checking for graph (c) and JIGSAWS sequence number  39
+
+    search ( a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7)) | nil | nil | nil |  
+    (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq)  | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
