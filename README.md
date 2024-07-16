@@ -1,4 +1,35 @@
-# graph-models
+# General Functionality
+
+This is a supervision system capable of real-time supervision as well as general analysis of task execution completeness based on a task model represented as a dependency graph with node functions. 
+
+This system utilises rewriting rules for action analysis. Every time a new action is sent to the input, the system configuration is rewritten and the result shows the immediate feedback. After the completion of the task, the final configuration shows additional information such as whether the task has been executed correctly. 
+
+Actions can be sent to the supervision system either one-by-one (for example, in real time) or as a list of actions (for example, of an already completed task) for analysis. 
+
+The 'SupervisionSystem.maude' file contains several examples at the end of the file.
+
+
+# Usage
+
+
+
+# Example
+
+In order to perform analysis of an already completed task, the command 
+`rew List_Of_Actions | nil | nil | nil | Task_Pattern | starting .` 
+can be used, with the list of actions in place of of `List_Of_Actions` and with the task model in place of `Task_Pattern`.
+
+![The pattern used to show an example of a trace of actions in the paper.](https://github.com/supervision-systems-development/graph-models/blob/main/figures/toy_example.png)
+
+For example, the pattern and the sequence of actions used in the paper to show an example of the trace is can be used as an input:
+`rew (a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting .
+` 
+which results in the following output:
+
+![rewrites: 1721 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                                      result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor      -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | correct     ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/github_example.png)
+
+This is an example of an already completed task being anaylsed after it has been completed. The result is in the form of a configuration containing elements of the configuration separated by `|`. The first element `nil` indicates, that the list of input actions is empty. The second element shows the list of indicators. The third element shows the list of correct actions, implying that this is the subset of the input list that conforms to the pattern and that is correct. The fourth element shows the list of incorrect actions, indicating that these were the mistakes made during the execution. The Fith element of the list shows the pattern and the sixth element indicates that the task has been completed correctly with a `correct` statement. 
+
 
 # Sorts:
 
