@@ -11,6 +11,7 @@ The 'SupervisionSystem.maude' file contains several examples at the end of the f
 
 # Usage
 
+The supervision system can be given inputs either as commands once it has been loaded to maude, or the commands can be appended at the end of the file in order to be executed once the file is loaded.
 
 
 # Example
