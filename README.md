@@ -13,12 +13,11 @@ The 'SupervisionSystem.maude' file contains several examples at the end of the f
 
 The supervision system can be given inputs either as commands once it has been loaded to maude, or the commands can be appended at the end of the file in order to be executed once the file is loaded.
 
-
-# Example
+## Existing list of actions
 
 In order to perform analysis of an already completed task, the command 
 `rew List_Of_Actions | nil | nil | nil | Task_Pattern | starting .` 
-can be used, with the list of actions in place of of `List_Of_Actions` and with the task model in place of `Task_Pattern`.
+can be used, with the list of actions in place of of `List_Of_Actions` and with the task model in place of `Task_Pattern`. 
 
 ![The pattern used to show an example of a trace of actions in the paper.](https://github.com/supervision-systems-development/graph-models/blob/main/figures/toy_example.png)
 
@@ -30,6 +29,20 @@ which results in the following output:
 ![rewrites: 1721 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                                      result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor      -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | correct     ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/github_example.png)
 
 This is an example of an already completed task being anaylsed after it has been completed. The result is in the form of a configuration containing elements of the configuration separated by `|`. The first element `nil` indicates, that the list of input actions is empty. The second element shows the list of indicators. The third element shows the list of correct actions, implying that this is the subset of the input list that conforms to the pattern and that is correct. The fourth element shows the list of incorrect actions, indicating that these were the mistakes made during the execution. The Fith element of the list shows the pattern and the sixth element indicates that the task has been completed correctly with a `correct` statement. 
+
+## Conformance Checking
+
+The approach described above can be used for conformance checking, however, as in conformance checking only the final conifugrations that resulted in a correct status, if they exist, are relevant, a separate command can be used to match a pattern containing the 'correct' status indicating the conformance of the sequence of actions to the pattern. 
+
+An example of such command matchin a pattern containing the 'correct' status for the example pattern shown above and the example sequence of actions used in the paper: 
+
+` search (a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct . `
+
+This command will only show a solution if the sequence conforms to a pattern, which will be indicated with a 'correct' status after the entire input sequence has been executed. 
+
+## Real-time feedback
+
+
 
 
 # Sorts:
