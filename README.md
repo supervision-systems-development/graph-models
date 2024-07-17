@@ -42,6 +42,11 @@ This command will only show a solution if the sequence conforms to a pattern, wh
 
 ## Real-time feedback
 
+In order to perform real-time supervision with feedback after each action, each action has to be sent to the input separately, as it is being executed, which is logical, as during the execution the supervision system does not know, which actions the student will execute in the future. 
+
+Real-time feedback during supervision after each student action implies the provision of each student action to the input of the system configuration. After the input of the student action, **one** rewriting rule is applied to the system and the resulting configuration contains the feedback. The correctness of incorrectness of the action is determined by the list of actions that the action is added to. In case the action has been correct, it is added to the list of correct actions, and in case it has been incorrect, it is added to the list of incorrect actions. In order to determine, which list the action has been added to, the lists of correct and incorrect actions from the previous configuration can be compared with the lists of correct and incorrect actions from the resulting configuration. Additionally, the resulting configuration will show, whether the sequence of actions has resulted in a correct execution of the task represented by the pattern. 
+
+An example of real-time supervision is shown using the example pattern used in the paper and shown on a figure above and the example sequence of actions used in the paper with the example pattern. 
 
 
 
