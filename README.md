@@ -45,7 +45,6 @@ This command will only show a solution if the sequence conforms to a pattern, wh
 ![ ` search in GRAPH-RL : (a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (((((n\[1\]: nxor -> n\[3\]: nseq ;; n\[-5\]: nseq -> n\[1\]:
     nxor) ;; n\[1\]: nxor -> n\[2\]: nseq) ;; n\[3\]: nseq -> n\[4\]: nseq) ;; n\[2\]: nseq -> n\[5\]: nor) ;; n\[5\]: nor -> n\[-7\]: nseq) ;; n\[4\]: nseq -> n\[5\]: nor |
     starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
-
 Solution 1 (state 9)
 states: 10  rewrites: 1721 in 1ms cpu (1ms real) (1142003 rewrites/second)
 List_Of_Input_Actions --> (nil).ActionList
@@ -54,7 +53,6 @@ List_Of_Correct_Actions --> a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7)
 List_Of_Incorrect_Actions --> a(2) ; a(4)
 Pattern --> n\[1\]: nxor -> n\[2\]: nseq ;; n\[1\]: nxor -> n\[3\]: nseq ;; n\[2\]: nseq -> n\[5\]: nor ;; n\[3\]: nseq -> n\[4\]: nseq ;; n\[4\]: nseq -> n\[5\]: nor ;; n\[5\]:
     nor -> n\[-7\]: nseq ;; n\[-5\]: nseq -> n\[1\]: nxor
-
 No more solutions.
 states: 10  rewrites: 1721 in 1ms cpu (2ms real) (910582 rewrites/second) ` ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/conformance.png)
 
