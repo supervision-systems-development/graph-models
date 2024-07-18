@@ -217,7 +217,7 @@ The resulting configuration
 
 shows the action ` 5 ` added to the list of correct actions and an added indicator for this action, which indicates that this action has been correct. 
 
-### Eigth action: -7
+### Eighth action: -7
 
 The next action, the final action ` -7 ` can be sent to the supervision system by adding it to the last resulting configuration: 
 
