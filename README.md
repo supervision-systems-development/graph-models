@@ -67,6 +67,8 @@ An example of real-time supervision is shown using the example pattern used in t
 
 As the feedback is given in the subsequent configuration after the application of one rule, there are two approaches towards applying a rewriting rule exactly once: using the `rew [1]` command or using the `search` command with the `=>1` argument after the input configuration followed by a configuration with all variables specifying that only one rule should be executed. The 'search' command lists the values of the variables while the `rew [1]` command shows the rewritten configuration, which is more convenient, which is why `rew [1]` will be used to show the real-time feedback in this example. 
 
+### First action: -5
+
 The first, initial action is `-5`. It is sent to the input of the system in the first position of the configuration as a list containing a single action – `-5`: 
 
 ` rew [1] (a(-5)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting . `. 
@@ -85,6 +87,8 @@ The rewritten rule
 n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
     
 shows that the list of input actions is empty – which is indicated with a 'nil', and the list of correct actions has had the action from the input list added to it, and the list of correct actions shows a clear diefference compared to the previous configuration, in which the list of correct actions was empty, indicated by a 'nil'. An indicator for the action '-5' seems to have been added to the list of indicators, indicating the indicator '1' for the action '-5', which shows that it has been activated. The status has changed to 'executing' after the starting action `-5` has been executed, which means that the system is actively receiving user actions. 
+
+### Second action: 1
 
 In order to send the next action to the supervision system, the next action needs to be added to the list of input actions of the configuration resulting from the analysis of the previous action (the most recent configuration). In this case, the configuration 
 
@@ -116,6 +120,8 @@ n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq
     
 offering feedback immediately after the action has been sent to the input, taking into account past actions. In case of this configuration, the action `1` has been added to the list of correct actions, which now contains `-5` and `1`. Additionally, the list of indicators also contains the action `1` **and** action `-5` from the previous input configuration, showing how the system keeps the record of past executed actions in order to use the actions executed in the past in order to perform analysis efficiently. 
 
+### Third action: 3
+
 In order to receive feedback on the next action, the configuration after the last executed action, 
 
 ` nil | t(-5,1),t(1,1) | a(-5) ; a(1) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq ->
@@ -145,7 +151,11 @@ The resulting configuration,
 
 `  nil | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` 
 
-shows the last action, ` 2 `, placed in the list of incorrect acions, which indicates that the action ` 2 ` has been incorrect. In order to execute the next action, ` 4 `, this action needs to be placed into the last configuration, in the position of the input list of actions: 
+shows the last action, ` 2 `, placed in the list of incorrect acions, which indicates that the action ` 2 ` has been incorrect. 
+
+### Fourth action: 4
+
+In order to execute the next action, ` 4 `, this action needs to be placed into the last configuration, in the position of the input list of actions: 
 
 `  a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `.
 
@@ -166,6 +176,9 @@ The resulting configuration
 ` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1) | a(-5) ; a(1) ; a(3) ; a(4) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
 
 in which all elements correspond to the elements received using the ` search ` command. 
+
+### Fifth action: 4
+
 Similarly, in order to execute the next action, the next action ` 4 ` needs to be placced into the list of input actions: 
 
 ` a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1) | a(-5) ; a(1) ; a(3) ; a(4) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` 
@@ -184,6 +197,8 @@ The resulting configuration,
 
 shows how the action ` 4 ` has been placed into the list of incorrect actions from the list of input actions. This case contains a confusing occurrence - both the list of correct and incorrect actions contan the action ` 4 ` in the end. This could make it slightly confusing to determine, which list the last action ` 4 ` has been added to. However, as stated before, comparing the lists of correct and incorrect actions from the input configuration with these lists of the output configuration simply solve this problem by indicating the particular list in which the action has been placed by the supervision system. In particular, if the list of correct actions has increased in size compared to this list in the input configuration, it indicates that the last action has been considered correct. Otherwise, if the list of incorrect actions has increased in size, then the action has been considered incorrect. In this case, the previous configuration (the input configuration) contained the list of correct actions: ` a(-5) ; a(1) ; a(3) ; a(4) ` and the list of incorrect action ` a(2) `. The resulting configuration contained the list of correct actions ` a(-5) ; a(1) ; a(3) ; a(4) ` and the list of incorrect actions ` a(2) ; a(4) `. The list of incorrect actions has clearly increased in size compared to this list in the input configuration. 
 
+### Sixth action: 5
+
 In order to send the next action to the supervision system, the next action needs to be added to the list of input actions of the last configuration: 
 
 ` a(5) | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1) | a(-5) ; a(1) ; a(3) ; a(4) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
@@ -196,7 +211,11 @@ The resulting configuration
 
 ` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  `
 
-shows the action ` 5 ` added to the list of correct actions and an added indicator for this action, which indicates that this action has been correct. The next action, the final action ` -7 ` can be sent to the supervision system by adding it to the last resulting configuration: 
+shows the action ` 5 ` added to the list of correct actions and an added indicator for this action, which indicates that this action has been correct. 
+
+### Seventh action: -7
+
+The next action, the final action ` -7 ` can be sent to the supervision system by adding it to the last resulting configuration: 
 
 ` a(-7) | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
 
@@ -208,7 +227,11 @@ The resuling configuration shows that the action ` -7 ` has been accepted as a c
 
 ` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  ` 
 
-as ` -7 ` has been added to the list of correct actions. In order to finish the supervision and perform the analysis of the task execution, the supervision system needs to receive an empty input list, which indicates that there are no more actions being sent to the supervision system. This can be done by simply sending this configuration to the supervision system, as this configuration already contains an empty list:
+as ` -7 ` has been added to the list of correct actions. 
+
+### Finishing the supervision: 
+
+In order to finish the supervision and perform the analysis of the task execution, the supervision system needs to receive an empty input list, which indicates that there are no more actions being sent to the supervision system. This can be done by simply sending this configuration to the supervision system, as this configuration already contains an empty list:
 
 ![rewrite [1] in GRAPH-RL : nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | (((((n[5]:       nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor) ;; n[4]: nseq -> n[5]: nor) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[     3]: nseq) ;; n[1]: nxor -> n[2]: nseq | executing .                                                                                                       rewrites: 9 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                         result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]:         nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]:      nseq -> n[1]: nxor | correct          ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_9.png)
 
