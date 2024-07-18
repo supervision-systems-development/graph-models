@@ -245,9 +245,11 @@ The final configuration is received with the status ` correct `, indicating that
 
 This way, the supervision system has provided a feedback regarding the correctness/conformance of the action to the pattern after each action in process of executing the task. Additionally, the final configuration provides an assessment of the task after it has been executed on the basis of it conforming or not conforming to the task pattern. 
 
+# Supervision System Structure
 
+The supervision system is comprised of functions, sorts and rules:
 
-# Sorts:
+## Sorts:
 
   Graph:       a set of arcs
   
@@ -264,7 +266,7 @@ This way, the supervision system has provided a feedback regarding the correctne
   TupleList:   a list of tuples
 
 
-# Functions:
+## Functions:
 
   first : Tuple -> Int
   
