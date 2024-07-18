@@ -42,8 +42,8 @@ An example of such command matchin a pattern containing the 'correct' status for
 
 This command will only show a solution if the sequence conforms to a pattern, which will be indicated with a 'correct' status after the entire input sequence has been executed. 
 
-![search in GRAPH-RL : (a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (((((n[1]: nxor -> n[3]: nseq ;; n[-5]: nseq -> n[1]:
-    nxor) ;; n[1]: nxor -> n[2]: nseq) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[5]: nor -> n[-7]: nseq) ;; n[4]: nseq -> n[5]: nor |
+![search in GRAPH-RL : (a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (((((n\[1\]: nxor -> n\[3\]: nseq ;; n\[-5\]: nseq -> n\[1\]:
+    nxor) ;; n\[1\]: nxor -> n\[2\]: nseq) ;; n\[3\]: nseq -> n\[4\]: nseq) ;; n\[2\]: nseq -> n\[5\]: nor) ;; n\[5\]: nor -> n\[-7\]: nseq) ;; n\[4\]: nseq -> n\[5\]: nor |
     starting =>* List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | correct .
 
 Solution 1 (state 9)
@@ -52,8 +52,8 @@ List_Of_Input_Actions --> (nil).ActionList
 List_Of_Indicators --> t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1)
 List_Of_Correct_Actions --> a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7)
 List_Of_Incorrect_Actions --> a(2) ; a(4)
-Pattern --> n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]:
-    nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor
+Pattern --> n\[1\]: nxor -> n\[2\]: nseq ;; n\[1\]: nxor -> n\[3\]: nseq ;; n\[2\]: nseq -> n\[5\]: nor ;; n\[3\]: nseq -> n\[4\]: nseq ;; n\[4\]: nseq -> n\[5\]: nor ;; n\[5\]:
+    nor -> n\[-7\]: nseq ;; n\[-5\]: nseq -> n\[1\]: nxor
 
 No more solutions.
 states: 10  rewrites: 1721 in 1ms cpu (2ms real) (910582 rewrites/second)](https://github.com/supervision-systems-development/graph-models/blob/main/figures/conformance.png)
