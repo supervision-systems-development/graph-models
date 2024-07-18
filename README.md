@@ -22,8 +22,9 @@ can be used, with the list of actions in place of of `List_Of_Actions` and with 
 ![The pattern used to show an example of a trace of actions in the paper.](https://github.com/supervision-systems-development/graph-models/blob/main/figures/toy_example.png)
 
 For example, the pattern and the sequence of actions used in the paper to show an example of the trace is can be used as an input:
-`rew (a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting .
-` 
+
+`rew (a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting . ` 
+
 which results in the following output:
 
 ![rewrites: 1721 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                                      result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor      -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | correct     ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/github_example.png)
@@ -66,7 +67,11 @@ An example of real-time supervision is shown using the example pattern used in t
 
 As the feedback is given in the subsequent configuration after the application of one rule, there are two approaches towards applying a rewriting rule exactly once: using the `rew [1]` command or using the `search` command with the `=>1` argument after the input configuration followed by a configuration with all variables specifying that only one rule should be executed. The 'search' command lists the values of the variables while the `rew [1]` command shows the rewritten configuration, which is more convenient, which is why `rew [1]` will be used to show the real-time feedback in this example. 
 
-The first, initial action is `-5`. It is sent to the input of the system in the first position of the configuration as a list containing a single action – `-5`: ` rew [1] (a(-5)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting . `. The result of applying one rule is shown in the output following immediately: 
+The first, initial action is `-5`. It is sent to the input of the system in the first position of the configuration as a list containing a single action – `-5`: 
+
+` rew [1] (a(-5)) | nil | nil | nil | (n[4]: nseq) -> (n[5]: nor) ;; (n[5]: nor) -> (n[-7]: nseq) ;; (n[2]: nseq) -> (n[5]: nor) ;; (n[3]: nseq -> n[4]: nseq) ;; (n[1]: nxor -> n[2]: nseq) ;; (n[1]: nxor -> n[3]: nseq) ;; (n[-5]: nseq -> n[1]: nxor) | starting . `. 
+
+The result of applying one rule is shown in the output following immediately: 
 
 ![rewrite [1] in GRAPH-RL : a(-5) | nil | nil | nil | (((((n[1]: nxor -> n[3]: nseq ;; n[-5]: nseq -> n[1]: nxor) ;; n[1]: nxor -> n[2]: nseq) ;; n[3]: nseq ->
     n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[5]: nor -> n[-7]: nseq) ;; n[4]: nseq -> n[5]: nor | starting .
@@ -74,39 +79,81 @@ rewrites: 10 in 0ms cpu (0ms real) (10000000 rewrites/second)
 result Config: nil | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
     n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_1.png)
 
-The rewritten rule ` nil | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
-    n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` shows that the list of input actions is empty – which is indicated with a 'nil', and the list of correct actions has had the action from the input list added to it, and the list of correct actions shows a clear diefference compared to the previous configuration, in which the list of correct actions was empty, indicated by a 'nil'. An indicator for the action '-5' seems to have been added to the list of indicators, indicating the indicator '1' for the action '-5', which shows that it has been activated. The status has changed to 'executing' after the starting action `-5` has been executed, which means that the system is actively receiving user actions. 
+The rewritten rule 
 
-In order to send the next action to the supervision system, the next action needs to be added to the list of input actions of the configuration resulting from the analysis of the previous action (the most recent configuration). In this case, the configuration ` nil | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
-    n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` is the configuration that resulteed after the input of the previous action. This configuration needs to have the next action, `1`, added in the first position, in the place of the list of input actions, which is empty ('nil') in the configuration. This is done by placing the next action instead of `nil`, as shown: ` a(1) | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
-    n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `. This is the new configuration with the next action that can be executed using the same command ` rew [1] a(1) | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
-    n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing . `, which can be sent to the input of the Maude System, which will offer an immediate result: 
+` nil | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
+    n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
+    
+    shows that the list of input actions is empty – which is indicated with a 'nil', and the list of correct actions has had the action from the input list added to it, and the list of correct actions shows a clear diefference compared to the previous configuration, in which the list of correct actions was empty, indicated by a 'nil'. An indicator for the action '-5' seems to have been added to the list of indicators, indicating the indicator '1' for the action '-5', which shows that it has been activated. The status has changed to 'executing' after the starting action `-5` has been executed, which means that the system is actively receiving user actions. 
+
+In order to send the next action to the supervision system, the next action needs to be added to the list of input actions of the configuration resulting from the analysis of the previous action (the most recent configuration). In this case, the configuration 
+
+` nil | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
+    n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
+    
+    is the configuration that resulteed after the input of the previous action. This configuration needs to have the next action, `1`, added in the first position, in the place of the list of input actions, which is empty ('nil') in the configuration. This is done by placing the next action instead of `nil`, as shown: 
+    
+    ` a(1) | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
+    n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `.
+    
+    This is the new configuration with the next action that can be executed using the same command 
+    
+    ` rew [1] a(1) | t(-5,1) | a(-5) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;;
+    n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing . `, 
+    
+    which can be sent to the input of the Maude System, which will offer an immediate result: 
+    
 ![rewrite [1] in GRAPH-RL : a(1) | t(-5,1) | a(-5) | nil | (((((n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor) ;; n[4]: nseq -> n[5]: nor) ;; n[3]:
     nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[3]: nseq) ;; n[1]: nxor -> n[2]: nseq | executing .
 rewrites: 135 in 0ms cpu (0ms real) (470383 rewrites/second)
 result Config: nil | t(-5,1),t(1,1) | a(-5) ; a(1) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq ->
     n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_2.png)
 
-which immediately shows the resulting configuration ` nil | t(-5,1),t(1,1) | a(-5) ; a(1) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq ->
-    n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` offering feedback immediately after the action has been sent to the input, taking into account past actions. In case of this configuration, the action `1` has been added to the list of correct actions, which now contains `-5` and `1`. Additionally, the list of indicators also contains the action `1` **and** action `-5` from the previous input configuration, showing how the system keeps the record of past executed actions in order to use the actions executed in the past in order to perform analysis efficiently. 
+which immediately shows the resulting configuration 
+
+` nil | t(-5,1),t(1,1) | a(-5) ; a(1) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq ->
+    n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` 
+    
+    offering feedback immediately after the action has been sent to the input, taking into account past actions. In case of this configuration, the action `1` has been added to the list of correct actions, which now contains `-5` and `1`. Additionally, the list of indicators also contains the action `1` **and** action `-5` from the previous input configuration, showing how the system keeps the record of past executed actions in order to use the actions executed in the past in order to perform analysis efficiently. 
 
 In order to receive feedback on the next action, the configuration after the last executed action, 
+
 ` nil | t(-5,1),t(1,1) | a(-5) ; a(1) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq ->
     n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
+    
 the next action, ` 3 ` needs to be placed in  the place of the list of input actions, which in the last configuration is indicated as ` nil `: 
+
 ` a(3) | t(-5,1),t(1,1) | a(-5) ; a(1) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  `.
+
     This configuration can be sent as an input to the Maude System:
 
 ![rewrite [1] in GRAPH-RL : a(3) | t(-5,1),t(1,1) | a(-5) ; a(1) | nil | (((((n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor) ;; n[4]: nseq -> n[5]: nor) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[                                                                                     3]: nseq) ;; n[1]: nxor -> n[2]: nseq | executing .                                                                                                       rewrites: 308 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                       result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[                                                                                     -7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_3.png)
 
 The Maude System immediately returns the analysis results for the action ` 3 `: 
+
 ` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  `
-The input action 3 has been placed into the list of correct actions from the list of input actions, and it has received an activation indicator. Interstingly, two other actions, ` 1 ` and ` 2 ` have also received activation indicators with the value ` -1 `, which indicates that these actions have been blocked. Similarly, in order to send the next action, ` 2 ` to the input of the supervision system, it has to be added into the list of input actions of the last configuration: ` a(2) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  `. This configuration, sent to the input of the supervision system, will immediately yield a new configuration that contains feedback
+
+The input action 3 has been placed into the list of correct actions from the list of input actions, and it has received an activation indicator. Interstingly, two other actions, ` 1 ` and ` 2 ` have also received activation indicators with the value ` -1 `, which indicates that these actions have been blocked. Similarly, in order to send the next action, ` 2 ` to the input of the supervision system, it has to be added into the list of input actions of the last configuration: 
+
+` a(2) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  `. 
+
+This configuration, sent to the input of the supervision system, will immediately yield a new configuration that contains feedback
+
 ![rewrite [1] in GRAPH-RL : a(2) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | nil | (((((n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor) ;;      n[4]: nseq -> n[5]: nor) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[3]: nseq) ;; n[1]: nxor -> n[2]: nseq | executing .  rewrites: 48 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                        result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[       5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_4.png)
 
 The resulting configuration,
-`  nil | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` shows the last action, ` 2 `, placed in the list of incorrect acions, which indicates that the action ` 2 ` has been incorrect. In order to execute the next action, ` 4 `, this action needs to be placed into the last configuration, in the position of the input list of actions: `  a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `. This configuration can be sent to the input of the supervision system as an argument to the command ` rew [1] ` and it will return the correct analysis result, but in order to show how a different command can be used, this time the ` search ` command specifying only one allowed rewriting rule using the ` =>1 ` argument. This way, the command will look like this: 
-` search a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing =>1 List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | Status . ` This way, the pattern matching ` search ` command is used, without matching any particular value, instead listing variables in place of all configuration components. This will show any value after one rule, however, unlike the ` rew [1] ` command, the ` search ` command will show the values of the specified variables, which is shown after this command is executed:
+
+`  nil | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` 
+
+shows the last action, ` 2 `, placed in the list of incorrect acions, which indicates that the action ` 2 ` has been incorrect. In order to execute the next action, ` 4 `, this action needs to be placed into the last configuration, in the position of the input list of actions: 
+
+`  a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `.
+
+This configuration can be sent to the input of the supervision system as an argument to the command ` rew [1] ` and it will return the correct analysis result, but in order to show how a different command can be used, this time the ` search ` command specifying only one allowed rewriting rule using the ` =>1 ` argument. This way, the command will look like this: 
+
+` search a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing =>1 List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | Status . `.
+
+This way, the pattern matching ` search ` command is used, without matching any particular value, instead listing variables in place of all configuration components. This will show any value after one rule, however, unlike the ` rew [1] ` command, the ` search ` command will show the values of the specified variables, which is shown after this command is executed:
 
 ![search in GRAPH-RL : a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | (((((n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor) ;; n[       4]: nseq -> n[5]: nor) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[3]: nseq) ;; n[1]: nxor -> n[2]: nseq | executing =>1      List_Of_Input_Actions | List_Of_Indicators | List_Of_Correct_Actions | List_Of_Incorrect_Actions | Pattern | Status .                                                                                                                                                                                                   Solution 1 (state 1)                                                                                                                                          states: 2  rewrites: 263 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                            List_Of_Input_Actions --> (nil).ActionList                                                                                                                    List_Of_Indicators --> t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1)                                                                                                  List_Of_Correct_Actions --> a(-5) ; a(1) ; a(3) ; a(4)                                                                                                        List_Of_Incorrect_Actions --> a(2)                                                                                                                            Pattern --> n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]:       nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor                                                                                                           Status --> executing                                                                                                                                                                                                                                                                                                        No more solutions.                                                                                                                                            states: 2  rewrites: 263 in 0ms cpu (0ms real) (~ rewrites/second)      ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_5.png)
 
@@ -115,7 +162,10 @@ As is shown, instead of a configuration, the output is shown for each variable. 
 ![rewrite [1] in GRAPH-RL : a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | a(2) | (((((n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor) ;;     n[4]: nseq -> n[5]: nor) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[3]: nseq) ;; n[1]: nxor -> n[2]: nseq | executing .  rewrites: 263 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                       result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1) | a(-5) ; a(1) ; a(3) ; a(4) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[       2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing        ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_5_2.png)
 
 The resulting configuration 
-` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1) | a(-5) ; a(1) ; a(3) ; a(4) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` in which all elements correspond to the elements received using the ` search ` command. 
+
+` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1) | a(-5) ; a(1) ; a(3) ; a(4) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
+
+in which all elements correspond to the elements received using the ` search ` command. 
 Similarly, in order to execute the next action, the next action ` 4 ` needs to be placced into the list of input actions: 
 
 ` a(4) | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1) | a(-5) ; a(1) ; a(3) ; a(4) | a(2) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing ` 
@@ -143,9 +193,11 @@ This configuration can be sent to the supervision system using the ` rew [1] ` c
 ![rewrite [1] in GRAPH-RL : a(5) | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1) | a(-5) ; a(1) ; a(3) ; a(4) | a(2) ; a(4) | (((((n[5]: nor -> n[-7]: nseq ;; n[-5]:       nseq -> n[1]: nxor) ;; n[4]: nseq -> n[5]: nor) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[3]: nseq) ;; n[1]: nxor -> n[     2]: nseq | executing .                                                                                                                                    rewrites: 403 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                       result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor      -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor      | executing   ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_7.png)
 
 The resulting configuration 
+
 ` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  `
 
 shows the action ` 5 ` added to the list of correct actions and an added indicator for this action, which indicates that this action has been correct. The next action, the final action ` -7 ` can be sent to the supervision system by adding it to the last resulting configuration: 
+
 ` a(-7) | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing `
 
 This configuration can be sent to the supervision system using the command ` rew [1] `: 
@@ -153,12 +205,15 @@ This configuration can be sent to the supervision system using the command ` rew
 ![rewrite [1] in GRAPH-RL : a(-7) | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) | a(2) ; a(4) | (((((n[5]: nor -> n[-7]:       nseq ;; n[-5]: nseq -> n[1]: nxor) ;; n[4]: nseq -> n[5]: nor) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[3]: nseq) ;;       n[1]: nxor -> n[2]: nseq | executing .                                                                                                                    rewrites: 375 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                       result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]:         nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]:      nseq -> n[1]: nxor | executing          ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_8.png)
 
 The resuling configuration shows that the action ` -7 ` has been accepted as a correct action: 
+
 ` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  ` 
+
 as ` -7 ` has been added to the list of correct actions. In order to finish the supervision and perform the analysis of the task execution, the supervision system needs to receive an empty input list, which indicates that there are no more actions being sent to the supervision system. This can be done by simply sending this configuration to the supervision system, as this configuration already contains an empty list:
 
 ![rewrite [1] in GRAPH-RL : nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | (((((n[5]:       nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor) ;; n[4]: nseq -> n[5]: nor) ;; n[3]: nseq -> n[4]: nseq) ;; n[2]: nseq -> n[5]: nor) ;; n[1]: nxor -> n[     3]: nseq) ;; n[1]: nxor -> n[2]: nseq | executing .                                                                                                       rewrites: 9 in 0ms cpu (0ms real) (~ rewrites/second)                                                                                                         result Config: nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]:         nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]:      nseq -> n[1]: nxor | correct          ](https://github.com/supervision-systems-development/graph-models/blob/main/figures/Interactive_9.png)
 
 The final configuration is received with the status ` correct `, indicating that the task has been executed correctly: 
+
 ` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1),t(4,1),t(5,1),t(-7,1) | a(-5) ; a(1) ; a(3) ; a(4) ; a(5) ; a(-7) | a(2) ; a(4) | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | correct `
 
 This way, the supervision system has provided a feedback regarding the correctness/conformance of the action to the pattern after each action in process of executing the task. Additionally, the final configuration provides an assessment of the task after it has been executed on the basis of it conforming or not conforming to the task pattern. 
