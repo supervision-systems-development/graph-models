@@ -139,7 +139,11 @@ The Maude System immediately returns the analysis results for the action ` 3 `:
 
 ` nil | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  `
 
-The input action 3 has been placed into the list of correct actions from the list of input actions, and it has received an activation indicator. Interstingly, two other actions, ` 1 ` and ` 2 ` have also received activation indicators with the value ` -1 `, which indicates that these actions have been blocked. Similarly, in order to send the next action, ` 2 ` to the input of the supervision system, it has to be added into the list of input actions of the last configuration: 
+The input action 3 has been placed into the list of correct actions from the list of input actions, and it has received an activation indicator. Interstingly, two other actions, ` 1 ` and ` 2 ` have also received activation indicators with the value ` -1 `, which indicates that these actions have been blocked.
+
+### Fourth action: 2
+
+Similarly, in order to send the next action, ` 2 ` to the input of the supervision system, it has to be added into the list of input actions of the last configuration: 
 
 ` a(2) | t(-5,1),t(3,1),t(1,-1),t(2,-1) | a(-5) ; a(1) ; a(3) | nil | n[1]: nxor -> n[2]: nseq ;; n[1]: nxor -> n[3]: nseq ;; n[2]: nseq -> n[5]: nor ;; n[3]: nseq -> n[4]: nseq ;; n[4]: nseq -> n[5]: nor ;; n[5]: nor -> n[-7]: nseq ;; n[-5]: nseq -> n[1]: nxor | executing  `. 
 
@@ -153,7 +157,7 @@ The resulting configuration,
 
 shows the last action, ` 2 `, placed in the list of incorrect acions, which indicates that the action ` 2 ` has been incorrect. 
 
-### Fourth action: 4
+### Fifth action: 4
 
 In order to execute the next action, ` 4 `, this action needs to be placed into the last configuration, in the position of the input list of actions: 
 
@@ -177,7 +181,7 @@ The resulting configuration
 
 in which all elements correspond to the elements received using the ` search ` command. 
 
-### Fifth action: 4
+### Sixth action: 4
 
 Similarly, in order to execute the next action, the next action ` 4 ` needs to be placced into the list of input actions: 
 
@@ -197,7 +201,7 @@ The resulting configuration,
 
 shows how the action ` 4 ` has been placed into the list of incorrect actions from the list of input actions. This case contains a confusing occurrence - both the list of correct and incorrect actions contan the action ` 4 ` in the end. This could make it slightly confusing to determine, which list the last action ` 4 ` has been added to. However, as stated before, comparing the lists of correct and incorrect actions from the input configuration with these lists of the output configuration simply solve this problem by indicating the particular list in which the action has been placed by the supervision system. In particular, if the list of correct actions has increased in size compared to this list in the input configuration, it indicates that the last action has been considered correct. Otherwise, if the list of incorrect actions has increased in size, then the action has been considered incorrect. In this case, the previous configuration (the input configuration) contained the list of correct actions: ` a(-5) ; a(1) ; a(3) ; a(4) ` and the list of incorrect action ` a(2) `. The resulting configuration contained the list of correct actions ` a(-5) ; a(1) ; a(3) ; a(4) ` and the list of incorrect actions ` a(2) ; a(4) `. The list of incorrect actions has clearly increased in size compared to this list in the input configuration. 
 
-### Sixth action: 5
+### Seventh action: 5
 
 In order to send the next action to the supervision system, the next action needs to be added to the list of input actions of the last configuration: 
 
@@ -213,7 +217,7 @@ The resulting configuration
 
 shows the action ` 5 ` added to the list of correct actions and an added indicator for this action, which indicates that this action has been correct. 
 
-### Seventh action: -7
+### Eigth action: -7
 
 The next action, the final action ` -7 ` can be sent to the supervision system by adding it to the last resulting configuration: 
 
