@@ -583,9 +583,11 @@ mod GRAPH-RL is
   var status status' Status final_st : Status . --- Status of the execution
 
   *** Rules ***
-  --- Start the execution: Transition status from "starting" to "executing" and consume starting action
-  --- Actions start and fin are artificially inserted to control the sequences
+  --- Transition rules
 
+
+  --- Rule handling the starting of the execution.
+  --- Start the execution: Transition status from "starting" to "executing" and consume starting action.
   rl [start]: 
     a(i) ; AList | TupleCookies | CList | EList | G | starting  
     => if isStartingNode( a(i) ) then
@@ -593,9 +595,9 @@ mod GRAPH-RL is
 	else 
     AList | TupleCookies | CList | ( EList ; (a(i)) ) | G | starting 
     fi .
-  --- works correctly
-  --- End the execution: Transition status from "executing" to "correct" or "incorrect"
-  --- Check if the "fin" node is in the "CList" (correct list) and if so, set status as "correct"
+
+  --- Rule handling the completion of the execution. 
+  --- End the execution: Transition status from "executing" to "correct" or "incorrect".
   rl [end]:  
     nil | TupleCookies | CList | EList | G | executing
     =>
@@ -605,7 +607,8 @@ mod GRAPH-RL is
     else 
       nil | TupleCookies | CList | EList | G | incorrect
     fi .
-    
+  
+  --- Rule implementing the execution between the start and the completion of the task. 
   rl [step] :
     (a(i)) ; AList | TupleCookies | CList | EList | G | executing
     => 
@@ -638,7 +641,6 @@ mod GRAPH-RL is
 endm
 
 
-
 --- Examples of the execution.
 --- S is represented as -5 and F is represented as -7 due to integers being used as labels for convenience.
 
@@ -656,7 +658,6 @@ search ((a(-5) ; a(1) ; a(3) ; a(2) ; a(4) ; a(4) ; a(5) ; a(-7)) | nil | nil | 
 --- If the task is not completed correctly, no final correct state can be found.
 --- The "Search" command is used instead of the "Rewrite" command because the in conformance checking, only the final state with a "correct" status is of interest
 --- The same procedure can be performed with "Rewrite", but it will show any final state, regardless of the correctness of execution. 
-
 
 
 --- Conformance Checking for All JIGSAWS sequences with the graph (a) from Section 6.2
