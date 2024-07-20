@@ -1,22 +1,15 @@
 
 *** Definition of Node types ***
 fmod NTYPE is
-  
+  --- Definition of the node type, enumerated data type that can have one of four values corresponding to one of four node types. 
   sort NType .
   ops nseq nand nor nxor : -> NType [ctor] .
 
 endfm
 
-*** Definition of Node function ***
-fmod NFUNC is
-  sort NFunc .
-  ops start fin oth : -> NFunc [ctor] .
-
-endfm
-
 *** Definition of execution status ***
 fmod STATUS is
-
+  --- Definition of the execution status - component of the configuration. 
   sort Status .
   ops starting correct incorrect executing  : -> Status [ctor] .
 
@@ -28,7 +21,6 @@ fmod GRAPH is
   pr INT .
   pr STRING .
   pr NTYPE .
-  pr NFUNC .
   pr STATUS .
 
   --- Definition of a Graph
@@ -48,7 +40,7 @@ fmod GRAPH is
   op _->_ : Node Node -> Arc [ctor prec 30] . --- Definition of Arc. Unites two nodes.
 
 
-  --- Definition of actions
+  --- Definition of Actions
   sort Action .
   subsort Action < ActionList . --- List of Nodes should be part of Graph
   op (a(_)) : Int -> Action [ctor prec 30] . --- Definition of Action. Has Id
@@ -59,27 +51,18 @@ fmod GRAPH is
   op nil : -> ActionList [ctor] . --- Definition of List of Nodes. There was no [ctor] --- it was returning an error
   op _;_ : ActionList ActionList -> ActionList [assoc id: nil] .
 
-
-  --- 
-  sort Cookie .
-  subsort Cookie < CookieList .
-  op (c[_,_]) : Int Int -> Cookie [ctor prec 30] .
-
-  ---
-  sort CookieList .
-  subsort CookieList < Graph .
-  op clnil : -> CookieList [ctor] .
-  op _;_ : CookieList CookieList -> CookieList [assoc id: nil] .
   
   var i j x y z : Int .
   var tuple1 tuple2 tuple3 : Tuple .
   var TList TList1 TList2 TList3 : TupleList .
   var AList1 : ActionList .
-  
+
+  --- Definition of a tuple
   sort Tuple .
   subsort Tuple < TupleList .
   op t(_,_) : Int Int -> Tuple [ctor] .
 
+  --- Definition of a list of tuples
   sort TupleList .
   op nil : -> TupleList [ctor] .
   op _,_ : TupleList TupleList -> TupleList [assoc id: nil] .
@@ -90,17 +73,16 @@ endfm
 *** Initial configurations ***
 fmod CONFIG is
   pr GRAPH .
-
+  --- Definition of the configuration.
+  --- Contains all elements of the configuration. 
   sort Config .
-  op _|_|_|_|_|_ : ActionList TupleList ActionList ActionList Graph Status -> Config [ctor] . --- input actionlist, cookielist, correct actionlist, incorrect actiounlist, graph, status
+  op _|_|_|_|_|_ : ActionList TupleList ActionList ActionList Graph Status -> Config [ctor] . 
   
   *** Variables ***
   var AList CList EList InputActionList : ActionList .
-  var Cookies : CookieList .
   var TupleCookies TList1 : TupleList .
   var G : Graph .
   var type : NType .
-  var func : NFunc .
   var i : Int .
 
 endfm
@@ -111,13 +93,11 @@ fmod GRAPH-EQ is
 
   *** Variables ***
   var AList AList' AList1 AList2 InputActionList : ActionList . --- Lists of user actions
-  var Cookies Cookies' Cookies1 Cookies2 : CookieList . --- Lists of cookies
   var TupleCookies TupleCookies' TupleCookies1 TupleCookies2 : TupleList . --- Lists of Tuple
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
   var EList EList' EList1 EList2 : ActionList . --- Lists of incorrect actions
   var G G' G1 G2 : Graph . --- Graphs
   var type type' type1 type2 type3 : NType . --- Node types
-  var func func' func1 func2 func3 : NFunc . --- Node functions
   var i j x y z c n : Int . --- Node ids
   var status status' : Status . --- Status of the execution
   var tuple1 tuple2 tuple3 tuple4 : Tuple . --- tuple variables
@@ -592,7 +572,6 @@ mod GRAPH-RL is
 
   *** Variables ***
   var AList AList' AList1 AList2 CorrectActionList IncorrectActionList InputActionList LR LW List_Of_Input_Actions List_Of_Correct_Actions List_Of_Incorrect_Actions : ActionList . --- Lists of user actions
-  var Cookies Cookies' Cookies1 Cookies2 BCookies BCookies2 BCookies1 BCookies3 LS : CookieList . --- Lists of cookies
   var CList CList' CList1 CList2 : ActionList . --- Lists of correct actions
   var TupleCookies TupleCookies' TupleCookies1 TupleCookies2 TupleBCookies TupleBCookies2 TupleBCookies1 TupleBCookies3 CookieT List_Of_Indicators  : TupleList . --- Lists of cookies
   var TuplePossibleCookies TupleRealCookies TupleBlockedCookies : TupleList . 
@@ -600,7 +579,6 @@ mod GRAPH-RL is
   var G G' G1 G2 Pattern : Graph . --- Graphs
   var Node1 Node2 Node3 : Node .
   var type type' type1 type2 type3 : NType . --- Node types
-  var func func' func1 func2 func3 : NFunc . --- Node functions
   var i j x y z : Int . --- Node ids
   var status status' Status final_st : Status . --- Status of the execution
 
