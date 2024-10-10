@@ -1,3 +1,4 @@
+
 *** Definition of Node types ***
 fmod NTYPE is
   --- Definition of the node type, enumerated data type that can have one of four values corresponding to one of four node types. 
@@ -215,6 +216,14 @@ fmod GRAPH-EQ is
     (a(x)) ; children((a(i)), G) .
   eq children((a(i)), G) = nil [owise] .
   
+  --- Checks if at least one parent exists
+  op parentExists : Action Graph -> Bool .
+  eq parentExists( a(x) , G ) = 
+  if ( parents( a(x) , G ) == nil ) then 
+    false
+  else 
+    true 
+  fi .
 
   --- Provides a list of actions corresponding to child nodes of the node corresponding to the input action.
   --- @param ActionList     the list of actions.
@@ -562,6 +571,32 @@ fmod GRAPH-EQ is
   	if not ( checkType( a(i), G ) == "and" ) then true
     else false
     fi .
+    
+  --- at least one action from the graph 
+  op atLeastOneActionActive : ActionList TupleList -> Bool .
+  eq atLeastOneActionActive( AList1 , nil ) = false .
+  eq atLeastOneActionActive( nil , TList ) = false .
+  eq atLeastOneActionActive( ( a(i) ; AList1 ) , TList ) = if 
+    isCookieActive( i, TList ) then true
+    else atLeastOneActionActive( AList1 , TList )
+    fi .
+  
+      --- Sequential graph
+  op graphLoop : -> Graph .
+  eq graphLoop = 
+  	(n[0]: nseq)->(n[1]: nseq);;
+    (n[1]: nseq)->(n[2]: nseq);;
+    (n[1]: nseq)->(n[3]: nseq);;
+    (n[2]: nseq)->(n[4]: nseq);;
+    (n[3]: nseq)->(n[4]: nseq);;
+    (n[4]: nseq)->(n[5]: nseq);;
+    (n[5]: nseq)->(n[6]: nseq);;
+    (n[6]: nseq)->(n[11]: nseq);;
+    (n[5]: nseq)->(n[1]: nseq) .
+    
+  --- is at least one xor activated  
+  op isParentXorActivated : Action TupleList Graph -> Bool .
+  eq isParentXorActivated( a(i) , TList, G ) = atLeastOneActionActive( getXorListInActionList( parents( a(i) , G ) , G ) , TList )
 
 endfm
 
@@ -583,7 +618,6 @@ mod GRAPH-RL is
 
   *** Rules ***
   --- Transition rules
-
   rl [rule]:
     a(i) ; AList | TupleCookies | CList | EList | G | Status =>
       if Status == starting then --- rule 1 
@@ -598,7 +632,22 @@ mod GRAPH-RL is
             if ( ( atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) and not ( checkType((a(i)), G) == "and" ) and not ( checkType((a(i)), G) == "or" ) and not ( isXorInList( parents( a(i), G ) , G ) and ( isCookieNotActive( i , TupleCookies) ) ) then
       		  AList | activateCookie( i , TupleCookies ) | ( CList ; (a(i)) ) | EList | G | executing 
             else --- rule 5
-              if ( ) and ( ) and ( ) and ( ) and ( ) and ( ) and ( ) and ( ) and then
+              if ( not parentExists( a(i), G ) ) or ( not ( atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) ) then
+				AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
+	      	  else --- rule 6
+                if ( isCookieNotActive(i, TupleCookies) ) and ( isAnd( a(i) , G ) ) and ( allParentCookiesActive( a(i) , TupleCookies , G ) ) then
+		    	  AList | activateCookie( i , TupleCookies ) | ( CList ; (a(i)) ) | EList | G | executing
+				else --- rule 7
+		  		  if ( isCookieNotActive(i, TupleCookies) ) and ( isAnd( a(i) , G ) ) and ( not allParentCookiesActive( a(i) , TupleCookies , G ) ) then 
+		    		AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
+		  		  else --- rule 8
+  		    		if ( isOr( a(i) ) ) and ( atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) then
+		      		  AList | activateCookie( i , TupleCookies ) | ( CList ; (a(i)) ) | EList | G | executing
+		    		else --- rule 9
+		      		  if ( isXorInList( parents( a(i) , G ) , G ) ) and ( isParentXorActivated( a(i) , TupleCookies , G ) ) then
+		        		AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing
+		      		  else --- rule 10 (loops)
+		        	 	if 
               
       fi.
 
@@ -655,4 +704,3 @@ mod GRAPH-RL is
    else AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
    fi .
 endm
-
