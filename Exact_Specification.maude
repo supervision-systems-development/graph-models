@@ -646,8 +646,9 @@ mod GRAPH-RL is
 		    		else --- rule 9
 		      		  if ( isXorInList( parents( a(i) , G ) , G ) ) and ( isParentXorActivated( a(i) , TupleCookies , G ) ) then
 		        		AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing
-		      		  else --- rule 10 (loops)
-		        	 	if 
+		      		  else --- rule 10 (loops) correct
+		        	 	if ( parentExists( a(i), G ) ) and ( atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) and ( not  isCookieNotActive(i, TupleCookies) ) and ( not isCookieNotBlocked( i , TList ) ) and (  ) and (  ) and (  ) and (  )
+                          
               
       fi.
 
