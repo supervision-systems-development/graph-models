@@ -354,6 +354,15 @@ fmod GRAPH-EQ is
   eq isArcAction( a(x), a(y) , G) = false [owise] .
   
   
+  op isArcActionIndicatorsNotZero : Action Action Graph TupleList -> Bool .
+  eq isArcActionIndicatorsNotZero( a(x) , a(y) , nil, TList ) = false .
+  eq isArcActionIndicatorsNotZero( (a(x)) , (a(y)) , ( G1 ;; (n[x]: type1) -> (n[y]: type) ;; G2 ), TList ) = 
+  if ( (not tupleInTupleList ( t( x , 0 ) , TList  ) ) and ( not tupleInTupleList ( t( y , 0 ) , TList )   ) ) then true 
+  else false 
+  fi .
+  eq isArcActionIndicatorsNotZero( a(x), a(y) , G, TList ) = false [owise] .
+  
+  
   --- Checks whether the action in the second argument is present in a subgraph starting from first action.
   --- @param Action       the action that the subgraphs starts from.
   --- @param Action       the action that the subgraph ends in.
@@ -572,6 +581,63 @@ fmod GRAPH-EQ is
     else false
     fi .
     
+  op activeOrBlockedParents : Action TupleList Graph -> ActionList .
+  eq activeOrBlockedParents(Action1, TList, G) = activeOrBlockedActions( parents(Action1, G) , TList ) .
+    
+    
+  op getActivePathForAllActiveOrBlockedParents : Action Graph TupleList -> ActionList .
+  eq getActivePathForAllActiveOrBlockedParents( Action1, G, TList ) = forAllActiveOrBlockedParentsHelper( Action1, G, TList, activeOrBlockedParents(Action1, TList, G) ) .
+  
+  op forAllActiveOrBlockedParentsHelper : Action Graph TupleList ActionList -> ActionList .
+  eq forAllActiveOrBlockedParentsHelper( Action1, G, TList, nil ) = nil .
+  eq forAllActiveOrBlockedParentsHelper( Action1, G, TList, ( a(i) ; AList ) ) = getActivePathForAllActiveOrBlockedParentsHelper( Action1, G, TList, a(i) ) ; forAllActiveOrBlockedParentsHelper( Action1, G, TList, AList ) .
+  
+  --- finds path to parent
+  op getActivePathForAllActiveOrBlockedParentsHelper : Action Graph TupleList Action -> ActionList . 
+  eq getActivePathForAllActiveOrBlockedParentsHelper( Action1, G, TList, Action2 ) = getActivePath( Action1, Action2, G, TList ) .
+  
+    --- get list of active child nodes, for each run this same 
+    --- if target action in list of active child nodes, return path
+    --- if source action in list of active child nodes, nil
+    --- if final action in list of active child nodes, nil
+    --- if nothing in list of active child nodes, nil
+    --- does include source and target actions, full path 
+  op getActivePath : Action Action Graph TupleList -> ActionList .
+  eq getActivePath(Action1, Action2, G, TList) = forEachActiveChild(Action1, Action2, G, TList , ( Action1 ), activeChildren(Action1, G, TList) ) .
+  
+  ---- Source Action, Target Action ,Graph, TupleList, List of Path, List of children
+  op forEachActiveChild : Action Action Graph TupleList ActionList ActionList -> ActionList .
+  eq forEachActiveChild( Action1, Action2, G, TList , AList1, nil ) = nil . 
+  eq forEachActiveChild( Action1, Action2, G, TList , AList1, ( a(i) ; AList2 ) ) = ( getActivePathHelper( Action1, Action2, G, TList , AList1, a(i) ) ; forEachActiveChild( Action1, Action2, G, TList , AList1, AList2 ) ) .
+  
+  --- if an action from past path reached, nil.
+  --- if target action reached, return path.
+  --- else, add current action to list of actions and launch a new iteration for each active child node. 
+  op getActivePathHelper : Action Action Graph TupleList ActionList Action -> ActionList . 
+  eq getActivePathHelper( Action1, Action2, G, TList, AList1 ; a(i) ; AList2 , a(i) ) = nil .
+  eq getActivePathHelper( Action1, Action2, G, TList, AList1 , Action2 ) = filterTwoConsecutiveBlockedActions( ( AList1 ; a(i) ), TList) . --- if path found, if path doesn't have two consecutive blocked, path is returned. 
+  eq getActivePathHelper( Action1, Action2, G, TList , AList1, a(i) ) = forEachActiveChild(Action1, Action2, G, TList , ( AList1 ; a(i) ), activeChildren(a(i)) ) .
+    
+  --- gets active children of an action based on a graph and a list of indicators  
+  op activeChildren : Action Graph TupleList -> ActionList .
+  eq activeChildren( Action1, G, TList ) = activeOrBlockedActions( children(Action1, G) , TList ) .
+  eq activeChildren( Action1, G, nil ) = nil .
+  
+  --- gets active actions from a list of actions based on a TupleList
+  op activeOrBlockedActions : ActionList TupleList -> ActionList .
+  eq activeOrBlockedActions( nil , TList ) = nil .
+  eq activeOrBlockedActions( ( a(i) ; AList1 ) , TList ) = if ( isCookieActive(i, TList) or isCookieBlocked(i, TList) ) then ( a(i) ; activeActions(AList1, TList) ) else activeActions(AList1, TList) fi .
+    
+  --- receives a list of actions and a list of cookies, checks if the list has two consecutive blocked actions, if yes, returns nil, else returns original actionList
+  op filterTwoConsecutiveBlockedActions : ActionList TupleList -> ActionList .
+  eq filterTwoConsecutiveBlockedActions( nil , TList) = nil .
+  eq filterTwoConsecutiveBlockedActions( ( a(i) ; AList ) , TList) = if isCookieBlocked(i, TList) then ( a(i) ; filterBlockedHelper(AList, TList) ) else ( a(i) ; filterTwoConsecutiveBlockedActions(AList, TList) ) fi .
+
+  --- only happens when a blocked cookie is before
+  op filterBlockedHelper : ActionList TupleList -> ActionList .
+  eq filterBlockedHelper(nil, TList) = nil .
+  eq filterBlockedHelper( ( a(i) ; AList ) , TList) = if isCookieBlocked(i, TList) then nil else ( a(i) ; filterTwoConsecutiveBlockedActions(AList, TList) ) fi .
+  
   --- at least one action from the graph 
   op atLeastOneActionActive : ActionList TupleList -> Bool .
   eq atLeastOneActionActive( AList1 , nil ) = false .
@@ -596,7 +662,7 @@ fmod GRAPH-EQ is
     
   --- is at least one xor activated  
   op isParentXorActivated : Action TupleList Graph -> Bool .
-  eq isParentXorActivated( a(i) , TList, G ) = atLeastOneActionActive( getXorListInActionList( parents( a(i) , G ) , G ) , TList )
+  eq isParentXorActivated( a(i) , TList, G ) = atLeastOneActionActive( getXorListInActionList( parents( a(i) , G ) , G ) , TList ) .
 
 endfm
 
@@ -621,7 +687,7 @@ mod GRAPH-RL is
   rl [rule]:
     a(i) ; AList | TupleCookies | CList | EList | G | Status =>
       if Status == starting then --- rule 1 
-        AList | activateCookie( i , TupleCookies) | ( CList ; (a(i)) ) | EList | G | executing
+        AList | activateCookie( i , TupleCookies ) | ( CList ; (a(i)) ) | EList | G | executing
       else --- rule 2 
         if ( ( a(-7) ) in CList ) and ( ( a(i) ; AList ) == nil ) and ( Status = executing ) then 
           nil | TupleCookies | CList | EList | G | correct
@@ -629,7 +695,7 @@ mod GRAPH-RL is
           if ( ( a(-7) ) in EList ) and ( ( a(i) ; AList ) == nil ) and ( Status = executing ) then
             nil | TupleCookies | CList | EList | G | incorrect
           else --- rule 4
-            if ( ( atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) and not ( checkType((a(i)), G) == "and" ) and not ( checkType((a(i)), G) == "or" ) and not ( isXorInList( parents( a(i), G ) , G ) and ( isCookieNotActive( i , TupleCookies) ) ) then
+            if ( ( atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) and not ( checkType((a(i)), G) == "and" ) and not ( checkType((a(i)), G) == "or" ) and not ( isXorInList( parents( a(i), G ) , G ) ) and ( isCookieNotActive( i , TupleCookies) ) ) then
       		  AList | activateCookie( i , TupleCookies ) | ( CList ; (a(i)) ) | EList | G | executing 
             else --- rule 5
               if ( not parentExists( a(i), G ) ) or ( not ( atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) ) then
@@ -646,11 +712,25 @@ mod GRAPH-RL is
 		    		else --- rule 9
 		      		  if ( isXorInList( parents( a(i) , G ) , G ) ) and ( isParentXorActivated( a(i) , TupleCookies , G ) ) then
 		        		AList | blockParentAndSiblingCookiesIfParentIsXor( a(i) , G , activateCookie( i , TupleCookies ) )  | (CList ; (a(i))) | EList | G | executing
-		      		  else --- rule 10 (loops) correct
-		        	 	if ( parentExists( a(i), G ) ) and ( atLeastOneParentCookieActive( a(i) , TupleCookies , G ) ) and ( not  isCookieNotActive(i, TupleCookies) ) and ( not isCookieNotBlocked( i , TList ) ) and (  ) and (  ) and (  ) and (  )
-                          
-              
-      fi.
+		      		  else --- rule 10 (loops)
+		        	 	if (  ( atLeastOneParentCookieActive( a(i), TupleCookies, G ) or isAtLeastOneParentBlocked( a(i), TupleCookies, G ) )  ) and (  ( (isCookieActive(i, TupleCookies)) or (isCookieBlocked(i, TupleCookies)) )  ) and ( not ( getActivePathForAllActiveOrBlockedParents( a(i), G, TupleCookies ) == nil ) ) then 
+              	          AList | activateCookie(    i , resetActionCookies(   getActivePathForAllActiveOrBlockedParents( a(i), G, TupleCookies )   , TupleCookies )    )  | (CList ; (a(i))) | EList | G | executing
+                        else --- rule 11 (loops rejection)
+                          if (  ( atLeastOneParentCookieActive( a(i), TupleCookies, G ) or isAtLeastOneParentBlocked( a(i), TupleCookies, G ) )  ) and (  ( (isCookieActive(i, TupleCookies)) or (isCookieBlocked(i, TupleCookies)) )  ) and ( ( getActivePathForAllActiveOrBlockedParents( a(i), G, TupleCookies ) == nil ) ) then 
+                            AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
+                          else --- not a rule, but just a final else statement rejecting just in case
+                            AList | TupleCookies | CList | (EList ; (a(i))) | G | executing
+                          fi
+                        fi
+                      fi
+                    fi
+                  fi
+                fi
+              fi
+            fi
+          fi
+        fi
+      fi .
 
   --- Rule handling the starting of the execution.
   --- Start the execution: Transition status from "starting" to "executing" and consume starting action.
