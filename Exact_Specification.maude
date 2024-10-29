@@ -671,6 +671,25 @@ fmod GRAPH-EQ is
     nil |
     graphLoop |
     starting .
+    
+  op simple-loop : -> Config .
+  eq simple-loop = 
+     a(-5); a(1); a(5); a(8); a(2); a(3); a(6); a(4); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(4); a(2); a(3); a(6); a(11) ; a(-7) | 
+     nil | 
+     nil | 
+     nil |  
+     (n[-5]: nseq)->(n[1]: nseq);;
+        (n[1]: nseq)->(n[5]: nseq);;
+       (n[5]: nseq)->(n[8]: nseq);;
+       (n[8]: nseq)->(n[2]: nor);;
+       (n[2]: nor)->(n[3]: nseq);;
+       (n[3]: nseq)->(n[6]: nseq);;
+       (n[6]: nseq)->(n[9]: nseq);;
+       (n[6]: nseq)->(n[11]: nseq);;
+       (n[4]: nseq)->(n[2]: nor);;
+       (n[9]: nseq)->(n[4]: nseq);;
+       (n[11]: nseq)->(n[-7]: nseq) | 
+       starting .
 
     
   --- is at least one xor activated  
