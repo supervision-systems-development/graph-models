@@ -580,19 +580,25 @@ fmod GRAPH-EQ is
   	if not ( checkType( a(i), G ) == "and" ) then true
     else false
     fi .
-    
+  
+  --- Returns active or blocked parents of an actions   
   op activeOrBlockedParents : Action TupleList Graph -> ActionList .
   eq activeOrBlockedParents(Action1, TList, G) = activeOrBlockedActions( parents(Action1, G) , TList ) .
     
-    
+  --- Returns active paths from the action to all of its active or blocked parents (used to search for a fully active path) 
+  --- @param Action that the path should start from and to the parents of which the path should end
+  --- @param pattern
+  --- @param list of indicators
+  --- @returns complete list of actions of all paths from the action to its parents that include only activeated or blocked actions
   op getActivePathForAllActiveOrBlockedParents : Action Graph TupleList -> ActionList .
   eq getActivePathForAllActiveOrBlockedParents( Action1, G, TList ) = forAllActiveOrBlockedParentsHelper( Action1, G, TList, activeOrBlockedParents(Action1, TList, G) ) .
-  
+
+  --- Helper function for getActivePathForAllActiveOrBlockedParents, essentially a for loop that runs the search algorithm for each parent of the action
   op forAllActiveOrBlockedParentsHelper : Action Graph TupleList ActionList -> ActionList .
   eq forAllActiveOrBlockedParentsHelper( Action1, G, TList, nil ) = nil .
   eq forAllActiveOrBlockedParentsHelper( Action1, G, TList, ( a(i) ; AList ) ) = getActivePathForAllActiveOrBlockedParentsHelper( Action1, G, TList, a(i) ) ; forAllActiveOrBlockedParentsHelper( Action1, G, TList, AList ) .
   
-  --- finds path to parent
+  --- Helper function for the forAllActiveOrBlockedParentsHelper function, is called in the for loop function, used to call the function to find active paths. 
   op getActivePathForAllActiveOrBlockedParentsHelper : Action Graph TupleList Action -> ActionList . 
   eq getActivePathForAllActiveOrBlockedParentsHelper( Action1, G, TList, Action2 ) = getActivePath( Action1, Action2, G, TList ) .
   
@@ -602,6 +608,11 @@ fmod GRAPH-EQ is
     --- if final action in list of active child nodes, nil
     --- if nothing in list of active child nodes, nil
     --- does include source and target actions, full path 
+    --- @param starting action
+    --- @param destination action
+    --- @param pattern
+    --- @param list of indicators
+    --- @returns list of action of all active paths from source to destination
   op getActivePath : Action Action Graph TupleList -> ActionList .
   eq getActivePath(Action1, Action2, G, TList) = forEachActiveChild(Action1, Action2, G, TList , ( Action1 ), activeChildren(Action1, G, TList) ) .
   
@@ -629,16 +640,20 @@ fmod GRAPH-EQ is
   eq activeOrBlockedActions( ( a(i) ; AList1 ) , TList ) = if ( isCookieActive(i, TList) or isCookieBlocked(i, TList) ) then ( a(i) ; activeOrBlockedActions(AList1, TList) ) else activeOrBlockedActions(AList1, TList) fi .
     
   --- receives a list of actions and a list of cookies, checks if the list has two consecutive blocked actions, if yes, returns nil, else returns original actionList
+  --- used to filter out paths within a pattern that contain two blocked nodes
   op filterTwoConsecutiveBlockedActions : ActionList TupleList -> ActionList .
   eq filterTwoConsecutiveBlockedActions( nil , TList) = nil .
   eq filterTwoConsecutiveBlockedActions( ( a(i) ; AList ) , TList) = if isCookieBlocked(i, TList) then ( a(i) ; filterBlockedHelper(AList, TList) ) else ( a(i) ; filterTwoConsecutiveBlockedActions(AList, TList) ) fi .
 
-  --- only happens when a blocked cookie is before
+  --- helper function for the "filterTwoConsecutiveBlockedActions", is called when one blocked action is detected
   op filterBlockedHelper : ActionList TupleList -> ActionList .
   eq filterBlockedHelper(nil, TList) = nil .
   eq filterBlockedHelper( ( a(i) ; AList ) , TList) = if isCookieBlocked(i, TList) then nil else ( a(i) ; filterTwoConsecutiveBlockedActions(AList, TList) ) fi .
   
-  --- at least one action from the graph 
+  --- Checks if at least one action from a list of actions is active
+  --- @param list of actions
+  --- @param list of indicators
+  --- @returns boolean value indicating whether at least one action is activated according to the list of indicators
   op atLeastOneActionActive : ActionList TupleList -> Bool .
   eq atLeastOneActionActive( AList1 , nil ) = false .
   eq atLeastOneActionActive( nil , TList ) = false .
@@ -692,7 +707,11 @@ fmod GRAPH-EQ is
        starting .
 
     
-  --- is at least one xor activated  
+  --- Checks if at least one parent XOR is activated
+  --- @param action that the parent of is checked
+  --- @param list of indicators
+  --- @param pattern
+  --- @returns boolean value, true if at least one parent XOR is activated
   op isParentXorActivated : Action TupleList Graph -> Bool .
   eq isParentXorActivated( a(i) , TList, G ) = atLeastOneActionActive( getXorListInActionList( parents( a(i) , G ) , G ) , TList ) .
 
